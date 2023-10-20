@@ -23,6 +23,7 @@
 #include "FilterModelConfig6581.h"
 
 #include <cmath>
+#include <mutex>
 
 #include "Integrator6581.h"
 #include "OpAmp.h"
@@ -89,9 +90,12 @@ const Spline::Point opamp_voltage[OPAMP_SIZE] =
 };
 
 std::unique_ptr<FilterModelConfig6581> FilterModelConfig6581::instance(nullptr);
+std::mutex Instance6581_Lock;
 
 FilterModelConfig6581* FilterModelConfig6581::getInstance()
 {
+    std::lock_guard<std::mutex> lock ( Instance6581_Lock );
+
     if (!instance.get())
     {
         instance.reset(new FilterModelConfig6581());

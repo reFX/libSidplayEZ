@@ -22,11 +22,16 @@
 #include "WaveformCalculator.h"
 
 #include <cmath>
-
+#include <map>
+#include <mutex>
 #include "sidcxx11.h"
 
 namespace reSIDfp
 {
+typedef std::map<const CombinedWaveformConfig*, matrix_t> cw_cache_t;
+
+cw_cache_t PULLDOWN_CACHE;
+std::mutex PULLDOWN_CACHE_Lock;
 
 WaveformCalculator* WaveformCalculator::getInstance()
 {
@@ -157,6 +162,8 @@ WaveformCalculator::WaveformCalculator() :
 
 matrix_t* WaveformCalculator::buildPulldownTable(ChipModel model)
 {
+    std::lock_guard<std::mutex> lock ( PULLDOWN_CACHE_Lock );
+
     const CombinedWaveformConfig* cfgArray = config[model == MOS6581 ? 0 : 1];
 
     cw_cache_t::iterator lb = PULLDOWN_CACHE.lower_bound(cfgArray);

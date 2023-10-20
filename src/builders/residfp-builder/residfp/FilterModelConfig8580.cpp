@@ -22,6 +22,8 @@
 
 #include "FilterModelConfig8580.h"
 
+#include <mutex>
+
 #include "Integrator8580.h"
 #include "OpAmp.h"
 
@@ -109,9 +111,12 @@ const Spline::Point opamp_voltage[OPAMP_SIZE] =
 };
 
 std::unique_ptr<FilterModelConfig8580> FilterModelConfig8580::instance(nullptr);
+std::mutex Instance8580_Lock;
 
 FilterModelConfig8580* FilterModelConfig8580::getInstance()
 {
+    std::lock_guard<std::mutex> lock ( Instance8580_Lock );
+
     if (!instance.get())
     {
         instance.reset(new FilterModelConfig8580());
