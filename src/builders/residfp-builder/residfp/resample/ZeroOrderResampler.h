@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,12 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef ZEROORDER_RESAMPLER_H
-#define ZEROORDER_RESAMPLER_H
-
 #include "Resampler.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -84,5 +80,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

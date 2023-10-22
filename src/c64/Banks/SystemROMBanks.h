@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,16 +20,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SYSTEMROMBANKS_H
-#define SYSTEMROMBANKS_H
-
 #include <stdint.h>
 #include <cstring>
 
 #include "Bank.h"
 #include "c64/CPU/opcodes.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -39,9 +35,7 @@ namespace libsidplayfp
 template <int N>
 class romBank : public Bank
 {
-#ifdef HAVE_CXX11
     static_assert((N != 0) && ((N & (N - 1)) == 0), "N must be a power of two");
-#endif
 
 protected:
     /// The ROM array
@@ -210,5 +204,3 @@ public:
 class CharacterRomBank final : public romBank<0x1000> {};
 
 }
-
-#endif

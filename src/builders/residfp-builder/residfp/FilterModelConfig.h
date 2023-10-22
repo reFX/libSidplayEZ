@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,15 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILTERMODELCONFIG_H
-#define FILTERMODELCONFIG_H
-
 #include <algorithm>
 #include <cassert>
 
 #include "Spline.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -73,8 +69,8 @@ protected:
     unsigned short opamp_rev[1 << 16]; //-V730_NOINIT this is initialized in the derived class constructor
 
 private:
-    FilterModelConfig (const FilterModelConfig&) DELETE;
-    FilterModelConfig& operator= (const FilterModelConfig&) DELETE;
+    FilterModelConfig (const FilterModelConfig&) = delete;
+    FilterModelConfig& operator= ( const FilterModelConfig& ) = delete;
 
 protected:
     /**
@@ -100,28 +96,24 @@ protected:
 
     ~FilterModelConfig()
     {
-        for (int i = 0; i < 8; i++)
-        {
-            delete [] mixer[i];
-        }
+		for ( int i = 0; i < 8; i++ )
+			delete[] mixer[ i ];
 
-        for (int i = 0; i < 5; i++)
-        {
-            delete [] summer[i];
-        }
+		for ( int i = 0; i < 5; i++ )
+			delete[] summer[ i ];
 
-        for (int i = 0; i < 16; i++)
-        {
-            delete [] gain_vol[i];
-            delete [] gain_res[i];
-        }
+		for ( int i = 0; i < 16; i++ )
+		{
+			delete[] gain_vol[ i ];
+			delete[] gain_res[ i ];
+		}
     }
 
 public:
-    unsigned short** getGainVol() { return gain_vol; }
-    unsigned short** getGainRes() { return gain_res; }
-    unsigned short** getSummer() { return summer; }
-    unsigned short** getMixer() { return mixer; }
+    unsigned short** getGainVol ()  { return gain_vol; }
+    unsigned short** getGainRes ()  { return gain_res; }
+    unsigned short** getSummer ()   { return summer; }
+    unsigned short** getMixer ()    { return mixer; }
 
     /**
      * The digital range of one voice is 20 bits; create a scaling term
@@ -161,5 +153,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

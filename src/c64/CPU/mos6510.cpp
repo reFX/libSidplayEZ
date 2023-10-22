@@ -32,9 +32,6 @@
 #  include "mos6510debug.h"
 #endif
 
-#include "sidcxx11.h"
-
-
 namespace libsidplayfp
 {
 
@@ -44,10 +41,10 @@ namespace libsidplayfp
  * The constants here defined are based on VICE testsuite which
  * refers to some real case usage of the opcodes.
  */
-const uint8_t lxa_magic = 0xee;
-const uint8_t ane_magic = 0xef;
+constexpr uint8_t lxa_magic = 0xee;
+constexpr uint8_t ane_magic = 0xef;
 
-const int interruptDelay = 2;
+constexpr auto  interruptDelay = 2;
 
 //-------------------------------------------------------------------------//
 
@@ -56,9 +53,9 @@ const int interruptDelay = 2;
  */
 void MOS6510::eventWithoutSteals()
 {
-    const ProcessorCycle &instr = instrTable[cycleCount++];
-    (this->*(instr.func)) ();
-    eventScheduler.schedule(m_nosteal, 1);
+	const auto& instr = instrTable[ cycleCount++ ];
+	( this->*( instr.func ) ) ();
+	eventScheduler.schedule ( m_nosteal, 1 );
 }
 
 /**
@@ -68,9 +65,9 @@ void MOS6510::eventWithSteals()
 {
     if (instrTable[cycleCount].nosteal)
     {
-        const ProcessorCycle &instr = instrTable[cycleCount++];
-        (this->*(instr.func)) ();
-        eventScheduler.schedule(m_steal, 1);
+		const auto& instr = instrTable[ cycleCount++ ];
+		( this->*( instr.func ) ) ();
+		eventScheduler.schedule ( m_steal, 1 );
     }
     else
     {
@@ -101,9 +98,7 @@ void MOS6510::eventWithSteals()
         // Even while stalled, the CPU can still process first clock of
         // interrupt delay, but only the first one.
         if (interruptCycle == cycleCount)
-        {
             interruptCycle--;
-        }
     }
 }
 
@@ -123,16 +118,8 @@ void MOS6510::setRDY(bool newRDY)
 {
     rdy = newRDY;
 
-    if (rdy)
-    {
-        eventScheduler.cancel(m_steal);
-        eventScheduler.schedule(m_nosteal, 0, EVENT_CLOCK_PHI2);
-    }
-    else
-    {
-        eventScheduler.cancel(m_nosteal);
-        eventScheduler.schedule(m_steal, 0, EVENT_CLOCK_PHI2);
-    }
+	eventScheduler.cancel ( rdy ? m_steal : m_nosteal );
+	eventScheduler.schedule ( rdy ? m_nosteal : m_steal, 0, EVENT_CLOCK_PHI2 );
 }
 
 
@@ -190,7 +177,7 @@ void MOS6510::triggerNMI()
     calculateInterruptTriggerCycle();
 
     /* maybe process 1 clock of interrupt delay. */
-    if (!rdy)
+    if (! rdy)
     {
         eventScheduler.cancel(m_steal);
         eventScheduler.schedule(m_steal, 0, EVENT_CLOCK_PHI2);
@@ -206,7 +193,7 @@ void MOS6510::triggerIRQ()
     calculateInterruptTriggerCycle();
 
     /* maybe process 1 clock of interrupt delay. */
-    if (!rdy && interruptCycle == cycleCount)
+    if (! rdy && interruptCycle == cycleCount)
     {
         eventScheduler.cancel(m_steal);
         eventScheduler.schedule(m_steal, 0, EVENT_CLOCK_PHI2);
@@ -226,18 +213,18 @@ void MOS6510::interruptsAndNextOpcode()
 {
     if (cycleCount > interruptCycle + interruptDelay)
     {
-#ifdef DEBUG
-        if (dodump)
-        {
-            const event_clock_t cycles = eventScheduler.getTime(EVENT_CLOCK_PHI2);
-            MOS6510Debug::DumpState(cycles, *this);
-            fprintf(m_fdbg, "****************************************************\n");
-            fprintf(m_fdbg, " interrupt (%d)\n", static_cast<int>(cycles));
-            fprintf(m_fdbg, "****************************************************\n");
-        }
+        #ifdef DEBUG
+            if (dodump)
+            {
+                const event_clock_t cycles = eventScheduler.getTime(EVENT_CLOCK_PHI2);
+                MOS6510Debug::DumpState(cycles, *this);
+                fprintf(m_fdbg, "****************************************************\n");
+                fprintf(m_fdbg, " interrupt (%d)\n", static_cast<int>(cycles));
+                fprintf(m_fdbg, "****************************************************\n");
+            }
 
-        instrStartPC = -1;
-#endif
+            instrStartPC = -1;
+        #endif
         cpuRead(Register_ProgramCounter);
         cycleCount = BRKn << 3;
         d1x1 = true;
@@ -251,14 +238,12 @@ void MOS6510::interruptsAndNextOpcode()
 
 void MOS6510::fetchNextOpcode()
 {
-#ifdef DEBUG
-    if (dodump)
-    {
-        MOS6510Debug::DumpState(eventScheduler.getTime(EVENT_CLOCK_PHI2), *this);
-    }
+    #ifdef DEBUG
+        if (dodump)
+            MOS6510Debug::DumpState(eventScheduler.getTime(EVENT_CLOCK_PHI2), *this);
 
-    instrStartPC = Register_ProgramCounter;
-#endif
+        instrStartPC = Register_ProgramCounter;
+    #endif
 
     rdyOnThrowAwayRead = false;
 
@@ -266,13 +251,9 @@ void MOS6510::fetchNextOpcode()
     Register_ProgramCounter++;
 
     if (!checkInterrupts())
-    {
         interruptCycle = MAX;
-    }
     else if (interruptCycle != MAX)
-    {
         interruptCycle = -MAX;
-    }
 }
 
 /**
@@ -283,12 +264,8 @@ void MOS6510::calculateInterruptTriggerCycle()
 {
     /* Interrupt cycle not going to trigger? */
     if (interruptCycle == MAX)
-    {
         if (checkInterrupts())
-        {
             interruptCycle = cycleCount;
-        }
-    }
 }
 
 void MOS6510::IRQLoRequest()
@@ -333,13 +310,11 @@ void MOS6510::FetchDataByte()
 {
     Cycle_Data = cpuRead(Register_ProgramCounter);
     if (!d1x1)
-    {
         Register_ProgramCounter++;
-    }
 
-#ifdef DEBUG
-    instrOperand = Cycle_Data;
-#endif
+    #ifdef DEBUG
+        instrOperand = Cycle_Data;
+    #endif
 }
 
 /**
@@ -358,9 +333,9 @@ void MOS6510::FetchLowAddr()
     Cycle_EffectiveAddress = cpuRead(Register_ProgramCounter);
     Register_ProgramCounter++;
 
-#ifdef DEBUG
-    instrOperand = Cycle_EffectiveAddress;
-#endif
+    #ifdef DEBUG
+        instrOperand = Cycle_EffectiveAddress;
+    #endif
 }
 
 /**
@@ -399,9 +374,9 @@ void MOS6510::FetchHighAddr()
     endian_16hi8(Cycle_EffectiveAddress, cpuRead(Register_ProgramCounter));
     Register_ProgramCounter++;
 
-#ifdef DEBUG
-    endian_16hi8(instrOperand, endian_16hi8(Cycle_EffectiveAddress));
-#endif
+    #ifdef DEBUG
+        endian_16hi8(instrOperand, endian_16hi8(Cycle_EffectiveAddress));
+    #endif
 }
 
 /**
@@ -464,9 +439,9 @@ void MOS6510::FetchLowPointer()
     Cycle_Pointer = cpuRead(Register_ProgramCounter);
     Register_ProgramCounter++;
 
-#ifdef DEBUG
-    instrOperand = Cycle_Pointer;
-#endif
+    #ifdef DEBUG
+        instrOperand = Cycle_Pointer;
+    #endif
 }
 
 /**
@@ -491,9 +466,9 @@ void MOS6510::FetchHighPointer()
     endian_16hi8(Cycle_Pointer, cpuRead(Register_ProgramCounter));
     Register_ProgramCounter++;
 
-#ifdef DEBUG
-    endian_16hi8(instrOperand, endian_16hi8(Cycle_Pointer));
-#endif
+    #ifdef DEBUG
+        endian_16hi8(instrOperand, endian_16hi8(Cycle_Pointer));
+    #endif
 }
 
 /**
@@ -583,7 +558,7 @@ void MOS6510::Push(uint8_t data)
 uint8_t MOS6510::Pop()
 {
     Register_StackPointer++;
-    const uint_least16_t addr = endian_16(SP_PAGE, Register_StackPointer);
+    const auto  addr = endian_16(SP_PAGE, Register_StackPointer);
     return cpuRead(addr);
 }
 
@@ -626,20 +601,11 @@ void MOS6510::brkPushLowPC()
     PushLowPC();
 
     if (rstFlag)
-    {
-        /* rst = %10x */
-        Cycle_EffectiveAddress = 0xfffc;
-    }
+		Cycle_EffectiveAddress = 0xfffc;        /* rst = %10x */
     else if (nmiFlag)
-    {
-        /* nmi = %01x */
-        Cycle_EffectiveAddress = 0xfffa;
-    }
+		Cycle_EffectiveAddress = 0xfffa;        /* nmi = %01x */
     else
-    {
-        /* irq = %11x */
-        Cycle_EffectiveAddress = 0xfffe;
-    }
+		Cycle_EffectiveAddress = 0xfffe;        /* irq = %11x */
 
     rstFlag = false;
     nmiFlag = false;
@@ -688,10 +654,10 @@ void MOS6510::rti_instr()
     Register_ProgramCounter = Cycle_EffectiveAddress;
     interruptsAndNextOpcode();
 
-#ifdef DEBUG
-    if (dodump)
-        fprintf(m_fdbg, "****************************************************\n\n");
-#endif
+    #ifdef DEBUG
+        if (dodump)
+            fprintf(m_fdbg, "****************************************************\n\n");
+    #endif
 }
 
 void MOS6510::rts_instr()
@@ -766,9 +732,7 @@ void MOS6510::sh_instr()
      * the highbyte of the target address is ANDed with the value stored.
      */
     if (adl_carry)
-    {
         endian_16hi8(Cycle_EffectiveAddress, tmp & Cycle_Data);
-    }
     else
         tmp++;
 
@@ -780,10 +744,8 @@ void MOS6510::sh_instr()
      * http://sourceforge.net/p/vice-emu/bugs/578/
      */
     if (!rdyOnThrowAwayRead)
-    {
         Cycle_Data &= tmp;
-    }
-
+ 
     PutEffAddrDataByte();
 }
 
@@ -854,7 +816,7 @@ void MOS6510::doADC()
             hi += 0x60;
 
         flags.setC(hi > 0xff);
-        Register_Accumulator = (hi | (lo & 0x0f));
+        Register_Accumulator = uint8_t (hi | (lo & 0x0f));
     }
     else
     {   // Binary mode
@@ -876,7 +838,7 @@ void MOS6510::doSBC()
 
     flags.setC(regAC2 < 0x100);
     flags.setV(((regAC2 ^ A) & 0x80) && ((A ^ s) & 0x80));
-    flags.setNZ(regAC2);
+    flags.setNZ(uint8_t(regAC2));
 
     if (flags.getD())
     {   // BCD mode
@@ -889,7 +851,7 @@ void MOS6510::doSBC()
         }
         if (hi & 0x100)
             hi -= 0x60;
-        Register_Accumulator = (hi | (lo & 0x0f));
+        Register_Accumulator = uint8_t (hi | (lo & 0x0f));
     }
     else
     {   // Binary mode
@@ -1061,7 +1023,7 @@ void MOS6510::clv_instr()
 void MOS6510::compare(uint8_t data)
 {
     const uint_least16_t tmp = static_cast<uint_least16_t>(data) - Cycle_Data;
-    flags.setNZ(tmp);
+    flags.setNZ(uint8_t(tmp));
     flags.setC(tmp < 0x100);
     interruptsAndNextOpcode();
 }
@@ -1364,7 +1326,7 @@ void MOS6510::dcm_instr()
     PutEffAddrDataByte();
     Cycle_Data--;
     const uint_least16_t tmp = static_cast<uint_least16_t>(Register_Accumulator) - Cycle_Data;
-    flags.setNZ(tmp);
+    flags.setNZ(uint8_t(tmp));
     flags.setC(tmp < 0x100);
 }
 
@@ -1433,7 +1395,7 @@ void MOS6510::rla_instr()
 {
     const uint8_t newC = Cycle_Data & 0x80;
     PutEffAddrDataByte();
-    Cycle_Data = Cycle_Data << 1;
+    Cycle_Data = uint8_t ( Cycle_Data << 1 );
     if (flags.getC())
         Cycle_Data |= 0x01;
     flags.setC(newC);
@@ -1465,25 +1427,25 @@ void MOS6510::rra_instr()
  */
 MOS6510::MOS6510(EventScheduler &scheduler) :
     eventScheduler(scheduler),
-#ifdef DEBUG
-    m_fdbg(stdout),
-#endif
+    #ifdef DEBUG
+        m_fdbg(stdout),
+    #endif
     m_nosteal("CPU-nosteal", *this, &MOS6510::eventWithoutSteals),
     m_steal("CPU-steal", *this, &MOS6510::eventWithSteals),
     clearInt("Remove IRQ", *this, &MOS6510::removeIRQ)
 {
     buildInstructionTable();
 
-    // Intialise Processor Registers
+    // Initialise Processor Registers
     Register_Accumulator   = 0;
     Register_X             = 0;
     Register_Y             = 0;
 
     Cycle_EffectiveAddress = 0;
     Cycle_Data             = 0;
-#ifdef DEBUG
-    dodump = false;
-#endif
+    #ifdef DEBUG
+        dodump = false;
+    #endif
     Initialise();
 }
 
@@ -1494,9 +1456,9 @@ void MOS6510::buildInstructionTable()
 {
     for (unsigned int i = 0; i < 0x100; i++)
     {
-#if DEBUG > 1
-        printf("Building Command %d[%02x]... ", i, i);
-#endif
+        #if DEBUG > 1
+            printf("Building Command %d[%02x]... ", i, i);
+        #endif
 
         /*
          * So: what cycles are marked as stealable? Rules are:
@@ -2131,9 +2093,9 @@ void MOS6510::buildInstructionTable()
         // check for IRQ triggers or fetch next opcode...
         instrTable[buildCycle].func = &MOS6510::interruptsAndNextOpcode;
 
-#if DEBUG > 1
-        printf("Done [%d Cycles]\n", buildCycle - (i << 3));
-#endif
+        #if DEBUG > 1
+            printf("Done [%d Cycles]\n", buildCycle - (i << 3));
+        #endif
     }
 }
 
@@ -2148,9 +2110,9 @@ void MOS6510::Initialise()
     // Reset Cycle Count
     cycleCount = (BRKn << 3) + 6; // fetchNextOpcode
 
-#ifdef DEBUG
-    instrStartPC = -1;
-#endif
+    #ifdef DEBUG
+        instrStartPC = -1;
+    #endif
 
     // Reset Status Register
     flags.reset();
@@ -2202,15 +2164,15 @@ const char *MOS6510::credits()
         "\t(C) 2011-2020 Leandro Nini\n";
 }
 
-void MOS6510::debug(MAYBE_UNUSED bool enable, MAYBE_UNUSED FILE *out)
+void MOS6510::debug ( [[maybe_unused]] bool enable, [[maybe_unused]] FILE* out )
 {
-#ifdef DEBUG
-    dodump = enable;
-    if (!(out && enable))
-        m_fdbg = stdout;
-    else
-        m_fdbg = out;
-#endif
+	#ifdef DEBUG
+	    dodump = enable;
+	    if ( !( out && enable ) )
+		    m_fdbg = stdout;
+	    else
+		    m_fdbg = out;
+	#endif
 }
 
 }

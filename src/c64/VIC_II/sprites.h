@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -21,14 +22,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SPRITES_H
-#define SPRITES_H
-
 #include <stdint.h>
-
 #include <cstring>
 
-#define SPRITES 8
+constexpr auto  SPRITES = 8;
 
 namespace libsidplayfp
 {
@@ -56,45 +53,43 @@ public:
         exp_flop = 0xff;
         dma = 0;
 
-        memset(mc_base, 0, sizeof(mc_base));
-        memset(mc, 0, sizeof(mc));
+		std::fill_n ( mc_base, std::size ( mc_base ), 0 );
+		std::fill_n ( mc, std::size ( mc ), 0 );
     }
 
     /**
      * Update mc values in one pass
      * after the dma has been processed
      */
-    void updateMc()
-    {
-        uint8_t mask = 1;
-        for (unsigned int i = 0; i < SPRITES; i++, mask <<= 1)
-        {
-            if (dma & mask)
-                mc[i] = (mc[i] + 3) & 0x3f;
-        }
-    }
+	void updateMc ()
+	{
+		uint8_t mask = 1;
+		for ( auto i = 0; i < SPRITES; i++, mask <<= 1 )
+			if ( dma & mask )
+				mc[ i ] = ( mc[ i ] + 3 ) & 0x3f;
+	}
 
     /**
      * Update mc base value.
      */
-    void updateMcBase()
-    {
-        uint8_t mask = 1;
-        for (unsigned int i = 0; i < SPRITES; i++, mask <<= 1)
-        {
-            if (exp_flop & mask)
-            {
-                mc_base[i] = mc[i];
-                if (mc_base[i] == 0x3f)
-                    dma &= ~mask;
-            }
-        }
-    }
+	void updateMcBase ()
+	{
+		uint8_t mask = 1;
+		for ( auto i = 0; i < SPRITES; i++, mask <<= 1 )
+		{
+			if ( exp_flop & mask )
+			{
+				mc_base[ i ] = mc[ i ];
+				if ( mc_base[ i ] == 0x3f )
+					dma &= ~mask;
+			}
+		}
+	}
 
     /**
      * Calculate sprite expansion.
      */
-    void checkExp()
+    void checkExp ()
     {
         exp_flop ^= dma & y_expansion;
     }
@@ -102,12 +97,9 @@ public:
     /**
      * Check if sprite is displayed.
      */
-    void checkDisplay()
+    void checkDisplay ()
     {
-        for (unsigned int i = 0; i < SPRITES; i++)
-        {
-            mc[i] = mc_base[i];
-        }
+        std::copy_n ( mc_base, std::size ( mc_base ), mc );
     }
 
     /**
@@ -118,17 +110,17 @@ public:
      */
     void checkDma(unsigned int rasterY, uint8_t regs[0x40])
     {
-        const uint8_t y = rasterY & 0xff;
-        uint8_t mask = 1;
-        for (unsigned int i = 0; i < SPRITES; i++, mask <<= 1)
-        {
-            if ((enable & mask) && (y == regs[(i << 1) + 1]) && !(dma & mask))
-            {
-                dma |= mask;
-                mc_base[i] = 0;
-                exp_flop |= mask;
-            }
-        }
+		const uint8_t y = rasterY & 0xff;
+		uint8_t mask = 1;
+		for ( auto i = 0; i < SPRITES; i++, mask <<= 1 )
+		{
+			if ( ( enable & mask ) && ( y == regs[ ( i << 1 ) + 1 ] ) && ! ( dma & mask ) )
+			{
+				dma |= mask;
+				mc_base[ i ] = 0;
+				exp_flop |= mask;
+			}
+		}
     }
 
     /**
@@ -137,27 +129,27 @@ public:
      * @param data the data written to the register
      * @param lineCycle current line cycle
      */
-    void lineCrunch(uint8_t data, unsigned int lineCycle)
+	void lineCrunch ( uint8_t data, unsigned int lineCycle )
     {
-        uint8_t mask = 1;
-        for (unsigned int i = 0; i < SPRITES; i++, mask <<= 1)
-        {
-            if (!(data & mask) && !(exp_flop & mask))
-            {
-                // sprite crunch
-                if (lineCycle == 14)
-                {
-                    const uint8_t mc_i = mc[i];
-                    const uint8_t mcBase_i = mc_base[i];
+		uint8_t mask = 1;
+		for ( auto i = 0; i < SPRITES; i++, mask <<= 1 )
+		{
+			if ( ! ( data & mask ) && !( exp_flop & mask ) )
+			{
+				// sprite crunch
+				if ( lineCycle == 14 )
+				{
+					const auto  mc_i = mc[ i ];
+					const auto  mcBase_i = mc_base[ i ];
 
-                    mc[i] = (0x2a & (mcBase_i & mc_i)) | (0x15 & (mcBase_i | mc_i));
+					mc[ i ] = ( 0x2a & ( mcBase_i & mc_i ) ) | ( 0x15 & ( mcBase_i | mc_i ) );
 
-                    // mcbase will be set from mc on the following clock call
-                }
+					// mcbase will be set from mc on the following clock call
+				}
 
-                exp_flop |= mask;
-            }
-        }
+				exp_flop |= mask;
+			}
+		}
     }
 
     /**
@@ -165,12 +157,10 @@ public:
      *
      * @param val bitmask for selected sprites
      */
-    inline bool isDma(unsigned int val) const
+    inline bool isDma (unsigned int val) const
     {
         return dma & val;
-    }
+	}
 };
 
 }
-
-#endif

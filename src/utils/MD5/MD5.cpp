@@ -36,54 +36,6 @@
 
 #include <string.h>
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
-#if defined(HAVE_MSWINDOWS) || defined(DLL_EXPORT)
-// Support for DLLs
-#   define MD5_EXPORT __declspec(dllexport)
-#endif
-
-/*
- * Compile with -DMD5_TEST to create a self-contained executable test program.
- * The test program should print out the same values as given in section
- * A.5 of RFC 1321, reproduced below.
- */
-
-#ifdef MD5_TEST
-
-#include <iostream.h>
-#include <iomanip.h>
-#include <cstdint>
-
-main()
-{
-    static const char *const test[7] = {
-	"", /*d41d8cd98f00b204e9800998ecf8427e*/
-	"a", /*0cc175b9c0f1b6a831c399e269772661*/
-	"abc", /*900150983cd24fb0d6963f7d28e17f72*/
-	"message digest", /*f96b697d7cb7938d525a2f31aaf161d0*/
-	"abcdefghijklmnopqrstuvwxyz", /*c3fcd3d76192e4007dfb496cca67e13b*/
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-				/*d174ab98d277d9f5a5611c2c9f419d9f*/
-	"12345678901234567890123456789012345678901234567890123456789012345678901234567890" /*57edf4a22be3c955ac49da2e2107b67a*/
-    };
-
-    for (int i = 0; i < 7; ++i)
-    {
-        MD5 myMD5;
-        myMD5.append((const md5_byte_t *)test[i], strlen(test[i]));
-        myMD5.finish();
-        cout << "MD5 (\"" << test[i] << "\") = ";
-        for (int di = 0; di < 16; ++di)
-            cout << hex << setw(2) << setfill('0') << static_cast<int>(myMD5.getDigest()[di]);
-        cout << endl;
-    }
-    return 0;
-}
-#endif  /* MD5_TEST */
-
 #define T1 0xd76aa478
 #define T2 0xe8c7b756
 #define T3 0x242070db
@@ -154,8 +106,7 @@ MD5::MD5()
     reset();
 }
 
-void
-MD5::reset()
+void MD5::reset()
 {
     count[0] = count[1] = 0;
     abcd[0] = 0x67452301;
@@ -166,43 +117,41 @@ MD5::reset()
     memset(buf,0,64);
 }
 
-void
-MD5::process(const md5_byte_t data[64])
+void MD5::process(const md5_byte_t data[64])
 {
     md5_word_t a = abcd[0], b = abcd[1], c = abcd[2], d = abcd[3];
 
-#ifdef MD5_WORDS_BIG_ENDIAN
+    #ifdef __BIG_ENDIAN__
 
-    /*
-     * On big-endian machines, we must arrange the bytes in the right
-     * order.  (This also works on machines of unknown byte order.)
-     */
-    const md5_byte_t *xp = data;
-    for (int i = 0; i < 16; ++i, xp += 4)
-    {
-        tmpBuf[i] = (xp[0]&0xFF) + ((xp[1]&0xFF)<<8) +
-                    ((xp[2]&0xFF)<<16) + ((xp[3]&0xFF)<<24);
-    }
-    X = tmpBuf;
+        /*
+         * On big-endian machines, we must arrange the bytes in the right
+         * order.  (This also works on machines of unknown byte order.)
+         */
+        const md5_byte_t *xp = data;
 
-#else  /* !MD5_IS_BIG_ENDIAN */
+        for (int i = 0; i < 16; ++i, xp += 4)
+            tmpBuf[i] = (xp[0]&0xFF) + ((xp[1]&0xFF)<<8) + ((xp[2]&0xFF)<<16) + ((xp[3]&0xFF)<<24);
 
-    /*
-     * On little-endian machines, we can process properly aligned data
-     * without copying it.
-     */
-    if (!((uintptr_t)data & 3))
-    {
-        /* data are properly aligned */
-        X = (const md5_word_t *)data;
-    }
-    else
-    {
-        /* not aligned */
-        memcpy(tmpBuf, data, 64);
         X = tmpBuf;
-    }
-#endif  /* MD5_IS_BIG_ENDIAN */
+
+    #else  // __BIG_ENDIAN__
+
+        /*
+         * On little-endian machines, we can process properly aligned data
+         * without copying it.
+         */
+        if ( ! ( ( uintptr_t )data & 3 ) )
+        {
+            /* data are properly aligned */
+            X = (const md5_word_t *)data;
+        }
+        else
+        {
+            /* not aligned */
+            memcpy(tmpBuf, data, 64);
+            X = tmpBuf;
+        }
+    #endif  // __BIG_ENDIAN__
 
     /* Round 1. */
     /* Let [abcd k s i] denote the operation
@@ -297,8 +246,7 @@ MD5::process(const md5_byte_t data[64])
     abcd[3] += d;
 }
 
-void
-MD5::append(const void* data, int nbytes)
+void MD5::append(const void* data, int nbytes)
 {
     const md5_byte_t* p = (const md5_byte_t*)data;
     int left = nbytes;
@@ -335,30 +283,31 @@ MD5::append(const void* data, int nbytes)
         memcpy(buf, p, left);
 }
 
-void
-MD5::finish()
+void MD5::finish ()
 {
-    static const md5_byte_t pad[64] = {
-        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    };
-    md5_byte_t data[8];
-    int i;
-    /* Save the length before padding. */
-    for (i = 0; i < 8; ++i)
-        data[i] = (md5_byte_t)(count[i>>2] >> ((i&3)<<3));
-    /* Pad to 56 bytes mod 64. */
-    append(pad, ((55 - (count[0] >> 3)) & 63) + 1);
-    /* Append the length. */
-    append(data, 8);
-    for (i = 0; i < 16; ++i)
-        digest[i] = (md5_byte_t)(abcd[i>>2] >> ((i&3)<<3));
+	static const md5_byte_t pad[ 64 ] = {
+		0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	};
+	md5_byte_t data[ 8 ];
+
+    // Save the length before padding
+	for ( auto i = 0; i < 8; ++i )
+		data[ i ] = (md5_byte_t)( count[ i >> 2 ] >> ( ( i & 3 ) << 3 ) );
+
+    // Pad to 56 bytes mod 64
+	append ( pad, ( ( 55 - ( count[ 0 ] >> 3 ) ) & 63 ) + 1 );
+	
+    // Append the length
+	append ( data, 8 );
+
+    for ( auto i = 0; i < 16; ++i )
+		digest[ i ] = (md5_byte_t)( abcd[ i >> 2 ] >> ( ( i & 3 ) << 3 ) );
 }
 
-const md5_byte_t*
-MD5::getDigest()
+const md5_byte_t* MD5::getDigest()
 {
     return digest;
 }

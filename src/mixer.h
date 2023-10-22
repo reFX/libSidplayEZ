@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -21,13 +22,7 @@
  */
 
 
-#ifndef MIXER_H
-#define MIXER_H
-
-#include "sidcxx11.h"
-
 #include <stdint.h>
-
 #include <vector>
 
 namespace libsidplayfp
@@ -45,9 +40,7 @@ private:
     template <int MAX_VAL>
     class randomLCG
     {
-#ifdef HAVE_CXX11
     static_assert((MAX_VAL != 0) && ((MAX_VAL & (MAX_VAL - 1)) == 0), "MAX_VAL must be a power of two");
-#endif
     private:
         uint32_t rand_seed;
 
@@ -71,11 +64,7 @@ public:
     static const unsigned int MAX_SIDS = 3;
 
     static const int_least32_t SCALE_FACTOR = 1 << 16;
-#ifdef HAVE_CXX11
     static constexpr double SQRT_0_5 = 0.70710678118654746;
-#else
-#  define SQRT_0_5 0.70710678118654746
-#endif
     static const int_least32_t C1 = static_cast<int_least32_t>(1.0 / (1.0 + SQRT_0_5) * SCALE_FACTOR);
     static const int_least32_t C2 = static_cast<int_least32_t>(SQRT_0_5 / (1.0 + SQRT_0_5) * SCALE_FACTOR);
 
@@ -275,5 +264,3 @@ public:
 };
 
 }
-
-#endif // MIXER_H

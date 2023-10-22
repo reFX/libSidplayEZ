@@ -19,31 +19,15 @@
  */
 
 #include "md5Factory.h"
-
 #include "iMd5.h"
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
-#ifdef HAVE_LIBGCRYPT
-#  include "md5Gcrypt.h"
-#else
-#  include "md5Internal.h"
-#endif
+#include "md5Internal.h"
 
 namespace libsidplayfp
 {
 
 std::unique_ptr<iMd5> md5Factory::get()
 {
-    return std::unique_ptr<iMd5>(
-#ifdef HAVE_LIBGCRYPT
-        new md5Gcrypt()
-#else
-        new md5Internal()
-#endif
-    );
+    return std::unique_ptr<iMd5>(new md5Internal());
 }
 
 }

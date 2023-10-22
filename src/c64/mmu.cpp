@@ -104,7 +104,7 @@ unsigned int random(unsigned int val)
 uint8_t MMU::getLastReadByte() const
 {
     seed = random(seed);
-    return seed;
+    return uint8_t ( seed );
 }
     
 }

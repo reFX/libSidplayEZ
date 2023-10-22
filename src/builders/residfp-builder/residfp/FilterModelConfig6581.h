@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,16 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILTERMODELCONFIG6581_H
-#define FILTERMODELCONFIG6581_H
-
 #include "FilterModelConfig.h"
 
 #include <memory>
 
 #include "Dac.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -47,11 +43,7 @@ private:
 private:
     static std::unique_ptr<FilterModelConfig6581> instance;
     // This allows access to the private constructor
-#ifdef HAVE_CXX11
     friend std::unique_ptr<FilterModelConfig6581>::deleter_type;
-#else
-    friend class std::auto_ptr<FilterModelConfig6581>;
-#endif
 
     /// Transistor parameters.
     //@{
@@ -70,15 +62,15 @@ private:
 
     /// VCR - 6581 only.
     //@{
-    unsigned short vcr_nVg[1 << 16];
-    unsigned short vcr_n_Ids_term[1 << 16];
+	uint16_t    vcr_nVg[ 1 << 16 ];
+	uint16_t    vcr_n_Ids_term[ 1 << 16 ];
     //@}
 
 private:
     double getDacZero(double adjustment) const { return dac_zero + (1. - adjustment); }
 
     FilterModelConfig6581();
-    ~FilterModelConfig6581() DEFAULT;
+    ~FilterModelConfig6581() = default;
 
 public:
     static FilterModelConfig6581* getInstance();
@@ -108,5 +100,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

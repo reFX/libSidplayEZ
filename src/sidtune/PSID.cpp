@@ -290,45 +290,46 @@ void PSID::tryLoad(const psidHeader &pHeader)
         // file formats
         switch (compatibility)
         {
-        case SidTuneInfo::COMPATIBILITY_C64:
-            if (flags & PSID_SPECIFIC)
-                info->m_compatibility = SidTuneInfo::COMPATIBILITY_PSID;
-            break;
-        case SidTuneInfo::COMPATIBILITY_R64:
-            if (flags & PSID_BASIC)
-                info->m_compatibility = SidTuneInfo::COMPATIBILITY_BASIC;
-            break;
-        default:
-            break;
+			case SidTuneInfo::COMPATIBILITY_C64:
+				if ( flags & PSID_SPECIFIC )
+					info->m_compatibility = SidTuneInfo::COMPATIBILITY_PSID;
+				break;
+
+			case SidTuneInfo::COMPATIBILITY_R64:
+				if ( flags & PSID_BASIC )
+					info->m_compatibility = SidTuneInfo::COMPATIBILITY_BASIC;
+				break;
+
+			default:
+				break;
         }
 
-        info->m_clockSpeed = clock;
+		info->m_clockSpeed = clock;
 
-        info->m_sidModels[0] = getSidModel(flags >> 4);
+		info->m_sidModels[ 0 ] = getSidModel ( flags >> 4 );
 
-        info->m_relocStartPage = pHeader.relocStartPage;
-        info->m_relocPages     = pHeader.relocPages;
+		info->m_relocStartPage = pHeader.relocStartPage;
+		info->m_relocPages = pHeader.relocPages;
 
-        if (pHeader.version >= 3)
-        {
-            if (validateAddress(pHeader.sidChipBase2))
-            {
-                info->m_sidChipAddresses.push_back(0xd000 | (pHeader.sidChipBase2 << 4));
+		if ( pHeader.version >= 3 )
+		{
+			if ( validateAddress ( pHeader.sidChipBase2 ) )
+			{
+				info->m_sidChipAddresses.push_back ( 0xd000 | uint16_t ( pHeader.sidChipBase2 << 4 ) );
+				info->m_sidModels.push_back ( getSidModel ( flags >> 6 ) );
+			}
 
-                info->m_sidModels.push_back(getSidModel(flags >> 6));
-            }
+			if ( pHeader.version >= 4 )
+			{
+				if ( pHeader.sidChipBase3 != pHeader.sidChipBase2
+					 && validateAddress ( pHeader.sidChipBase3 ) )
+				{
+					info->m_sidChipAddresses.push_back ( 0xd000 | uint16_t ( pHeader.sidChipBase3 << 4 ) );
 
-            if (pHeader.version >= 4)
-            {
-                if (pHeader.sidChipBase3 != pHeader.sidChipBase2
-                    && validateAddress(pHeader.sidChipBase3))
-                {
-                    info->m_sidChipAddresses.push_back(0xd000 | (pHeader.sidChipBase3 << 4));
-
-                    info->m_sidModels.push_back(getSidModel(flags >> 8));
-                }
-            }
-        }
+					info->m_sidModels.push_back ( getSidModel ( flags >> 8 ) );
+				}
+			}
+		}
     }
 
     // Check reserved fields to force real c64 compliance
@@ -379,7 +380,7 @@ const char *PSID::createMD5(char *md5)
         myMD5.append(tmp, sizeof(tmp));
 
         // Include number of songs.
-        endian_little16(tmp, info->m_songs);
+        endian_little16(tmp, uint16_t ( info->m_songs) );
         myMD5.append(tmp, sizeof(tmp));
 
         {
@@ -440,7 +441,7 @@ const char *PSID::createMD5New(char *md5)
         // The calculation is now simplified
         // All the header + all the data
         sidmd5 myMD5;
-        myMD5.append(&cache[0], cache.size());
+		myMD5.append ( &cache[ 0 ], int ( cache.size () ) );
 
         myMD5.finish();
 

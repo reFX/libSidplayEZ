@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,14 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDPLAYFP_H
-#define SIDPLAYFP_H
-
 #include <stdint.h>
 #include <stdio.h>
-
-#include "sidplayfp/siddefs.h"
-#include "sidplayfp/sidversion.h"
 
 class  SidConfig;
 class  SidTune;
@@ -43,7 +38,7 @@ namespace libsidplayfp
 /**
  * sidplayfp
  */
-class SID_EXTERN sidplayfp
+class sidplayfp
 {
 private:
     libsidplayfp::Player &sidplayer;
@@ -192,5 +187,3 @@ public:
      */
     bool getSidStatus(unsigned int sidNum, uint8_t regs[32]);
 };
-
-#endif // SIDPLAYFP_H

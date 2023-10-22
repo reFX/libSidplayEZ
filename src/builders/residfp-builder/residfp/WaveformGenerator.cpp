@@ -273,7 +273,7 @@ void WaveformGenerator::shift_phase2(unsigned int waveform_old, unsigned int wav
 
 void WaveformGenerator::write_shift_register()
 {
-    if (unlikely(waveform > 0x8))
+    if (waveform > 0x8)
     {
 #if 0
         // FIXME this breaks SID/wf12nsr/wf12nsr
@@ -288,7 +288,7 @@ void WaveformGenerator::write_shift_register()
 
         // Write changes to the shift register output caused by combined waveforms
         // back into the shift register.
-        if (likely(shift_pipeline != 1) && !test)
+        if (shift_pipeline != 1 && !test)
         {
 #ifdef TRACE
             std::cout << "write shift_register" << std::endl;
@@ -340,10 +340,8 @@ void WaveformGenerator::synchronize(WaveformGenerator* syncDest, const WaveformG
     // A special case occurs when a sync source is synced itself on the same
     // cycle as when its MSB is set high. In this case the destination will
     // not be synced. This has been verified by sampling OSC3.
-    if (unlikely(msb_rising) && syncDest->sync && !(sync && syncSource->msb_rising))
-    {
+    if ( msb_rising && syncDest->sync && ! ( sync && syncSource->msb_rising ) )
         syncDest->accumulator = 0;
-    }
 }
 
 void WaveformGenerator::set_no_noise_or_noise_output()
@@ -363,52 +361,38 @@ void WaveformGenerator::writeCONTROL_REG(unsigned char control)
     // Substitution of accumulator MSB when sawtooth = 0, ring_mod = 1.
     ring_msb_mask = ((~control >> 5) & (control >> 2) & 0x1) << 23;
 
-    if (waveform != waveform_prev)
+    if ( waveform != waveform_prev )
     {
-        // Set up waveform tables
-        wave = (*model_wave)[waveform & 0x3];
-        // We assume tha combinations including noise
-        // behave the same as without
-        switch (waveform & 0x7)
+		// Set up waveform tables
+		wave = ( *model_wave )[ waveform & 0x3 ];
+
+        // We assume the combinations including noise behave the same as without
+		switch ( waveform & 0x7 )
         {
-        case 3:
-            pulldown = (*model_pulldown)[0];
-            break;
-        case 4:
-            pulldown = (waveform & 0x8) ? (*model_pulldown)[4] : nullptr;
-            break;
-        case 5:
-            pulldown = (*model_pulldown)[1];
-            break;
-        case 6:
-            pulldown = (*model_pulldown)[2];
-            break;
-        case 7:
-            pulldown = (*model_pulldown)[3];
-            break;
-        default:
-            pulldown = nullptr;
-            break;
+			case 3:     pulldown = ( *model_pulldown )[ 0 ];                                    break;
+			case 4:     pulldown = ( waveform & 0x8 ) ? ( *model_pulldown )[ 4 ] : nullptr;     break;
+			case 5:     pulldown = ( *model_pulldown )[ 1 ];                                    break;
+			case 6:     pulldown = ( *model_pulldown )[ 2 ];                                    break;
+			case 7:     pulldown = ( *model_pulldown )[ 3 ];                                    break;
+			default:    pulldown = nullptr;                                                     break;
         }
 
         // no_noise and no_pulse are used in set_waveform_output() as bitmasks to
         // only let the noise or pulse influence the output when the noise or pulse
         // waveforms are selected.
-        no_noise = (waveform & 0x8) != 0 ? 0x000 : 0xfff;
+		no_noise = ( waveform & 0x8 ) != 0 ? 0x000 : 0xfff;
         set_no_noise_or_noise_output();
-        no_pulse = (waveform & 0x4) != 0 ? 0x000 : 0xfff;
+		no_pulse = ( waveform & 0x4 ) != 0 ? 0x000 : 0xfff;
 
-        if (waveform == 0)
-        {
-            // Change to floating DAC input.
-            // Reset fading time for floating DAC input.
+		// Change to floating DAC input.
+		// Reset fading time for floating DAC input.
+		if ( waveform == 0 )
             floating_output_ttl = is6581 ? FLOATING_OUTPUT_TTL_6581R3 : FLOATING_OUTPUT_TTL_8580R5;
-        }
     }
 
-    if (test != test_prev)
+	if ( test != test_prev )
     {
-        if (test)
+		if ( test )
         {
             // Reset accumulator.
             accumulator = 0;
@@ -421,7 +405,6 @@ void WaveformGenerator::writeCONTROL_REG(unsigned char control)
 #ifdef TRACE
             std::cout << "shift phase 1 (test)" << std::endl;
 #endif
-
             // Set reset time for shift register.
             shift_register_reset = is6581 ? SHIFT_REGISTER_RESET_6581R3 : SHIFT_REGISTER_RESET_8580R5;
         }
@@ -429,7 +412,7 @@ void WaveformGenerator::writeCONTROL_REG(unsigned char control)
         {
             // When the test bit is falling, the second phase of the shift is
             // completed by enabling SRAM write.
-            shift_phase2(waveform_prev, waveform);
+			shift_phase2 ( waveform_prev, waveform );
         }
     }
 }
@@ -438,16 +421,16 @@ void WaveformGenerator::waveBitfade()
 {
     waveform_output &= waveform_output >> 1;
     osc3 = waveform_output;
-    if (waveform_output != 0)
-        floating_output_ttl = is6581 ? FLOATING_OUTPUT_FADE_6581R3 : FLOATING_OUTPUT_FADE_8580R5;
+	if ( waveform_output != 0 )
+		floating_output_ttl = is6581 ? FLOATING_OUTPUT_FADE_6581R3 : FLOATING_OUTPUT_FADE_8580R5;
 }
 
 void WaveformGenerator::shiftregBitfade()
 {
-    shift_register |= shift_register >> 1;
-    shift_register |= 0x400000;
-    if (shift_register != 0x7fffff)
-        shift_register_reset = is6581 ? SHIFT_REGISTER_FADE_6581R3 : SHIFT_REGISTER_FADE_8580R5;
+	shift_register |= shift_register >> 1;
+	shift_register |= 0x400000;
+	if ( shift_register != 0x7fffff )
+		shift_register_reset = is6581 ? SHIFT_REGISTER_FADE_6581R3 : SHIFT_REGISTER_FADE_8580R5;
 }
 
 void WaveformGenerator::reset()

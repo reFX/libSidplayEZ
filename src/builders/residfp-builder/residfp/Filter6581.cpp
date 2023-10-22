@@ -20,11 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#define FILTER6581_CPP
-
 #include "Filter6581.h"
-
-#include "Integrator6581.h"
 
 namespace reSIDfp
 {

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,19 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MOS6510_H
-#define MOS6510_H
-
 #include <stdint.h>
 #include <cstdio>
 
 #include "flags.h"
 #include "EventCallback.h"
 #include "EventScheduler.h"
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
 
 class EventContext;
 
@@ -333,5 +327,3 @@ public:
 };
 
 }
-
-#endif // MOS6510_H

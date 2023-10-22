@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,16 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RESIDFP_H
-#define RESIDFP_H
-
 #include "sidplayfp/sidbuilder.h"
-#include "sidplayfp/siddefs.h"
 
 /**
  * ReSIDfp Builder Class
  */
-class SID_EXTERN ReSIDfpBuilder: public sidbuilder
+class ReSIDfpBuilder: public sidbuilder
 {
 public:
     ReSIDfpBuilder(const char * const name) :
@@ -75,5 +72,3 @@ public:
     void filter8580Curve(double filterCurve);
     //@}
 };
-
-#endif // RESIDFP_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -18,14 +19,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MUS_H
-#define MUS_H
-
 #include <stdint.h>
 
 #include "SidTuneBase.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -56,7 +52,7 @@ protected:
                                 buffer_t& buf, bool isSlashedFileName) override;
 
 public:
-    virtual ~MUS() {}
+    ~MUS() override {}
 
     static SidTuneBase* load(buffer_t& dataBuf, bool init = false);
     static SidTuneBase* load(buffer_t& musBuf,
@@ -73,5 +69,3 @@ private:
 };
 
 }
-
-#endif // MUS_H

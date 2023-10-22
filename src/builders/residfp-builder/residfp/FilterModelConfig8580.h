@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,14 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILTERMODELCONFIG8580_H
-#define FILTERMODELCONFIG8580_H
-
 #include "FilterModelConfig.h"
 
 #include <memory>
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -42,15 +38,11 @@ class FilterModelConfig8580 final : public FilterModelConfig
 private:
     static std::unique_ptr<FilterModelConfig8580> instance;
     // This allows access to the private constructor
-#ifdef HAVE_CXX11
     friend std::unique_ptr<FilterModelConfig8580>::deleter_type;
-#else
-    friend class std::auto_ptr<FilterModelConfig8580>;
-#endif
 
 private:
     FilterModelConfig8580();
-    ~FilterModelConfig8580() DEFAULT;
+    ~FilterModelConfig8580() = default;
 
 public:
     static FilterModelConfig8580* getInstance();
@@ -64,5 +56,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

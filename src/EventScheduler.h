@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,13 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef EVENTSCHEDULER_H
-#define EVENTSCHEDULER_H
-
 #include "Event.h"
-
-#include "sidcxx11.h"
-
 
 namespace libsidplayfp
 {
@@ -175,5 +170,3 @@ public:
 };
 
 }
-
-#endif // EVENTSCHEDULER_H

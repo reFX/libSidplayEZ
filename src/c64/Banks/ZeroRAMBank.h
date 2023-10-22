@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef ZERORAMBANK_H
-#define ZERORAMBANK_H
-
 #include <stdint.h>
 
 #include "Bank.h"
@@ -30,8 +28,6 @@
 #include "pla.h"
 
 #include "Event.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -169,13 +165,10 @@ private:
         pla.setCpuPort((data | ~dir) & 0x07);
 
         if ((dir & 0x20) == 0)
-        {
             dataRead &= ~0x20;
-        }
+
         if (tape_sense && (dir & 0x10) == 0)
-        {
             dataRead &= ~0x10;
-        }
     }
 
 public:
@@ -282,5 +275,3 @@ public:
 };
 
 }
-
-#endif

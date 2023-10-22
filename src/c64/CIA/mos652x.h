@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -21,9 +22,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MOS652X_H
-#define MOS652X_H
-
 #include <memory>
 
 #include <stdint.h>
@@ -33,8 +31,6 @@
 #include "tod.h"
 #include "SerialPort.h"
 #include "EventScheduler.h"
-
-#include "sidcxx11.h"
 
 class EventContext;
 
@@ -63,8 +59,8 @@ public:
     /**
      * Create timer A.
      */
-    TimerA(EventScheduler &scheduler, MOS652X &parent) :
-        Timer("CIA Timer A", scheduler, parent) {}
+    TimerA(EventScheduler& scheduler, MOS652X& _parent) :
+        Timer("CIA Timer A", scheduler, _parent) {}
 };
 
 /**
@@ -82,8 +78,8 @@ public:
     /**
      * Create timer B.
      */
-    TimerB(EventScheduler &scheduler, MOS652X &parent) :
-        Timer("CIA Timer B", scheduler, parent) {}
+    TimerB(EventScheduler& scheduler, MOS652X& _parent) :
+        Timer("CIA Timer B", scheduler, _parent) {}
 
     /**
      * Receive an underflow from Timer A.
@@ -310,5 +306,3 @@ public:
 };
 
 }
-
-#endif // MOS6526_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -17,14 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-
-#ifndef SIDENDIAN_H
-#define SIDENDIAN_H
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
 
 #include <stdint.h>
 
@@ -86,7 +79,7 @@ inline uint_least16_t endian_16 (uint8_t hi, uint8_t lo)
 /// Convert high-byte and low-byte to 16-bit little endian word.
 inline void endian_16 (uint8_t ptr[2], uint_least16_t word)
 {
-#if defined(WORDS_BIGENDIAN)
+#if defined(__BIG_ENDIAN__)
     ptr[0] = endian_16hi8 (word);
     ptr[1] = endian_16lo8 (word);
 #else
@@ -249,5 +242,3 @@ inline void endian_big32 (uint8_t ptr[4], uint_least32_t dword)
     ptr[2] = endian_32hi8  (dword);
     ptr[3] = endian_32lo8  (dword);
 }
-
-#endif // SIDENDIAN_H

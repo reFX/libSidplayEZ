@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INTEGRATOR6581_H
-#define INTEGRATOR6581_H
-
 #include "FilterModelConfig6581.h"
 
 #include <stdint.h>
@@ -36,8 +34,6 @@
 #ifdef SLOPE_FACTOR
 #  include <cmath>
 #endif
-
-#include "siddefs-fp.h"
 
 namespace reSIDfp
 {
@@ -168,14 +164,14 @@ class Integrator6581
 {
 private:
     unsigned int nVddt_Vw_2;
-    mutable int vx;
-    mutable int vc;
+    int vx;
+    int vc;
 
 #ifdef SLOPE_FACTOR
     // Slope factor n = 1/k
     // where k is the gate coupling coefficient
     // k = Cox/(Cox+Cdep) ~ 0.7 (depends on gate voltage)
-    mutable double n;
+    double n;
 #endif
     const unsigned short nVddt;
     const unsigned short nVt;
@@ -185,34 +181,29 @@ private:
     const FilterModelConfig6581* fmc;
 
 public:
-    Integrator6581(const FilterModelConfig6581* fmc,
-               double WL_snake) :
-        nVddt_Vw_2(0),
-        vx(0),
-        vc(0),
+    Integrator6581(const FilterModelConfig6581* fmc, double WL_snake)
+        : nVddt_Vw_2(0)
+        , vx(0)
+        , vc(0)
 #ifdef SLOPE_FACTOR
-        n(1.4),
+        , n(1.4)
 #endif
-        nVddt(fmc->getNormalizedValue(fmc->getVddt())),
-        nVt(fmc->getNormalizedValue(fmc->getVth())),
-        nVmin(fmc->getNVmin()),
-        nSnake(fmc->getNormalizedCurrentFactor(WL_snake)),
-        fmc(fmc) {}
+        , nVddt(fmc->getNormalizedValue(fmc->getVddt()))
+        , nVt(fmc->getNormalizedValue(fmc->getVth()))
+        , nVmin(fmc->getNVmin())
+        , nSnake(fmc->getNormalizedCurrentFactor(WL_snake))
+        , fmc(fmc) {}
 
-    void setVw(unsigned short Vw) { nVddt_Vw_2 = ((nVddt - Vw) * (nVddt - Vw)) >> 1; }
-
-    int solve(int vi) const;
+	void setVw ( unsigned short Vw ) { nVddt_Vw_2 = ( ( nVddt - Vw ) * ( nVddt - Vw ) ) >> 1; }
+	int solve ( int vi );
 };
 
 } // namespace reSIDfp
 
-#if RESID_INLINING || defined(INTEGRATOR_CPP)
-
 namespace reSIDfp
 {
 
-RESID_INLINE
-int Integrator6581::solve(int vi) const
+inline int Integrator6581::solve(int vi)
 {
     // Make sure Vgst>0 so we're not in subthreshold mode
     assert(vx < nVddt);
@@ -279,7 +270,3 @@ int Integrator6581::solve(int vi) const
 }
 
 } // namespace reSIDfp
-
-#endif
-
-#endif

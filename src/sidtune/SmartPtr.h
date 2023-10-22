@@ -1,9 +1,4 @@
-/* Simple smart pointer class. */
-
-#ifndef SMARTPTR_H
-#define SMARTPTR_H
-
-#include "sidcxx11.h"
+#pragma once
 
 namespace libsidplayfp
 {
@@ -222,5 +217,3 @@ public:
 };
 
 }
-
-#endif  /* SMARTPTR_H */

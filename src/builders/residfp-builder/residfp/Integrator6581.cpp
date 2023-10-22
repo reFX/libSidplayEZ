@@ -18,8 +18,4 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#define INTEGRATOR_CPP
-
 #include "Integrator6581.h"
-
-// This is needed when compiling with --disable-inline

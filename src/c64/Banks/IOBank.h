@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,14 +20,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef IOBANK_H
-#define IOBANK_H
-
 #include <stdint.h>
 
 #include "Bank.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -39,30 +35,13 @@ namespace libsidplayfp
 class IOBank final : public Bank
 {
 private:
-    Bank* map[16];
+	Bank*   map[ 16 ];
 
 public:
-    void setBank(int num, Bank* bank)
-    {
-        map[num] = bank;
-    }
-
-    Bank *getBank(int num) const
-    {
-        return map[num];
-    }
-
-    uint8_t peek(uint_least16_t addr) override
-    {
-        return map[addr >> 8 & 0xf]->peek(addr);
-    }
-
-    void poke(uint_least16_t addr, uint8_t data) override
-    {
-        map[addr >> 8 & 0xf]->poke(addr, data);
-    }
+    void setBank(int num, Bank* bank)                       {   map[num] = bank;                           }
+    Bank *getBank(int num) const                            {   return map[num];                           }
+    uint8_t peek(uint_least16_t addr) override              {   return map[addr >> 8 & 0xf]->peek(addr);   }
+    void poke(uint_least16_t addr, uint8_t data) override   {   map[addr >> 8 & 0xf]->poke(addr, data);    }
 };
 
 }
-
-#endif

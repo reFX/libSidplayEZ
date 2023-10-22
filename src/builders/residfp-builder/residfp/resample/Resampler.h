@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,14 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RESAMPLER_H
-#define RESAMPLER_H
-
 #include <cmath>
-
-#include "sidcxx11.h"
-
-#include "siddefs-fp.h"
 
 namespace reSIDfp
 {
@@ -41,15 +35,15 @@ protected:
     inline short softClip(int x) const
     {
         constexpr int threshold = 28000;
-        if (likely(x < threshold))
-            return x;
+        if ( x < threshold )
+            return short ( x );
 
         constexpr double t = threshold / 32768.;
         constexpr double a = 1. - t;
         constexpr double b = 1. / a;
 
         double value = static_cast<double>(x - threshold) / 32768.;
-        value = t + a * tanh(b * value);
+        value = t + a * std::tanh(b * value);
         return static_cast<short>(value * 32768.);
     }
 
@@ -82,5 +76,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

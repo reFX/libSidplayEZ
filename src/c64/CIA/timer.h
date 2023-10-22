@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,16 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef TIMER_H
-#define TIMER_H
-
 #include <stdint.h>
 
 #include "Event.h"
 #include "EventCallback.h"
 #include "EventScheduler.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -195,7 +191,7 @@ public:
      * @param state
      *            PB6/PB7 flipflop state
      */
-    inline void setPbToggle(bool state) { pbToggle = state; }
+    inline void setPbToggle(bool _state) { pbToggle = _state; }
 
     /**
      * Get current state value.
@@ -276,5 +272,3 @@ void Timer::reschedule()
 }
 
 }
-
-#endif // TIMER_H

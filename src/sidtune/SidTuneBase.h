@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,21 +21,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDTUNEBASE_H
-#define SIDTUNEBASE_H
-
 #include <stdint.h>
 #include <memory>
 #include <vector>
 #include <string>
 
 #include "sidplayfp/SidTuneInfo.h"
-#include "sidplayfp/siddefs.h"
 
 #include "SmartPtr.h"
 #include "SidTuneInfoImpl.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -278,5 +273,3 @@ private:
 };
 
 }
-
-#endif  /* SIDTUNEBASE_H */

@@ -170,7 +170,7 @@ bool psiddrv::drvReloc()
             if (i >= 0xa0 && i <= 0xbf)
                 continue;
 
-            relocStartPage = i;
+            relocStartPage = uint_least8_t ( i );
             relocPages = 1;
             break;
         }
@@ -183,7 +183,7 @@ bool psiddrv::drvReloc()
     }
 
     // Place psid driver into ram
-    const uint_least16_t relocAddr = relocStartPage << 8;
+    const uint_least16_t relocAddr = uint_least16_t ( relocStartPage << 8 );
 
     reloc_driver = psid_driver;
     reloc_size   = sizeof(psid_driver);
@@ -212,9 +212,7 @@ void psiddrv::install(sidmemory& mem, uint8_t video) const
     mem.fillRam(0, static_cast<uint8_t>(0), 0x3ff);
 
     if (m_tuneInfo->compatibility() >= SidTuneInfo::COMPATIBILITY_R64)
-    {
         copyPoweronPattern(mem);
-    }
 
     // Set PAL/NTSC switch
     mem.writeMemByte(0x02a6, video);
@@ -240,7 +238,7 @@ void psiddrv::install(sidmemory& mem, uint8_t video) const
         mem.writeMemWord(0x0328, addr);
     }
 
-    int pos = m_driverAddr;
+    auto    pos = m_driverAddr;
 
     // Install driver to ram
     mem.fillRam(pos, &reloc_driver[10], reloc_size);

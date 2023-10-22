@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,13 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef WAVEFORMCALCULATOR_h
-#define WAVEFORMCALCULATOR_h
-
 #include "array.h"
-#include "sidcxx11.h"
-#include "siddefs-fp.h"
-
 
 namespace reSIDfp
 {
@@ -125,5 +120,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

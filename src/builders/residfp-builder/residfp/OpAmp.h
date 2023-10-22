@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,15 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef OPAMP_H
-#define OPAMP_H
-
 #include <memory>
 #include <vector>
 
 #include "Spline.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -72,7 +68,7 @@ class OpAmp
 {
 private:
     /// Current root position (cached as guess to speed up next iteration)
-    mutable double x;
+    double x;
 
     const double Vddt;
     const double vmin;
@@ -89,19 +85,17 @@ public:
      * @param vmin
      * @param vmax
      */
-    OpAmp(const std::vector<Spline::Point> &opamp, double Vddt,
-            double vmin, double vmax
-    ) :
-        x(0.),
-        Vddt(Vddt),
-        vmin(vmin),
-        vmax(vmax),
-        opamp(new Spline(opamp)) {}
+	OpAmp ( const std::vector<Spline::Point>& opamp, double Vddt, double vmin, double vmax )
+		: x ( 0.0 )
+		, Vddt ( Vddt )
+		, vmin ( vmin )
+		, vmax ( vmax )
+		, opamp ( new Spline ( opamp ) ) {}
 
     /**
      * Reset root position
      */
-    void reset() const
+	void reset ()
     {
         x = vmin;
     }
@@ -113,9 +107,7 @@ public:
      * @param vi input voltage
      * @return vo output voltage
      */
-    double solve(double n, double vi) const;
+	double solve ( double n, double vi );
 };
 
 } // namespace reSIDfp
-
-#endif

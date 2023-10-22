@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -18,9 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDMD5_H
-#define SIDMD5_H
-
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -28,8 +26,6 @@
 
 #include "utils/md5Factory.h"
 #include "utils/iMd5.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -90,5 +86,3 @@ public:
 };
 
 }
-
-#endif

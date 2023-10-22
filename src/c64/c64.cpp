@@ -138,7 +138,7 @@ void c64::setModel(model_t model)
     cpuFrequency = getCpuFreq(model);
     vic.chip(modelData[model].vicModel);
 
-    const unsigned int rate = cpuFrequency / modelData[model].powerFreq;
+	const auto  rate = (unsigned int)( cpuFrequency / modelData[ model ].powerFreq );
     cia1.setDayOfTimeRate(rate);
     cia2.setDayOfTimeRate(rate);
 }

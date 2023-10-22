@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef C64VIC_H
-#define C64VIC_H
-
 // The VIC emulation is very generic and here we need to effectively
 // wire it into the computer (like adding a chip to a PCB).
 
@@ -30,8 +28,6 @@
 #include "c64/c64env.h"
 #include "sidendian.h"
 #include "VIC_II/mos656x.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -47,32 +43,30 @@ private:
     c64env &m_env;
 
 protected:
-    void interrupt(bool state) override
-    {
-        m_env.interruptIRQ(state);
-    }
+	void interrupt ( bool state ) override
+	{
+		m_env.interruptIRQ ( state );
+	}
 
-    void setBA(bool state) override
-    {
-        m_env.setBA(state);
-    }
+	void setBA ( bool state ) override
+	{
+		m_env.setBA ( state );
+	}
 
 public:
-    c64vic(c64env &env) :
-        MOS656X(env.scheduler()),
-        m_env(env) {}
+	c64vic ( c64env& env ) :
+		MOS656X ( env.scheduler () ),
+		m_env ( env ) {}
 
-    void poke(uint_least16_t address, uint8_t value) override
-    {
-        write(endian_16lo8(address), value);
-    }
+	void poke ( uint_least16_t address, uint8_t value ) override
+	{
+		write ( endian_16lo8 ( address ), value );
+	}
 
-    uint8_t peek(uint_least16_t address) override
-    {
-        return read(endian_16lo8(address));
-    }
+	uint8_t peek ( uint_least16_t address ) override
+	{
+		return read ( endian_16lo8 ( address ) );
+	}
 };
 
 }
-
-#endif // C64VIC_H

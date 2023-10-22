@@ -1,11 +1,4 @@
-/* SidTuneCfg.h (template) */
-
-#ifndef SIDTUNECFG_H
-#define SIDTUNECFG_H
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
+#pragma once
 
 // Define the file/path separator(s) that your filesystem uses:
 // SID_FS_IS_COLON_AND_BACKSLASH, SID_FS_IS_COLON_AND_SLASH,
@@ -19,5 +12,3 @@
 #else
 #  define SID_FS_IS_SLASH
 #endif
-
-#endif  /* SIDTUNECFG_H */

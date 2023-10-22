@@ -26,37 +26,23 @@
 #include <string>
 #include <algorithm>
 
-#include "residfp/siddefs-fp.h"
-#include "sidplayfp/siddefs.h"
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
 namespace libsidplayfp
 {
+	const char* ReSIDfp::getCredits ()
+	{
+		static const char*  credits = {
+		    "ReSIDfp V" VERSION " Engine:\n"
+		    "\t(C) 1999-2002 Simon White\n"
+		    "MOS6581 (SID) Emulation (ReSIDfp V" VERSION "):\n"
+		    "\t(C) 1999-2002 Dag Lem\n"
+		    "\t(C) 2005-2011 Antti S. Lankila\n"
+		    "\t(C) 2010-2015 Leandro Nini\n"
+		};
 
-const char* ReSIDfp::getCredits()
-{
-    static std::string credits;
+        return credits;
+	}
 
-    if (credits.empty())
-    {
-        // Setup credits
-        std::ostringstream ss;
-        ss << "ReSIDfp V" << VERSION << " Engine:\n";
-        ss << "\t(C) 1999-2002 Simon White\n";
-        ss << "MOS6581 (SID) Emulation (ReSIDfp V" << residfp_version_string << "):\n";
-        ss << "\t(C) 1999-2002 Dag Lem\n";
-        ss << "\t(C) 2005-2011 Antti S. Lankila\n";
-        ss << "\t(C) 2010-2015 Leandro Nini\n";
-        credits = ss.str();
-    }
-
-    return credits.c_str();
-}
-
-ReSIDfp::ReSIDfp(sidbuilder *builder) :
+	ReSIDfp::ReSIDfp ( sidbuilder* builder ) :
     sidemu(builder),
     m_sid(*(new reSIDfp::SID))
 {
@@ -104,7 +90,7 @@ void ReSIDfp::clock()
 {
     const event_clock_t cycles = eventScheduler->getTime(EVENT_CLOCK_PHI1) - m_accessClk;
     m_accessClk += cycles;
-    m_bufferpos += m_sid.clock(cycles, m_buffer+m_bufferpos);
+	m_bufferpos += m_sid.clock ( (unsigned int)cycles, m_buffer + m_bufferpos );
 }
 
 void ReSIDfp::filter(bool enable)
@@ -132,8 +118,8 @@ void ReSIDfp::sampling(float systemclock, float freq,
 
     try
     {
-        const int halfFreq = (freq > 44000) ? 20000 : 9 * freq / 20;
-        m_sid.setSamplingParameters(systemclock, sampleMethod, freq, halfFreq);
+		const auto  halfFreq = ( freq > 44000.0f ) ? 20000 : int ( 9 * freq / 20 );
+		m_sid.setSamplingParameters ( systemclock, sampleMethod, freq, halfFreq );
     }
     catch (reSIDfp::SIDError const &)
     {

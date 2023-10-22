@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,13 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDCONFIG_H
-#define SIDCONFIG_H
-
 #include <stdint.h>
-
-#include "sidplayfp/siddefs.h"
-
 
 class sidbuilder;
 
@@ -36,7 +31,7 @@ class sidbuilder;
  * An instance of this class is used to transport emulator settings
  * to and from the interface class.
  */
-class SID_EXTERN SidConfig
+class SidConfig
 {
 public:
     /// Playback mode
@@ -180,5 +175,3 @@ public:
 public:
     SidConfig();
 };
-
-#endif // SIDCONFIG_H

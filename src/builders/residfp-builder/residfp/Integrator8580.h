@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,15 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INTEGRATOR8580_H
-#define INTEGRATOR8580_H
-
 #include "FilterModelConfig8580.h"
 
 #include <stdint.h>
 #include <cassert>
-
-#include "siddefs-fp.h"
 
 namespace reSIDfp
 {
@@ -102,13 +98,10 @@ public:
 
 } // namespace reSIDfp
 
-#if RESID_INLINING || defined(INTEGRATOR8580_CPP)
-
 namespace reSIDfp
 {
 
-RESID_INLINE
-int Integrator8580::solve(int vi) const
+inline int Integrator8580::solve(int vi) const
 {
     // Make sure we're not in subthreshold mode
     assert(vx < nVgt);
@@ -136,7 +129,3 @@ int Integrator8580::solve(int vi) const
 }
 
 } // namespace reSIDfp
-
-#endif
-
-#endif

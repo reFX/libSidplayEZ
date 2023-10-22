@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,12 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef NULLSID_H
-#define NULLSID_H
-
 #include "c64/c64sid.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -35,25 +31,23 @@ namespace libsidplayfp
 class NullSid final : public c64sid
 {
 private:
-    NullSid() {}
-    virtual ~NullSid() {}
+	NullSid () {}
+	virtual ~NullSid () override {}
 
 public:
-    /**
-     * Returns singleton instance.
-     */
-    static NullSid *getInstance()
-    {
-        static NullSid nullsid;
-        return &nullsid;
-    }
+	/**
+		* Returns singleton instance.
+		*/
+	static NullSid* getInstance ()
+	{
+		static NullSid nullsid;
+		return &nullsid;
+	}
 
-    void reset(uint8_t) override {}
+	void reset ( uint8_t ) override {}
 
-    void write(uint_least8_t, uint8_t) override {}
-    uint8_t read(uint_least8_t) override { return 0xff; }
+	void write ( uint_least8_t, uint8_t ) override {}
+	uint8_t read ( uint_least8_t ) override { return 0xff; }
 };
 
 }
-
-#endif // NULLSID_H

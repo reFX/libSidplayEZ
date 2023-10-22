@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,17 +20,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef TWOPASSSINCRESAMPLER_H
-#define TWOPASSSINCRESAMPLER_H
-
 #include <cmath>
 
 #include <memory>
 
 #include "Resampler.h"
 #include "SincResampler.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -56,7 +52,7 @@ public:
         // Calculation according to Laurent Ganier. It evaluates to about 120 kHz at typical settings.
         // Some testing around the chosen value seems to confirm that this does work.
         double const intermediateFrequency = 2. * highestAccurateFrequency
-            + sqrt(2. * highestAccurateFrequency * clockFrequency
+            + std::sqrt(2. * highestAccurateFrequency * clockFrequency
                 * (samplingFrequency - 2. * highestAccurateFrequency) / samplingFrequency);
         return new TwoPassSincResampler(clockFrequency, samplingFrequency, highestAccurateFrequency, intermediateFrequency);
     }
@@ -79,5 +75,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

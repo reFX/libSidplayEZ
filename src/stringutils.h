@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -18,40 +20,25 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef STRINGUTILS_H
-#define STRINGUTILS_H
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
-#if defined(_WIN32)
-#  include <string.h>
-#elif defined(HAVE_STRCASECMP) || defined (HAVE_STRNCASECMP)
-#  include <strings.h>
-#endif
-
 #include <cctype>
 #include <algorithm>
 #include <string>
-
 
 namespace stringutils
 {
     /**
      * Compare two characters in a case insensitive way.
      */
-    inline bool casecompare(char c1, char c2) { return (tolower(c1) == tolower(c2)); }
+    inline bool casecompare ( char c1, char c2 ) { return std::tolower ( c1 ) == std::tolower ( c2 ); }
 
     /**
      * Compare two strings in a case insensitive way. 
      *
      * @return true if strings are equal.
      */
-    inline bool equal(const std::string& s1, const std::string& s2)
+	inline bool equal ( const std::string& s1, const std::string& s2 )
     {
-        return s1.size() == s2.size()
-            && std::equal(s1.begin(), s1.end(), s2.begin(), casecompare);
+        return std::equal ( s1.begin (), s1.end (), s2.begin (), s2.end (), casecompare );
     }
 
     /**
@@ -59,29 +46,24 @@ namespace stringutils
      *
      * @return true if strings are equal.
      */
-    inline bool equal(const char* s1, const char* s2)
+    inline bool equal ( const char* s1, const char* s2 )
     {
-#if defined(_WIN32)
-        return _stricmp(s1, s2) == 0;
-#elif defined(HAVE_STRCASECMP)
-        return strcasecmp(s1, s2) == 0;
-#else
-        if (s1 == s2)
-            return true;
+		if ( s1 == s2 )
+			return true;
 
-        if (s1 == 0 || s2 == 0)
-            return false;
+		if ( s1 == 0 || s2 == 0 )
+			return false;
 
-        while ((*s1 != '\0') || (*s2 != '\0'))
-        {
-            if (!casecompare(*s1, *s2))
-                return false;
+		while ( *s1 || *s2 )
+		{
+			if ( ! casecompare ( *s1, *s2 ) )
+				return false;
+
             ++s1;
-            ++s2;
-        }
+			++s2;
+		}
 
-        return true;
-#endif
+		return true;
     }
 
     /**
@@ -89,30 +71,23 @@ namespace stringutils
      *
      * @return true if strings are equal.
      */
-    inline bool equal(const char* s1, const char* s2, size_t n)
-    {
-#if defined(_WIN32)
-        return _strnicmp(s1, s2, n) == 0;
-#elif defined(HAVE_STRNCASECMP)
-        return strncasecmp(s1, s2, n) == 0;
-#else
-        if (s1 == s2 || n == 0)
-            return true;
+	inline bool equal ( const char* s1, const char* s2, size_t n )
+	{
+		if ( s1 == s2 || n == 0 )
+			return true;
 
-        if (s1 == 0 || s2 == 0)
-            return false;
+		if ( s1 == 0 || s2 == 0 )
+			return false;
 
-        while (n-- && ((*s1 != '\0') || (*s2 != '\0')))
-        {
-            if (!casecompare(*s1, *s2))
-                return false;
-            ++s1;
-            ++s2;
-        }
+		while ( n-- && ( *s1 || *s2 ) )
+		{
+			if ( ! casecompare ( *s1, *s2 ) )
+				return false;
 
-        return true;
-#endif
-    }
+			++s1;
+			++s2;
+		}
+
+		return true;
+	}
 }
-
-#endif

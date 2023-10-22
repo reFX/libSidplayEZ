@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef C64_H
-#define C64_H
-
 #include <stdint.h>
 #include <cstdio>
 
@@ -41,12 +39,6 @@
 #include "c64/c64cia.h"
 #include "c64/c64vic.h"
 #include "c64/mmu.h"
-
-#include "sidcxx11.h"
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
 
 namespace libsidplayfp
 {
@@ -311,5 +303,3 @@ void c64::lightpen(bool state)
 }
 
 }
-
-#endif // C64_H

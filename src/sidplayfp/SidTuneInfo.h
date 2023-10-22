@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,12 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef SIDTUNEINFO_H
-#define SIDTUNEINFO_H
-
 #include <stdint.h>
-
-#include "sidplayfp/siddefs.h"
 
 /**
  * This interface is used to get values from SidTune objects.
@@ -35,7 +31,7 @@
  *        const SidTuneInfo* tuneInfo = SidTune.getInfo();
  *        const SidTuneInfo* tuneInfo = SidTune.getInfo(songNumber);
  */
-class SID_EXTERN SidTuneInfo
+class SidTuneInfo
 {
 public:
     typedef enum {
@@ -250,5 +246,3 @@ private:
 protected:
     ~SidTuneInfo() {}
 };
-
-#endif  /* SIDTUNEINFO_H */

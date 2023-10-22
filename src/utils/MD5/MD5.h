@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * This code has been derived by Michael Schwendt <mschwendt@yahoo.com>
  * from original work by L. Peter Deutsch <ghost@aladdin.com>.
@@ -29,12 +31,7 @@
   ghost@aladdin.com
  */
 
-#ifndef MD5_H
-#define MD5_H
-
 #include <stdint.h>
-
-#include "MD5_Defs.h"
 
 typedef uint8_t md5_byte_t;
 typedef uint32_t md5_word_t;
@@ -69,69 +66,50 @@ class MD5
     md5_word_t tmpBuf[16];
     const md5_word_t* X;
 
-    void
-    process(const md5_byte_t data[64]);
+    void process(const md5_byte_t data[64]);
 
-    md5_word_t
-    ROTATE_LEFT(const md5_word_t x, const int n);
+    md5_word_t ROTATE_LEFT(const md5_word_t x, const int n);
 
-    md5_word_t
-    F(const md5_word_t x, const md5_word_t y, const md5_word_t z);
+    md5_word_t F(const md5_word_t x, const md5_word_t y, const md5_word_t z);
 
-    md5_word_t
-    G(const md5_word_t x, const md5_word_t y, const md5_word_t z);
+    md5_word_t G(const md5_word_t x, const md5_word_t y, const md5_word_t z);
 
-    md5_word_t
-    H(const md5_word_t x, const md5_word_t y, const md5_word_t z);
+    md5_word_t H(const md5_word_t x, const md5_word_t y, const md5_word_t z);
 
-    md5_word_t
-    I(const md5_word_t x, const md5_word_t y, const md5_word_t z);
+    md5_word_t I(const md5_word_t x, const md5_word_t y, const md5_word_t z);
 
     typedef md5_word_t (MD5::*md5func)(const md5_word_t x, const md5_word_t y, const md5_word_t z);
 
-    void
-    SET(md5func func, md5_word_t& a, md5_word_t& b, md5_word_t& c,
-        md5_word_t& d, const int k, const int s,
-        const md5_word_t Ti);
+    void SET(md5func func, md5_word_t& a, md5_word_t& b, md5_word_t& c, md5_word_t& d, const int k, const int s,  const md5_word_t Ti);
 };
 
-inline md5_word_t
-MD5::ROTATE_LEFT(const md5_word_t x, const int n)
+inline md5_word_t MD5::ROTATE_LEFT(const md5_word_t x, const int n)
 {
     return ( (x<<n) | (x>>(32-n)) );
 }
 
-inline md5_word_t
-MD5::F(const md5_word_t x, const md5_word_t y, const md5_word_t z)
+inline md5_word_t MD5::F(const md5_word_t x, const md5_word_t y, const md5_word_t z)
 {
     return ( (x&y) | (~x&z) );
 }
 
-inline md5_word_t
-MD5::G(const md5_word_t x, const md5_word_t y, const md5_word_t z)
+inline md5_word_t MD5::G(const md5_word_t x, const md5_word_t y, const md5_word_t z)
 {
     return ( (x&z) | (y&~z) );
 }
 
-inline md5_word_t
-MD5::H(const md5_word_t x, const md5_word_t y, const md5_word_t z)
+inline md5_word_t MD5::H(const md5_word_t x, const md5_word_t y, const md5_word_t z)
 {
     return ( x^y^z );
 }
 
-inline md5_word_t
-MD5::I(const md5_word_t x, const md5_word_t y, const md5_word_t z)
+inline md5_word_t MD5::I(const md5_word_t x, const md5_word_t y, const md5_word_t z)
 {
     return ( y ^ (x|~z) );
 }
 
-inline void
-MD5::SET(md5func func, md5_word_t& a, md5_word_t& b, md5_word_t& c,
-          md5_word_t& d, const int k, const int s,
-          const md5_word_t Ti)
+inline void MD5::SET(md5func func, md5_word_t& a, md5_word_t& b, md5_word_t& c, md5_word_t& d, const int k, const int s, const md5_word_t Ti)
 {
     md5_word_t t = a + (this->*func)(b,c,d) + X[k] + Ti;
     a = ROTATE_LEFT(t, s) + b;
 }
-
-#endif  /* MD5_H */

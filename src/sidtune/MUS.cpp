@@ -87,53 +87,50 @@ bool detect(const uint8_t* buffer, size_t bufsize, uint_least32_t& voice3Index)
 
 void MUS::setPlayerAddress()
 {
-    if (info->getSidChips() == 1)
-    {
-        // Player #1.
-        info->m_initAddr = 0xec60;
-        info->m_playAddr = 0xec80;
-    }
-    else
-    {
-        // Player #1 + #2.
-        info->m_initAddr = 0xfc90;
-        info->m_playAddr = 0xfc96;
-    }
+	if ( info->getSidChips () == 1 )
+	{
+		// Player #1.
+		info->m_initAddr = 0xec60;
+		info->m_playAddr = 0xec80;
+	}
+	else
+	{
+		// Player #1 + #2.
+		info->m_initAddr = 0xfc90;
+		info->m_playAddr = 0xfc96;
+	}
 }
 
-void MUS::acceptSidTune(const char* dataFileName, const char* infoFileName,
-                            buffer_t& buf, bool isSlashedFileName)
+void MUS::acceptSidTune ( const char* dataFileName, const char* infoFileName, buffer_t& buf, bool isSlashedFileName )
 {
-    setPlayerAddress();
-    SidTuneBase::acceptSidTune(dataFileName, infoFileName, buf, isSlashedFileName);
+	setPlayerAddress ();
+	SidTuneBase::acceptSidTune ( dataFileName, infoFileName, buf, isSlashedFileName );
 }
 
-void MUS::placeSidTuneInC64mem(sidmemory& mem)
+void MUS::placeSidTuneInC64mem ( sidmemory& mem )
 {
-    SidTuneBase::placeSidTuneInC64mem(mem);
-    installPlayer(mem);
+	SidTuneBase::placeSidTuneInC64mem ( mem );
+	installPlayer ( mem );
 }
 
-bool MUS::mergeParts(buffer_t& musBuf, buffer_t& strBuf)
+bool MUS::mergeParts ( buffer_t& musBuf, buffer_t& strBuf )
 {
-    const uint_least32_t mergeLen = musBuf.size() + strBuf.size();
+	const auto  mergeLen = uint32_t ( musBuf.size () + strBuf.size () );
 
-    // Sanity check. I do not trust those MUS/STR files around.
-    const uint_least32_t freeSpace = endian_16(player1[1], player1[0]) - SIDTUNE_MUS_DATA_ADDR;
-    if ((mergeLen - 4) > freeSpace)
-    {
-        throw loadError(ERR_SIZE_EXCEEDED);
-    }
+	// Sanity check. I do not trust those MUS/STR files around.
+	const auto  freeSpace = uint32_t ( endian_16 ( player1[ 1 ], player1[ 0 ] ) - SIDTUNE_MUS_DATA_ADDR );
+	if ( ( mergeLen - 4 ) > freeSpace )
+		throw loadError ( ERR_SIZE_EXCEEDED );
 
-    if (!strBuf.empty() && info->getSidChips() > 1)
-    {
-        // Install MUS data #2 _NOT_ including load address.
-        musBuf.insert(musBuf.end(), strBuf.begin(), strBuf.end());
-    }
+	if ( !strBuf.empty () && info->getSidChips () > 1 )
+	{
+		// Install MUS data #2 _NOT_ including load address.
+		musBuf.insert ( musBuf.end (), strBuf.begin (), strBuf.end () );
+	}
 
-    strBuf.clear();
+	strBuf.clear ();
 
-    return true;
+	return true;
 }
 
 /**
@@ -174,95 +171,80 @@ SidTuneBase* MUS::load(buffer_t& musBuf, bool init)
     return load(musBuf, empty, 0, init);
 }
 
-SidTuneBase* MUS::load(buffer_t& musBuf,
-                            buffer_t& strBuf,
-                            uint_least32_t fileOffset,
-                            bool init)
+SidTuneBase* MUS::load ( buffer_t& musBuf, buffer_t& strBuf, uint_least32_t _fileOffset, bool init )
 {
-    uint_least32_t voice3Index;
-    if (!detect(&musBuf[fileOffset], musBuf.size()-fileOffset, voice3Index))
-        return nullptr;
+	uint_least32_t voice3Index;
+	if ( ! detect ( &musBuf[ _fileOffset ], musBuf.size () - _fileOffset, voice3Index ) )
+		return nullptr;
 
-    std::unique_ptr<MUS> tune(new MUS());
-    tune->tryLoad(musBuf, strBuf, fileOffset, voice3Index, init);
-    tune->mergeParts(musBuf, strBuf);
+	std::unique_ptr<MUS> tune ( new MUS () );
+	tune->tryLoad ( musBuf, strBuf, _fileOffset, voice3Index, init );
+	tune->mergeParts ( musBuf, strBuf );
 
-    return tune.release();
+	return tune.release ();
 }
 
-void MUS::tryLoad(buffer_t& musBuf,
-                    buffer_t& strBuf,
-                    uint_least32_t fileOffset,
-                    uint_least32_t voice3Index,
-                    bool init)
+void MUS::tryLoad ( buffer_t& musBuf, buffer_t& strBuf, uint_least32_t _fileOffset, uint_least32_t voice3Index, bool init )
 {
-    if (init)
-    {
-        info->m_songs = 1;
-        info->m_startSong = 1;
+	if ( init )
+	{
+		info->m_songs = 1;
+		info->m_startSong = 1;
 
-        songSpeed[0]  = SidTuneInfo::SPEED_CIA_1A;
-        clockSpeed[0] = SidTuneInfo::CLOCK_ANY;
-    }
+		songSpeed[ 0 ] = SidTuneInfo::SPEED_CIA_1A;
+		clockSpeed[ 0 ] = SidTuneInfo::CLOCK_ANY;
+	}
 
     // Check setting compatibility for MUS playback
-    if ((info->m_compatibility != SidTuneInfo::COMPATIBILITY_C64)
-        || (info->m_relocStartPage != 0)
-        || (info->m_relocPages != 0))
-    {
-        throw loadError(ERR_INVALID);
-    }
+	if (    ( info->m_compatibility != SidTuneInfo::COMPATIBILITY_C64 )
+		 || ( info->m_relocStartPage != 0 )
+		 || ( info->m_relocPages != 0 ) )
+	{
+		throw loadError ( ERR_INVALID );
+	}
 
-    {
-        // All subtunes should be CIA
-        for (unsigned int i = 0; i < info->m_songs; i++)
-        {
-            if (songSpeed[i] != SidTuneInfo::SPEED_CIA_1A)
-            {
-                throw loadError(ERR_INVALID);
-            }
-        }
-    }
+    // All subtunes should be CIA
+	for ( unsigned int i = 0; i < info->m_songs; i++ )
+		if ( songSpeed[ i ] != SidTuneInfo::SPEED_CIA_1A )
+			throw loadError ( ERR_INVALID );
 
-    musDataLen = musBuf.size();
-    info->m_loadAddr = SIDTUNE_MUS_DATA_ADDR;
+	musDataLen = uint16_t ( musBuf.size () );
+	info->m_loadAddr = SIDTUNE_MUS_DATA_ADDR;
 
-    SmartPtr_sidtt<const uint8_t> spPet(&musBuf[fileOffset], musDataLen - fileOffset);
+    SmartPtr_sidtt<const uint8_t> spPet(&musBuf[_fileOffset], musDataLen - _fileOffset);
 
     // Voice3Index now is offset to text lines (uppercase Pet-strings).
     spPet += voice3Index;
 
     // Extract credits
-    while (*spPet)
-    {
-        info->m_commentString.push_back(petsciiToAscii(spPet));
-    }
+	while ( *spPet )
+		info->m_commentString.push_back ( petsciiToAscii ( spPet ) );
 
     spPet++;
 
     // If we appear to have additional data at the end, check is it's
     // another mus file (but only if a second file isn't supplied)
-    bool stereo = false;
-    if (!strBuf.empty())
-    {
-        if (!detect(&strBuf[0], strBuf.size(), voice3Index))
-            throw loadError(ERR_2ND_INVALID);
-        spPet.setBuffer(&strBuf[0], strBuf.size());
-        stereo = true;
-    }
-    else
-    {
-        // For MUS + STR via stdin the files come combined
-        if (spPet.good())
-        {
-            const ulint_smartpt pos = spPet.tellPos();
-            if (detect(&spPet[0], spPet.tellLength()-pos, voice3Index))
-            {
-                musDataLen = static_cast<uint_least16_t>(pos);
-                stereo = true;
-            }
-        }
-    }
+    auto    stereo = false;
+	if ( ! strBuf.empty () )
+	{
+		if ( ! detect ( &strBuf[ 0 ], strBuf.size (), voice3Index ) )
+			throw loadError ( ERR_2ND_INVALID );
+		spPet.setBuffer ( &strBuf[ 0 ], ulint_smartpt ( strBuf.size () ) );
+		stereo = true;
+	}
+	else
+	{
+		// For MUS + STR via stdin the files come combined
+		if ( spPet.good () )
+		{
+			const ulint_smartpt pos = spPet.tellPos ();
+			if ( detect ( &spPet[ 0 ], spPet.tellLength () - pos, voice3Index ) )
+			{
+				musDataLen = static_cast<uint_least16_t>( pos );
+				stereo = true;
+			}
+		}
+	}
 
     if (stereo)
     {
@@ -270,10 +252,8 @@ void MUS::tryLoad(buffer_t& musBuf,
         spPet += voice3Index;
 
         // Extract credits
-        while (*spPet)
-        {
-            info->m_commentString.push_back(petsciiToAscii(spPet));
-        }
+		while ( *spPet )
+			info->m_commentString.push_back ( petsciiToAscii ( spPet ) );
 
         info->m_sidChipAddresses.push_back(SIDTUNE_SID2_BASE_ADDR);
         info->m_formatString = TXT_FORMAT_STR;
@@ -286,16 +266,14 @@ void MUS::tryLoad(buffer_t& musBuf,
     setPlayerAddress();
 
     // Remove trailing empty lines.
-    const int lines = info->m_commentString.size();
-    {
-        for (int line = lines-1; line >= 0; line--)
-        {
-            if (info->m_commentString[line].length() == 0)
-                info->m_commentString.pop_back();
-            else
-                break;
-        }
-    }
+	const int lines = int ( info->m_commentString.size () );
+	{
+		for ( int line = lines - 1; line >= 0; line-- )
+			if ( info->m_commentString[ line ].length () == 0 )
+				info->m_commentString.pop_back ();
+			else
+				break;
+	}
 }
 
 }

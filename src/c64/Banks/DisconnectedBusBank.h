@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,13 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef DISCONNECTEDBUSBANK_H
-#define DISCONNECTEDBUSBANK_H
-
 #include "Bank.h"
 #include "pla.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -52,14 +48,12 @@ public:
     /**
      * No device is connected so this is a no-op.
      */
-    void poke(uint_least16_t, uint8_t) override {}
+	void poke ( uint_least16_t, uint8_t ) override {}
 
     /**
      * No device is connected so this should return the value left on the bus.
      */
-    uint8_t peek(uint_least16_t) override { return pla.getLastReadByte(); }
+	uint8_t peek ( uint_least16_t ) override { return pla.getLastReadByte (); }
 };
 
 }
-
-#endif

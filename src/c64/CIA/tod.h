@@ -115,7 +115,7 @@ public:
      *
      * @param clock
      */
-    void setPeriod(event_clock_t clock) { period = clock * (1 << 7); }
+	void setPeriod ( event_clock_t _clock ) { period = _clock * ( 1 << 7 ); }
 };
 
 }

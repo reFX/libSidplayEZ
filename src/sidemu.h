@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,20 +21,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDEMU_H
-#define SIDEMU_H
-
 #include <string>
 
 #include "sidplayfp/SidConfig.h"
-#include "sidplayfp/siddefs.h"
 #include "Event.h"
 #include "EventScheduler.h"
 
 #include "c64/c64sid.h"
-
-#include "sidcxx11.h"
-
 
 class sidbuilder;
 
@@ -124,8 +118,7 @@ public:
      * @param method
      * @param fast
      */
-    virtual void sampling(float systemfreq SID_UNUSED, float outputfreq SID_UNUSED,
-        SidConfig::sampling_method_t method SID_UNUSED, bool fast SID_UNUSED) {}
+    virtual void sampling( [[ maybe_unused ]]float systemfreq, [[ maybe_unused ]] float outputfreq, [[ maybe_unused ]] SidConfig::sampling_method_t method, [[ maybe_unused ]] bool fast) {}
 
     /**
      * Get a detailed error message.
@@ -151,5 +144,3 @@ public:
 };
 
 }
-
-#endif // SIDEMU_H

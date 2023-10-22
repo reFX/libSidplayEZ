@@ -20,10 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#define FILTER8580_CPP
-
 #include "Filter8580.h"
-
 #include "Integrator8580.h"
 
 namespace reSIDfp
@@ -92,7 +89,7 @@ void Filter8580::setFilterCurve(double curvePosition)
 {
     // Adjust cp
     // 1.2 <= cp <= 1.8
-    cp = 1.8 - curvePosition * 3./5.;
+    cp = 1.8 - curvePosition * 3.0 / 5.0;
 
     hpIntegrator->setV(cp);
     bpIntegrator->setV(cp);

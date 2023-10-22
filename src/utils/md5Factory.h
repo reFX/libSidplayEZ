@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -18,12 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MD5_FACTORY_H
-#define MD5_FACTORY_H
-
 #include <memory>
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -31,9 +27,6 @@ class iMd5;
 
 namespace md5Factory
 {
-    std::unique_ptr<iMd5> get();
+    std::unique_ptr<iMd5> get ();
 }
-
 }
-
-#endif // MD5_FACTORY_H

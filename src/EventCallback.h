@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,17 +21,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef EVENTCALLBACK_H
-#define EVENTCALLBACK_H
-
 #include "Event.h"
-
-#include "sidcxx11.h"
-
 
 namespace libsidplayfp
 {
-
 template< class This >
 class EventCallback final : public Event
 {
@@ -53,5 +47,3 @@ public:
 };
 
 }
-
-#endif // EVENTCALLBACK_H

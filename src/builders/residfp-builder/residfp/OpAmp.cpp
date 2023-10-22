@@ -21,63 +21,56 @@
 
 #include "OpAmp.h"
 
-#include <cmath>
-
-#include "siddefs-fp.h"
-
 namespace reSIDfp
 {
 
-const double EPSILON = 1e-8;
+constexpr auto	EPSILON = 1e-8;
 
-double OpAmp::solve(double n, double vi) const
+double OpAmp::solve ( double n, double vi )
 {
     // Start off with an estimate of x and a root bracket [ak, bk].
     // f is decreasing, so that f(ak) > 0 and f(bk) < 0.
-    double ak = vmin;
-    double bk = vmax;
+    auto    ak = vmin;
+    auto    bk = vmax;
 
-    const double a = n + 1.;
-    const double b = Vddt;
-    const double b_vi = (b > vi) ? (b - vi) : 0.;
-    const double c = n * (b_vi * b_vi);
+	const auto  a = n + 1.0;
+	const auto  b = Vddt;
+	const auto  b_vi = ( b > vi ) ? ( b - vi ) : 0.0;
+	const auto  c = n * ( b_vi * b_vi );
 
     for (;;)
     {
-        const double xk = x;
+        const auto  xk = x;
 
-        // Calculate f and df.
+        // Calculate f and df
+        const auto	out = opamp->evaluate(x);
+        const auto  vo = out.x;
+        const auto  dvo = out.y;
 
-        Spline::Point out = opamp->evaluate(x);
-        const double vo = out.x;
-        const double dvo = out.y;
+		const auto  b_vx = ( b > x ) ? b - x : 0.;
+		const auto  b_vo = ( b > vo ) ? b - vo : 0.;
 
-        const double b_vx = (b > x) ? b - x : 0.;
-        const double b_vo = (b > vo) ? b - vo : 0.;
+		// f = a*(b - vx)^2 - c - (b - vo)^2
+		const auto	f = a * ( b_vx * b_vx ) - c - ( b_vo * b_vo );
 
-        // f = a*(b - vx)^2 - c - (b - vo)^2
-        const double f = a * (b_vx * b_vx) - c - (b_vo * b_vo);
-
-        // df = 2*((b - vo)*dvo - a*(b - vx))
-        const double df = 2. * (b_vo * dvo - a * b_vx);
+		// df = 2*((b - vo)*dvo - a*(b - vx))
+		const auto	df = 2.0 * ( b_vo * dvo - a * b_vx );
 
         // Newton-Raphson step: xk1 = xk - f(xk)/f'(xk)
         x -= f / df;
 
-        if (unlikely(fabs(x - xk) < EPSILON))
-        {
-            out = opamp->evaluate(x);
-            return out.x;
-        }
+		if ( std::fabs ( x - xk ) < EPSILON )
+			return opamp->evaluate ( x ).x;
 
-        // Narrow down root bracket.
-        (f < 0. ? bk : ak) = xk;
+		// Narrow down root bracket
+		if ( f < 0.0 )
+			bk = xk;
+		else
+			ak = xk;
 
-        if (unlikely(x <= ak) || unlikely(x >= bk))
-        {
-            // Bisection step (ala Dekker's method).
-            x = (ak + bk) * 0.5;
-        }
+		// Bisection step (ala Dekker's method)
+		if ( x <= ak || x >= bk )
+			x = ( ak + bk ) * 0.5;
     }
 }
 

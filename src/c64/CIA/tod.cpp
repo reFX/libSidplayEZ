@@ -131,7 +131,7 @@ void Tod::event()
     cycles += period;
 
     // Fixed precision 25.7
-    eventScheduler.schedule(*this, cycles >> 7);
+	eventScheduler.schedule ( *this, (unsigned int)( cycles >> 7 ) );
     cycles &= 0x7F; // Just keep the decimal part
 
     if (!isStopped)
@@ -224,9 +224,9 @@ void Tod::updateCounters()
     }
 
     clock[TENTHS]  = ts;
-    clock[SECONDS] = sl | (sh << 4);
-    clock[MINUTES] = ml | (mh << 4);
-    clock[HOURS]   = hl | (hh << 4) | pm;
+    clock[SECONDS] = uint8_t ( sl | (sh << 4) );
+    clock[MINUTES] = uint8_t ( ml | (mh << 4) );
+    clock[HOURS]   = uint8_t ( hl | (hh << 4) | pm );
 
     checkAlarm();
 }

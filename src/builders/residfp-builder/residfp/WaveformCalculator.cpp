@@ -24,7 +24,6 @@
 #include <cmath>
 #include <map>
 #include <mutex>
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -72,15 +71,15 @@ typedef float (*distance_t)(float, int);
 // Distance functions
 static float exponentialDistance(float distance, int i)
 {
-    return pow(distance, -i);
+    return std::powf(distance, -i);
 }
 
-MAYBE_UNUSED static float linearDistance(float distance, int i)
+[[ maybe_unused ]] static float linearDistance(float distance, int i)
 {
     return 1.f / (1.f + i * distance);
 }
 
-MAYBE_UNUSED static float quadraticDistance(float distance, int i)
+[[ maybe_unused ]] static float quadraticDistance(float distance, int i)
 {
     return 1.f / (1.f + (i*i) * distance);
 }
@@ -99,106 +98,99 @@ static unsigned int triXor(unsigned int val)
  * @param threshold
  * @param accumulator the high bits of the accumulator value
  */
-short calculatePulldown(float distancetable[], float pulsestrength, float threshold, unsigned int accumulator)
+short calculatePulldown ( float distancetable[], float pulsestrength, float threshold, unsigned int accumulator )
 {
-    unsigned char bit[12];
+	unsigned char   bit[ 12 ];
 
-    for (unsigned int i = 0; i < 12; i++)
+    for ( auto i = 0; i < 12; i++)
+		bit[ i ] = ( accumulator & ( 1 << i ) ) ? 1 : 0;
+
+	float   pulldown[ 12 ];
+
+	for ( auto sb = 0; sb < 12; sb++ )
     {
-        bit[i] = (accumulator & (1u << i)) != 0 ? 1 : 0;
-    }
+        auto    avg = 0.0f;
+        auto    n = 0.0f;
 
-    float pulldown[12];
+		for ( auto cb = 0; cb < 12; cb++ )
+		{
+			if ( cb == sb )
+				continue;
 
-    for (int sb = 0; sb < 12; sb++)
-    {
-        float avg = 0.f;
-        float n = 0.f;
-
-        for (int cb = 0; cb < 12; cb++)
-        {
-            if (cb == sb)
-                continue;
-            const float weight = distancetable[sb - cb + 12];
-            avg += static_cast<float>(1 - bit[cb]) * weight;
-            n += weight;
-        }
+            const auto  weight = distancetable[ sb - cb + 12 ];
+			avg += ( 1 - bit[ cb ] ) * weight;
+			n += weight;
+		}
 
         avg -= pulsestrength;
 
-        pulldown[sb] = avg / n;
+		pulldown[ sb ] = avg / n;
     }
 
     // Get the predicted value
-    short value = 0;
+    short   value = 0;
 
-    for (unsigned int i = 0; i < 12; i++)
+    for ( auto i = 0; i < 12; i++ )
     {
-        const float bitValue = bit[i] != 0 ? 1.f - pulldown[i] : 0.f;
-        if (bitValue > threshold)
-        {
-            value |= 1u << i;
-        }
+		const auto  bitValue = bit[ i ] != 0 ? 1.0f - pulldown[ i ] : 0.0f;
+
+        if ( bitValue > threshold )
+			value |= 1 << i;
     }
 
     return value;
 }
 
-WaveformCalculator::WaveformCalculator() :
-    wftable(4, 4096)
+WaveformCalculator::WaveformCalculator ()
+	: wftable ( 4, 4096 )
 {
-    // Build waveform table.
-    for (unsigned int idx = 0; idx < (1u << 12); idx++)
-    {
-        const short saw = static_cast<short>(idx);
-        const short tri = static_cast<short>(triXor(idx));
+	// Build waveform table.
+	for ( unsigned int idx = 0; idx < ( 1 << 12 ); idx++ )
+	{
+		const auto  saw = uint16_t ( idx );
+		const auto  tri = uint16_t ( triXor ( idx ) );
 
-        wftable[0][idx] = 0xfff;
-        wftable[1][idx] = tri;
-        wftable[2][idx] = saw;
-        wftable[3][idx] = saw & (saw << 1);
-    }
+		wftable[ 0 ][ idx ] = 0x0FFF;
+		wftable[ 1 ][ idx ] = tri;
+		wftable[ 2 ][ idx ] = saw;
+		wftable[ 3 ][ idx ] = saw & ( saw << 1 );
+	}
 }
 
-matrix_t* WaveformCalculator::buildPulldownTable(ChipModel model)
+matrix_t* WaveformCalculator::buildPulldownTable ( ChipModel model )
 {
     std::lock_guard<std::mutex> lock ( PULLDOWN_CACHE_Lock );
 
-    const CombinedWaveformConfig* cfgArray = config[model == MOS6581 ? 0 : 1];
+    const auto  cfgArray = config[model == MOS6581 ? 0 : 1];
 
-    cw_cache_t::iterator lb = PULLDOWN_CACHE.lower_bound(cfgArray);
+	auto    lb = PULLDOWN_CACHE.lower_bound ( cfgArray );
 
-    if (lb != PULLDOWN_CACHE.end() && !(PULLDOWN_CACHE.key_comp()(cfgArray, lb->first)))
+	if ( lb != PULLDOWN_CACHE.end () && ! ( PULLDOWN_CACHE.key_comp ()( cfgArray, lb->first ) ) )
+		return &( lb->second );
+
+	matrix_t pdTable ( 5, 4096 );
+
+    for ( auto wav = 0; wav < 5; wav++ )
     {
-        return &(lb->second);
-    }
-
-    matrix_t pdTable(5, 4096);
-
-    for (int wav = 0; wav < 5; wav++)
-    {
-        const CombinedWaveformConfig& cfg = cfgArray[wav];
+		const auto& cfg = cfgArray[ wav ];
 
         const distance_t distFunc = exponentialDistance;
 
-        float distancetable[12 * 2 + 1];
-        distancetable[12] = 1.f;
-        for (int i = 12; i > 0; i--)
+		float distancetable[ 12 * 2 + 1 ];
+		distancetable[ 12 ] = 1.f;
+		for ( auto i = 12; i > 0; i-- )
         {
-            distancetable[12-i] = distFunc(cfg.distance1, i);
-            distancetable[12+i] = distFunc(cfg.distance2, i);
+			distancetable[ 12 - i ] = distFunc ( cfg.distance1, i );
+			distancetable[ 12 + i ] = distFunc ( cfg.distance2, i );
         }
 
-        for (unsigned int idx = 0; idx < (1u << 12); idx++)
-        {
-            pdTable[wav][idx] = calculatePulldown(distancetable, cfg.pulsestrength, cfg.threshold, idx);
-        }
+		for ( unsigned int idx = 0; idx < ( 1 << 12 ); idx++ )
+		{
+			pdTable[ wav ][ idx ] = calculatePulldown ( distancetable, cfg.pulsestrength, cfg.threshold, idx );
+		}
     }
-#ifdef HAVE_CXX11
-    return &(PULLDOWN_CACHE.emplace_hint(lb, cw_cache_t::value_type(cfgArray, pdTable))->second);
-#else
-    return &(PULLDOWN_CACHE.insert(lb, cw_cache_t::value_type(cfgArray, pdTable))->second);
-#endif
+
+	return &( PULLDOWN_CACHE.emplace_hint ( lb, cw_cache_t::value_type ( cfgArray, pdTable ) )->second );
 }
 
 } // namespace reSIDfp

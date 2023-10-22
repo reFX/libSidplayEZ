@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,17 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILTER6581_H
-#define FILTER6581_H
-
-#include "siddefs-fp.h"
-
 #include <memory>
 
 #include "Filter.h"
 #include "FilterModelConfig6581.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -322,7 +316,7 @@ class Integrator6581;
 class Filter6581 final : public Filter
 {
 private:
-    const unsigned short* f0_dac;
+    const uint16_t* f0_dac;
 
     unsigned short** mixer;
     unsigned short** summer;
@@ -354,21 +348,21 @@ protected:
     void updatedMixing() override;
 
 public:
-    Filter6581() :
-        f0_dac(FilterModelConfig6581::getInstance()->getDAC(0.5)),
-        mixer(FilterModelConfig6581::getInstance()->getMixer()),
-        summer(FilterModelConfig6581::getInstance()->getSummer()),
-        gain_res(FilterModelConfig6581::getInstance()->getGainRes()),
-        gain_vol(FilterModelConfig6581::getInstance()->getGainVol()),
-        voiceScaleS11(FilterModelConfig6581::getInstance()->getVoiceScaleS11()),
-        voiceDC(FilterModelConfig6581::getInstance()->getNormalizedVoiceDC()),
-        hpIntegrator(FilterModelConfig6581::getInstance()->buildIntegrator()),
-        bpIntegrator(FilterModelConfig6581::getInstance()->buildIntegrator())
+    Filter6581 ()
+		: f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
+		, mixer ( FilterModelConfig6581::getInstance ()->getMixer () )
+		, summer ( FilterModelConfig6581::getInstance ()->getSummer () )
+		, gain_res ( FilterModelConfig6581::getInstance ()->getGainRes () )
+		, gain_vol ( FilterModelConfig6581::getInstance ()->getGainVol () )
+		, voiceScaleS11 ( FilterModelConfig6581::getInstance ()->getVoiceScaleS11 () )
+		, voiceDC ( FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC () )
+		, hpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
+		, bpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
     {
         input(0);
     }
 
-    ~Filter6581();
+    ~Filter6581() override;
 
     unsigned short clock(int voice1, int voice2, int voice3) override;
 
@@ -384,15 +378,12 @@ public:
 
 } // namespace reSIDfp
 
-#if RESID_INLINING || defined(FILTER6581_CPP)
-
 #include "Integrator6581.h"
 
 namespace reSIDfp
 {
 
-RESID_INLINE
-unsigned short Filter6581::clock(int voice1, int voice2, int voice3)
+inline unsigned short Filter6581::clock(int voice1, int voice2, int voice3)
 {
     voice1 = (voice1 * voiceScaleS11 >> 15) + voiceDC;
     voice2 = (voice2 * voiceScaleS11 >> 15) + voiceDC;
@@ -419,7 +410,3 @@ unsigned short Filter6581::clock(int voice1, int voice2, int voice3)
 }
 
 } // namespace reSIDfp
-
-#endif
-
-#endif

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef SIDINFOIMPL_H
-#define SIDINFOIMPL_H
-
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -30,21 +28,6 @@
 #include "sidplayfp/SidInfo.h"
 
 #include "mixer.h"
-
-#include "sidcxx11.h"
-
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
-#ifndef PACKAGE_NAME
-#  define PACKAGE_NAME PACKAGE
-#endif
-
-#ifndef PACKAGE_VERSION
-#  define PACKAGE_VERSION VERSION
-#endif
 
 /**
  * The implementation of the SidInfo interface.
@@ -96,8 +79,8 @@ public:
     const char *getName() const override { return m_name.c_str(); }
     const char *getVersion() const override { return m_version.c_str(); }
 
-    unsigned int getNumberOfCredits() const override { return m_credits.size(); }
-    const char *getCredits(unsigned int i) const override { return i<m_credits.size()?m_credits[i].c_str():""; }
+    unsigned int getNumberOfCredits() const override { return (unsigned int)m_credits.size(); }
+    const char *getCredits(unsigned int i) const override { return i < (unsigned int)m_credits.size () ? m_credits[i].c_str() : ""; }
 
     unsigned int getMaxsids() const override { return m_maxsids; }
 
@@ -114,5 +97,3 @@ public:
     const char *getBasicDesc() const override { return m_basicDesc.c_str(); }
     const char *getChargenDesc() const override { return m_chargenDesc.c_str(); }
 };
-
-#endif  /* SIDTUNEINFOIMPL_H */

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,14 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
-#ifndef PLAYER_H
-#define PLAYER_H
-
 #include <stdint.h>
 #include <cstdio>
 
-#include "sidplayfp/siddefs.h"
 #include "sidplayfp/SidConfig.h"
 #include "sidplayfp/SidTuneInfo.h"
 
@@ -36,13 +32,7 @@
 #include "mixer.h"
 #include "c64/c64.h"
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
-#ifdef HAVE_CXX11
-#  include <atomic>
-#endif
+#include <atomic>
 #include <vector>
 
 class SidTune;
@@ -82,11 +72,7 @@ private:
     /// Error message
     const char *m_errorString;
 
-#ifndef HAVE_CXX11
-    volatile state_t m_isPlaying;
-#else
     std::atomic<state_t> m_isPlaying;
-#endif
 
     sidrandom m_rand;
 
@@ -98,7 +84,7 @@ private:
      * Get the C64 model for the current loaded tune.
      *
      * @param defaultModel the default model
-     * @param forced true if the default model shold be forced in spite of tune model
+     * @param forced true if the default model should be forced in spite of tune model
      */
     c64::model_t c64model(SidConfig::c64_model_t defaultModel, bool forced);
 
@@ -173,5 +159,3 @@ public:
 };
 
 }
-
-#endif // PLAYER_H

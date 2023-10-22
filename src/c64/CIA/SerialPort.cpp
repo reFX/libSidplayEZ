@@ -49,11 +49,11 @@ void SerialPort::syncCntHistory()
 {
     const event_clock_t time = eventScheduler.getTime(EVENT_CLOCK_PHI1);
     const event_clock_t clocks = time - lastSync;
+
     lastSync = time;
-    for (int i=0; i<clocks; i++)
-    {
-        cntHistory = (cntHistory << 1) | cnt;
-    }
+
+    for ( int i = 0; i < clocks; i++ )
+		cntHistory = uint8_t ( ( cntHistory << 1 ) | cnt );
 }
 
 void SerialPort::startSdr()

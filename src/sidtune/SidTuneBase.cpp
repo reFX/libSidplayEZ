@@ -169,8 +169,8 @@ void SidTuneBase::placeSidTuneInC64mem(sidmemory& mem)
 {
     // The Basic ROM sets these values on loading a file.
     // Program end address
-    const uint_least16_t start = info->m_loadAddr;
-    const uint_least16_t end   = start + info->m_c64dataLen;
+    const auto  start = info->m_loadAddr;
+    const auto  end   = uint16_t ( start + info->m_c64dataLen );
     mem.writeMemWord(0x2d, end); // Variables start
     mem.writeMemWord(0x2f, end); // Arrays start
     mem.writeMemWord(0x31, end); // Strings start
@@ -191,7 +191,7 @@ void SidTuneBase::loadFile(const char* fileName, buffer_t& bufferRef)
     }
 
     inFile.seekg(0, inFile.end);
-    const int fileLen = inFile.tellg();
+    const auto fileLen = int ( inFile.tellg() );
 
     if (fileLen <= 0)
     {
@@ -229,7 +229,7 @@ SidTuneBase::SidTuneBase() :
     // Initialize the object with some safe defaults.
     for (unsigned int si = 0; si < MAX_SONGS; si++)
     {
-        songSpeed[si] = info->m_songSpeed;
+        songSpeed[si] = uint8_t ( info->m_songSpeed );
         clockSpeed[si] = info->m_clockSpeed;
     }
 }
@@ -248,7 +248,7 @@ SidTuneBase* SidTuneBase::getFromStdIn()
         fileBuf.push_back((uint_least8_t)datb);
     }
 
-    return getFromBuffer(&fileBuf.front(), fileBuf.size());
+	return getFromBuffer ( &fileBuf.front (), uint32_t ( fileBuf.size () ) );
 }
 
 #endif
@@ -314,8 +314,8 @@ void SidTuneBase::acceptSidTune(const char* dataFileName, const char* infoFileNa
         info->m_startSong = 1;
     }
 
-    info->m_dataFileLen = buf.size();
-    info->m_c64dataLen = buf.size() - fileOffset;
+    info->m_dataFileLen = uint32_t ( buf.size() );
+    info->m_c64dataLen = uint32_t ( buf.size() - fileOffset );
 
     // Calculate any remaining addresses and then
     // confirm all the file details are correct

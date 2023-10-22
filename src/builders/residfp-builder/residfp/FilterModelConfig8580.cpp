@@ -27,7 +27,6 @@
 #include "Integrator8580.h"
 #include "OpAmp.h"
 
-
 namespace reSIDfp
 {
 
@@ -117,171 +116,136 @@ FilterModelConfig8580* FilterModelConfig8580::getInstance()
 {
     std::lock_guard<std::mutex> lock ( Instance8580_Lock );
 
-    if (!instance.get())
-    {
-        instance.reset(new FilterModelConfig8580());
-    }
+	if ( ! instance.get () )
+		instance.reset ( new FilterModelConfig8580 () );
 
-    return instance.get();
+	return instance.get ();
 }
 
-FilterModelConfig8580::FilterModelConfig8580() :
-    FilterModelConfig(
-        0.30,   // voice voltage range FIXME measure
-        4.84,   // voice DC voltage FIXME measure
-        22e-9,  // capacitor value
-        9.09,   // Vdd
-        0.80,   // Vth
-        100e-6, // uCox
-        opamp_voltage,
-        OPAMP_SIZE
-    )
+FilterModelConfig8580::FilterModelConfig8580 () :
+	FilterModelConfig (
+		0.30,   // voice voltage range FIXME measure
+		4.84,   // voice DC voltage FIXME measure
+		22e-9,  // capacitor value
+		9.09,   // Vdd
+		0.80,   // Vth
+		100e-6, // uCox
+		opamp_voltage,
+		OPAMP_SIZE
+	)
 {
     // Create lookup tables for gains / summers.
-#ifndef _OPENMP
-    OpAmp opampModel(
-        std::vector<Spline::Point>(
-            std::begin(opamp_voltage),
-            std::end(opamp_voltage)),
-        Vddt,
-        vmin,
-        vmax);
-#endif
 
-    #pragma omp parallel sections
+	//
+	// We spawn four threads to calculate these tables in parallel
+	//
+
+    auto filterSummer = [ this ]
     {
-        #pragma omp section
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        // The filter summer operates at n ~ 1, and has 5 fundamentally different
+        // input configurations (2 - 6 input "resistors").
+        //
+        // Note that all "on" transistors are modeled as one. This is not
+        // entirely accurate, since the input for each transistor is different,
+        // and transistors are not linear components. However modeling all
+        // transistors separately would be extremely costly.
+        for ( auto i = 0; i < 5; i++ )
         {
-#ifdef _OPENMP
-            OpAmp opampModel(
-                std::vector<Spline::Point>(
-                    std::begin(opamp_voltage),
-                    std::end(opamp_voltage)),
-                Vddt,
-                vmin,
-                vmax);
-#endif
-            // The filter summer operates at n ~ 1, and has 5 fundamentally different
-            // input configurations (2 - 6 input "resistors").
-            //
-            // Note that all "on" transistors are modeled as one. This is not
-            // entirely accurate, since the input for each transistor is different,
-            // and transistors are not linear components. However modeling all
-            // transistors separately would be extremely costly.
-            for (int i = 0; i < 5; i++)
-            {
-                const int idiv = 2 + i;        // 2 - 6 input "resistors".
-                const int size = idiv << 16;
-                const double n = idiv;
-                opampModel.reset();
-                summer[i] = new unsigned short[size];
+            const auto  idiv = 2 + i;        // 2 - 6 input "resistors".
+            const auto  size = idiv << 16;
+            const auto  n = idiv;
+            opampModel.reset ();
+            summer[ i ] = new unsigned short[ size ];
 
-                for (int vi = 0; vi < size; vi++)
-                {
-                    const double vin = vmin + vi / N16 / idiv; /* vmin .. vmax */
-                    summer[i][vi] = getNormalizedValue(opampModel.solve(n, vin));
-                }
+            for ( auto vi = 0; vi < size; vi++ )
+            {
+                const auto  vin = vmin + vi / N16 / idiv; // vmin .. vmax
+                summer[ i ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
             }
         }
-
-        #pragma omp section
+    };
+    auto filterMixer = [ this ]
+    {
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        // The audio mixer operates at n ~ 8/5, and has 8 fundamentally different
+        // input configurations (0 - 7 input "resistors").
+        //
+        // All "on", transistors are modeled as one - see comments above for
+        // the filter summer.
+        for ( auto i = 0; i < 8; i++ )
         {
-#ifdef _OPENMP
-            OpAmp opampModel(
-                std::vector<Spline::Point>(
-                    std::begin(opamp_voltage),
-                    std::end(opamp_voltage)),
-                Vddt,
-                vmin,
-                vmax);
-#endif
-            // The audio mixer operates at n ~ 8/5, and has 8 fundamentally different
-            // input configurations (0 - 7 input "resistors").
-            //
-            // All "on", transistors are modeled as one - see comments above for
-            // the filter summer.
-            for (int i = 0; i < 8; i++)
-            {
-                const int idiv = (i == 0) ? 1 : i;
-                const int size = (i == 0) ? 1 : i << 16;
-                const double n = i * 8.0 / 5.0;
-                opampModel.reset();
-                mixer[i] = new unsigned short[size];
+            const auto  idiv = ( i == 0 ) ? 1 : i;
+            const auto  size = ( i == 0 ) ? 1 : i << 16;
+            const auto  n = i * 8.0 / 5.0;
+            opampModel.reset ();
+            mixer[ i ] = new unsigned short[ size ];
 
-                for (int vi = 0; vi < size; vi++)
-                {
-                    const double vin = vmin + vi / N16 / idiv; /* vmin .. vmax */
-                    mixer[i][vi] = getNormalizedValue(opampModel.solve(n, vin));
-                }
+            for ( auto vi = 0; vi < size; vi++ )
+            {
+                const auto  vin = vmin + vi / N16 / idiv; // vmin .. vmax
+                mixer[ i ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
             }
         }
-
-        #pragma omp section
+    };
+    auto filterGain = [ this ]
+    {
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        // 4 bit "resistor" ladders in the audio output gain
+        // necessitate 16 gain tables.
+        // From die photographs of the volume "resistor" ladders
+        // it follows that gain ~ vol/16 (assuming ideal
+        // op-amps and ideal "resistors").
+        for ( auto n8 = 0; n8 < 16; n8++ )
         {
-#ifdef _OPENMP
-            OpAmp opampModel(
-                std::vector<Spline::Point>(
-                    std::begin(opamp_voltage),
-                    std::end(opamp_voltage)),
-                Vddt,
-                vmin,
-                vmax);
-#endif
-            // 4 bit "resistor" ladders in the audio output gain
-            // necessitate 16 gain tables.
-            // From die photographs of the volume "resistor" ladders
-            // it follows that gain ~ vol/16 (assuming ideal
-            // op-amps and ideal "resistors").
-            for (int n8 = 0; n8 < 16; n8++)
-            {
-                const int size = 1 << 16;
-                const double n = n8 / 16.0;
-                opampModel.reset();
-                gain_vol[n8] = new unsigned short[size];
+            const auto  size = 1 << 16;
+            const auto  n = n8 / 16.0;
+            opampModel.reset ();
+            gain_vol[ n8 ] = new unsigned short[ size ];
 
-                for (int vi = 0; vi < size; vi++)
-                {
-                    const double vin = vmin + vi / N16; /* vmin .. vmax */
-                    gain_vol[n8][vi] = getNormalizedValue(opampModel.solve(n, vin));
-                }
+            for ( auto vi = 0; vi < size; vi++ )
+            {
+                const auto  vin = vmin + vi / N16; // vmin .. vmax
+                gain_vol[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
             }
         }
-
-        #pragma omp section
+    };
+    auto filterGainRes = [ this ]
+    {
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        // 4 bit "resistor" ladders in the bandpass resonance gain
+        // necessitate 16 gain tables.
+        // From die photographs of the bandpass "resistor" ladders
+        // it follows that 1/Q ~ 2^((4 - res)/8) (assuming ideal
+        // op-amps and ideal "resistors").
+        for ( auto n8 = 0; n8 < 16; n8++ )
         {
-#ifdef _OPENMP
-            OpAmp opampModel(
-                std::vector<Spline::Point>(
-                    std::begin(opamp_voltage),
-                    std::end(opamp_voltage)),
-                Vddt,
-                vmin,
-                vmax);
-#endif
-            // 4 bit "resistor" ladders in the bandpass resonance gain
-            // necessitate 16 gain tables.
-            // From die photographs of the bandpass "resistor" ladders
-            // it follows that 1/Q ~ 2^((4 - res)/8) (assuming ideal
-            // op-amps and ideal "resistors").
-            for (int n8 = 0; n8 < 16; n8++)
-            {
-                const int size = 1 << 16;
-                opampModel.reset();
-                gain_res[n8] = new unsigned short[size];
+            const auto  size = 1 << 16;
+            opampModel.reset ();
+            gain_res[ n8 ] = new unsigned short[ size ];
 
-                for (int vi = 0; vi < size; vi++)
-                {
-                    const double vin = vmin + vi / N16; /* vmin .. vmax */
-                    gain_res[n8][vi] = getNormalizedValue(opampModel.solve(resGain[n8], vin));
-                }
+            for ( auto vi = 0; vi < size; vi++ )
+            {
+                const auto  vin = vmin + vi / N16; // vmin .. vmax
+                gain_res[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( resGain[ n8 ], vin ) );
             }
         }
-    }
+    };
+
+	auto    thdSummer = std::thread ( filterSummer );
+	auto    thdMixer = std::thread ( filterMixer );
+	auto    thdGain = std::thread ( filterGain );
+	auto    thdGainRes = std::thread ( filterGainRes );
+
+	thdSummer.join ();
+	thdMixer.join ();
+	thdGain.join ();
+	thdGainRes.join ();
 }
 
 std::unique_ptr<Integrator8580> FilterModelConfig8580::buildIntegrator()
 {
-    return MAKE_UNIQUE(Integrator8580, this);
+    return std::make_unique<Integrator8580> ( this );
 }
 
 } // namespace reSIDfp

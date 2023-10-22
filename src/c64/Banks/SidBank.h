@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,13 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDBANK_H
-#define SIDBANK_H
-
 #include "Bank.h"
 #include "c64/c64sid.h"
-
-#include "sidcxx11.h"
 
 #include "NullSid.h"
 
@@ -41,36 +37,24 @@ class SidBank final : public Bank
 {
 private:
     /// SID chip
-    c64sid *sid;
+    c64sid* sid;
 
 public:
-    SidBank()
-      : sid(NullSid::getInstance())
-    {}
+	SidBank ()
+		: sid ( NullSid::getInstance () )
+	{}
 
-    void reset()
-    {
-        sid->reset(0xf);
-    }
+	void reset ()	{	sid->reset ( 0xf );	}
 
-    uint8_t peek(uint_least16_t addr) override
-    {
-        return sid->peek(addr);
-    }
-
-    void poke(uint_least16_t addr, uint8_t data) override
-    {
-        sid->poke(addr, data);
-    }
+	uint8_t peek ( uint_least16_t addr ) override				{	return sid->peek ( addr );	}
+	void poke ( uint_least16_t addr, uint8_t data ) override	{	sid->poke ( addr, data );	}
 
     /**
      * Set SID emulation.
      *
      * @param s the emulation, nullptr to remove current sid
      */
-    void setSID(c64sid *s) { sid = (s != nullptr) ? s : NullSid::getInstance(); }
+	void setSID ( c64sid* s ) { sid = s ? s : NullSid::getInstance (); }
 };
 
 }
-
-#endif

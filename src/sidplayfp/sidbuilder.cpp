@@ -20,27 +20,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "sidbuilder.h"
-
 #include <algorithm>
 
+#include "sidbuilder.h"
 #include "sidemu.h"
 
-#include "sidcxx11.h"
-
-libsidplayfp::sidemu *sidbuilder::lock(libsidplayfp::EventScheduler *env, SidConfig::sid_model_t model, bool digiboost)
+libsidplayfp::sidemu* sidbuilder::lock ( libsidplayfp::EventScheduler* env, SidConfig::sid_model_t model, bool digiboost )
 {
     m_status = true;
 
-    for (emuset_t::iterator it=sidobjs.begin(); it != sidobjs.end(); ++it)
-    {
-        libsidplayfp::sidemu *sid = (*it);
-        if (sid->lock(env))
-        {
-            sid->model(model, digiboost);
-            return sid;
-        }
-    }
+	for ( auto it = sidobjs.begin (); it != sidobjs.end (); ++it )
+	{
+		libsidplayfp::sidemu* sid = ( *it );
+		if ( sid->lock ( env ) )
+		{
+			sid->model ( model, digiboost );
+			return sid;
+		}
+	}
 
     // Unable to locate free SID
     m_status = false;
@@ -48,21 +45,19 @@ libsidplayfp::sidemu *sidbuilder::lock(libsidplayfp::EventScheduler *env, SidCon
     return nullptr;
 }
 
-void sidbuilder::unlock(libsidplayfp::sidemu *device)
+void sidbuilder::unlock ( libsidplayfp::sidemu* device )
 {
-    emuset_t::iterator it = sidobjs.find(device);
-    if (it != sidobjs.end())
-    {
-        (*it)->unlock();
-    }
+    auto    it = sidobjs.find(device);
+	if ( it != sidobjs.end () )
+		( *it )->unlock ();
 }
 
 template<class T>
 void Delete(T s) { delete s; }
 
-void sidbuilder::remove()
+void sidbuilder::remove ()
 {
-    std::for_each(sidobjs.begin(), sidobjs.end(), Delete<emuset_t::value_type>);
+	std::for_each ( sidobjs.begin (), sidobjs.end (), Delete<emuset_t::value_type> );
 
-    sidobjs.clear();
+	sidobjs.clear ();
 }

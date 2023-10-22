@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -18,16 +19,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef PSID_H
-#define PSID_H
-
 #include <stdint.h>
 
 #include "SidTuneBase.h"
-
 #include "sidplayfp/SidTune.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -58,7 +53,7 @@ protected:
     PSID() {}
 
 public:
-    virtual ~PSID() {}
+    ~PSID() override {}
 
     /**
      * @return pointer to a SidTune or 0 if not a PSID file
@@ -77,5 +72,3 @@ private:
 };
 
 }
-
-#endif // PSID_H

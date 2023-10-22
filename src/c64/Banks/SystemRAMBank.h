@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,15 +20,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SYSTEMRAMBANK_H
-#define SYSTEMRAMBANK_H
-
 #include <stdint.h>
 #include <cstring>
 
 #include "Bank.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -55,31 +51,29 @@ public:
      * ...
      * $c000: ff ff 00 00 00 00 ff ff ff ff 00 00 00 00 ff ff
      */
-    void reset()
+    void reset ()
     {
-        uint8_t byte = 0x00;
-        for (int j=0x0000; j<0x10000; j+=0x4000)
-        {
-            memset(ram+j, byte, 0x4000);
-            byte = ~byte;
-            for (int i = 0x02; i < 0x4000; i += 0x08)
-            {
-                memset(ram+j+i, byte, 0x04);
-            }
-        }
+		uint8_t byte = 0x00;
+		for ( int j = 0x0000; j < 0x10000; j += 0x4000 )
+		{
+			std::fill_n ( ram + j, 0x4000, byte );
+
+			byte = ~byte;
+
+			for ( int i = 0x02; i < 0x4000; i += 0x08 )
+				std::fill_n ( ram + j + i, 0x04, byte );
+		}
     }
 
-    uint8_t peek(uint_least16_t address) override
-    {
-        return ram[address];
-    }
+	uint8_t peek ( uint_least16_t address ) override
+	{
+		return ram[ address ];
+	}
 
-    void poke(uint_least16_t address, uint8_t value) override
-    {
-        ram[address] = value;
-    }
+	void poke ( uint_least16_t address, uint8_t value ) override
+	{
+		ram[ address ] = value;
+	}
 };
 
 }
-
-#endif

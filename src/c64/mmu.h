@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MMU_H
-#define MMU_H
-
 #include <stdint.h>
 
 #include "sidendian.h"
@@ -33,8 +31,6 @@
 #include "Banks/SystemRAMBank.h"
 #include "Banks/SystemROMBanks.h"
 #include "Banks/ZeroRAMBank.h"
-
-#include "sidcxx11.h"
 
 #include <string.h>
 
@@ -140,5 +136,3 @@ public:
 };
 
 }
-
-#endif

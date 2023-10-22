@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,11 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-#ifndef EXTERNALFILTER_H
-#define EXTERNALFILTER_H
-
-#include "siddefs-fp.h"
 
 namespace reSIDfp
 {
@@ -100,15 +96,7 @@ public:
     void reset();
 };
 
-} // namespace reSIDfp
-
-#if RESID_INLINING || defined(EXTERNALFILTER_CPP)
-
-namespace reSIDfp
-{
-
-RESID_INLINE
-int ExternalFilter::clock(unsigned short input)
+inline int ExternalFilter::clock(unsigned short input)
 {
     const int Vi = (static_cast<unsigned int>(input)<<11) - (1 << (11+15));
     const int dVlp = (w0lp_1_s7 * (Vi - Vlp) >> 7);
@@ -119,7 +107,3 @@ int ExternalFilter::clock(unsigned short input)
 }
 
 } // namespace reSIDfp
-
-#endif
-
-#endif

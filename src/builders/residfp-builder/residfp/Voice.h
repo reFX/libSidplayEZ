@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,16 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef VOICE_H
-#define VOICE_H
-
 #include <memory>
 
-#include "siddefs-fp.h"
 #include "WaveformGenerator.h"
 #include "EnvelopeGenerator.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -66,8 +61,7 @@ public:
      * @param ringModulator Ring-modulator for waveform
      * @return the voice analog output
      */
-    RESID_INLINE
-    int output(const WaveformGenerator* ringModulator) const
+    inline int output(const WaveformGenerator* ringModulator) const
     {
         unsigned int const wav = waveformGenerator->output(ringModulator);
         unsigned int const env = envelopeGenerator->output();
@@ -126,5 +120,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

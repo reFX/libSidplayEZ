@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,13 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef WAVEFORMGENERATOR_H
-#define WAVEFORMGENERATOR_H
-
-#include "siddefs-fp.h"
 #include "array.h"
-
-#include "sidcxx11.h"
 
 // print SR debugging info
 //#define TRACE 1
@@ -177,7 +172,7 @@ public:
      *
      * @param is6581 true if MOS6581, false if CSG8580
      */
-    void setModel(bool is6581) { this->is6581 = is6581; }
+    void setModel(bool _is6581) { is6581 = _is6581; }
 
     /**
      * SID clocking.
@@ -297,19 +292,11 @@ public:
     bool readSync() const { return sync; }
 };
 
-} // namespace reSIDfp
-
-#if RESID_INLINING || defined(WAVEFORMGENERATOR_CPP)
-
-namespace reSIDfp
+inline void WaveformGenerator::clock()
 {
-
-RESID_INLINE
-void WaveformGenerator::clock()
-{
-    if (unlikely(test))
+    if (test)
     {
-        if (unlikely(shift_register_reset != 0) && unlikely(--shift_register_reset == 0))
+        if ((shift_register_reset != 0) && (--shift_register_reset == 0))
         {
 #ifdef TRACE
             std::cout << "shiftregBitfade" << std::endl;
@@ -341,12 +328,12 @@ void WaveformGenerator::clock()
 
         // Shift noise register once for each time accumulator bit 19 is set high.
         // The shift is delayed 2 cycles.
-        if (unlikely((accumulator_bits_set & 0x080000) != 0))
+        if ((accumulator_bits_set & 0x080000) != 0)
         {
             // Pipeline: Detect rising bit, shift phase 1, shift phase 2.
             shift_pipeline = 2;
         }
-        else if (unlikely(shift_pipeline != 0))
+        else if (shift_pipeline != 0)
         {
             switch (--shift_pipeline)
             {
@@ -369,11 +356,10 @@ void WaveformGenerator::clock()
     }
 }
 
-RESID_INLINE
-unsigned int WaveformGenerator::output(const WaveformGenerator* ringModulator)
+inline unsigned int WaveformGenerator::output(const WaveformGenerator* ringModulator)
 {
     // Set output value.
-    if (likely(waveform != 0))
+    if (waveform != 0)
     {
         const unsigned int ix = (accumulator ^ (~ringModulator->accumulator & ring_msb_mask)) >> 12;
 
@@ -410,7 +396,7 @@ unsigned int WaveformGenerator::output(const WaveformGenerator* ringModulator)
     else
     {
         // Age floating DAC input.
-        if (likely(floating_output_ttl != 0) && unlikely(--floating_output_ttl == 0))
+        if (floating_output_ttl != 0 && (--floating_output_ttl == 0))
         {
             waveBitfade();
         }
@@ -434,7 +420,3 @@ unsigned int WaveformGenerator::output(const WaveformGenerator* ringModulator)
 }
 
 } // namespace reSIDfp
-
-#endif
-
-#endif

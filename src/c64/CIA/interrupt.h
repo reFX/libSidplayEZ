@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,16 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INTERRUPT_H
-#define INTERRUPT_H
-
 #include "Event.h"
 #include "EventScheduler.h"
 #include "EventCallback.h"
 
 #include <stdint.h>
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -141,21 +137,21 @@ protected:
     /**
      * Schedules an IRQ asserting state transition for next cycle.
      */
-    void schedule(int delay)
+	void schedule ( int delay )
     {
-        if (!scheduled)
-        {
-            eventScheduler.schedule(interruptEvent, delay, EVENT_CLOCK_PHI1);
-            scheduled = true;
-        }
+        if ( scheduled )
+            return;
+
+		eventScheduler.schedule ( interruptEvent, delay, EVENT_CLOCK_PHI1 );
+		scheduled = true;
     }
 
-    void scheduleIrq()
-    {
-        eventScheduler.schedule(setIrqEvent, 1, EVENT_CLOCK_PHI1);
-    }
+	void scheduleIrq ()
+	{
+		eventScheduler.schedule ( setIrqEvent, 1, EVENT_CLOCK_PHI1 );
+	}
 
-    bool isTriggered(uint8_t interruptMask);
+	bool isTriggered ( uint8_t interruptMask );
 
 public:
     virtual ~InterruptSource() {}
@@ -204,5 +200,3 @@ public:
 };
 
 }
-
-#endif // INTERRUPT_H

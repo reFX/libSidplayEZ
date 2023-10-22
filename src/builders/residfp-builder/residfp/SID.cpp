@@ -205,9 +205,9 @@ void SID::voiceSync(bool sync)
     }
 }
 
-void SID::setChipModel(ChipModel model)
+void SID::setChipModel(ChipModel _model)
 {
-    switch (model)
+    switch (_model)
     {
     case MOS6581:
         filter = filter6581.get();
@@ -223,69 +223,60 @@ void SID::setChipModel(ChipModel model)
         throw SIDError("Unknown chip type");
     }
 
-    this->model = model;
+    model = _model;
 
     // calculate waveform-related tables
-    matrix_t* wavetables = WaveformCalculator::getInstance()->getWaveTable();
-    matrix_t* pulldowntables = WaveformCalculator::getInstance()->buildPulldownTable(model);
+    auto    wavetables = WaveformCalculator::getInstance()->getWaveTable();
+    auto    pulldowntables = WaveformCalculator::getInstance()->buildPulldownTable(model);
 
     // calculate envelope DAC table
     {
-        Dac dacBuilder(ENV_DAC_BITS);
-        dacBuilder.kinkedDac(model);
+		Dac dacBuilder ( ENV_DAC_BITS );
+		dacBuilder.kinkedDac ( model );
 
-        for (unsigned int i = 0; i < (1 << ENV_DAC_BITS); i++)
-        {
-            envDAC[i] = static_cast<float>(dacBuilder.getOutput(i));
-        }
+		for ( unsigned int i = 0; i < ( 1 << ENV_DAC_BITS ); i++ )
+			envDAC[ i ] = float ( dacBuilder.getOutput ( i ) );
     }
 
     // calculate oscillator DAC table
-    const bool is6581 = model == MOS6581;
+    const auto  is6581 = _model == MOS6581;
 
     {
-        Dac dacBuilder(OSC_DAC_BITS);
-        dacBuilder.kinkedDac(model);
+		Dac dacBuilder ( OSC_DAC_BITS );
+		dacBuilder.kinkedDac ( model );
 
-        const double offset = dacBuilder.getOutput(is6581 ? OFFSET_6581 : OFFSET_8580);
+		const auto  offset = dacBuilder.getOutput ( is6581 ? OFFSET_6581 : OFFSET_8580 );
 
-        for (unsigned int i = 0; i < (1 << OSC_DAC_BITS); i++)
-        {
-            const double dacValue = dacBuilder.getOutput(i);
-            oscDAC[i] = static_cast<float>(dacValue - offset);
-        }
+		for ( unsigned int i = 0; i < ( 1 << OSC_DAC_BITS ); i++ )
+			oscDAC[ i ] = float ( dacBuilder.getOutput ( i ) - offset );
     }
 
     // set voice tables
-    for (int i = 0; i < 3; i++)
-    {
-        voice[i]->setEnvDAC(envDAC);
-        voice[i]->setWavDAC(oscDAC);
-        voice[i]->wave()->setModel(is6581);
-        voice[i]->wave()->setWaveformModels(wavetables);
-        voice[i]->wave()->setPulldownModels(pulldowntables);
-    }
+	for ( auto i = 0; i < 3; i++ )
+	{
+		voice[ i ]->setEnvDAC ( envDAC );
+		voice[ i ]->setWavDAC ( oscDAC );
+		voice[ i ]->wave ()->setModel ( is6581 );
+		voice[ i ]->wave ()->setWaveformModels ( wavetables );
+		voice[ i ]->wave ()->setPulldownModels ( pulldowntables );
+	}
 }
 
 void SID::reset()
 {
-    for (int i = 0; i < 3; i++)
-    {
-        voice[i]->reset();
-    }
+	for ( int i = 0; i < 3; i++ )
+		voice[ i ]->reset ();
 
-    filter6581->reset();
-    filter8580->reset();
-    externalFilter->reset();
+	filter6581->reset ();
+	filter8580->reset ();
+	externalFilter->reset ();
 
-    if (resampler.get())
-    {
-        resampler->reset();
-    }
+	if ( resampler.get () )
+		resampler->reset ();
 
-    busValue = 0;
-    busValueTtl = 0;
-    voiceSync(false);
+	busValue = 0;
+	busValueTtl = 0;
+	voiceSync ( false );
 }
 
 void SID::input(int value)

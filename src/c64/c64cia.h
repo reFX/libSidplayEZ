@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef C64CIA_H
-#define C64CIA_H
-
 // The CIA emulations are very generic and here we need to effectively
 // wire them into the computer (like adding a chip to a PCB).
 
@@ -30,8 +28,6 @@
 #include "c64/c64env.h"
 #include "sidendian.h"
 #include "CIA/mos652x.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -70,29 +66,27 @@ public:
 
     void poke(uint_least16_t address, uint8_t value) override
     {
-        const uint8_t addr = endian_16lo8(address);
-        write(addr, value);
+		const auto  addr = endian_16lo8 ( address );
+		write ( addr, value );
 
         // Save the value written to Timer A
-        if ((addr == 0x04) || (addr == 0x05))
-        {
-            if (timerA.getTimer() != 0)
-                last_ta = timerA.getTimer();
-        }
+		if ( addr == 0x04 || addr == 0x05 )
+			if ( timerA.getTimer () )
+				last_ta = timerA.getTimer ();
     }
 
-    uint8_t peek(uint_least16_t address) override
-    {
-        return read(endian_16lo8(address));
-    }
+	uint8_t peek ( uint_least16_t address ) override
+	{
+		return read ( endian_16lo8 ( address ) );
+	}
 
-    void reset() override
-    {
-        last_ta = 0;
-        MOS652X::reset();
-    }
+	void reset () override
+	{
+		last_ta = 0;
+		MOS652X::reset ();
+	}
 
-    uint_least16_t getTimerA() const { return last_ta; }
+	uint_least16_t getTimerA () const { return last_ta; }
 };
 
 /**
@@ -110,8 +104,8 @@ private:
 protected:
     void interrupt(bool state) override
     {
-        if (state)
-            m_env.interruptNMI();
+		if ( state )
+			m_env.interruptNMI ();
     }
 
 public:
@@ -119,17 +113,15 @@ public:
         MOS652X(env.scheduler()),
         m_env(env) {}
 
-    void poke(uint_least16_t address, uint8_t value) override
-    {
-        write(endian_16lo8(address), value);
-    }
+	void poke ( uint_least16_t address, uint8_t value ) override
+	{
+		write ( endian_16lo8 ( address ), value );
+	}
 
-    uint8_t peek(uint_least16_t address) override
-    {
-        return read(endian_16lo8(address));
-    }
+	uint8_t peek ( uint_least16_t address ) override
+	{
+		return read ( endian_16lo8 ( address ) );
+	}
 };
 
 }
-
-#endif // C64CIA_H

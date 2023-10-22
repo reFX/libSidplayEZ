@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,13 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDTUNE_H
-#define SIDTUNE_H
-
 #include <stdint.h>
 #include <vector>
-
-#include "sidplayfp/siddefs.h"
 
 class SidTuneInfo;
 
@@ -39,7 +35,7 @@ class sidmemory;
 /**
  * SidTune
  */
-class SID_EXTERN SidTune
+class SidTune
 {
 public:
     static const int MD5_LENGTH = 32;
@@ -206,5 +202,3 @@ private:    // prevent copying
     SidTune(const SidTune&);
     SidTune& operator=(SidTune&);
 };
-
-#endif  /* SIDTUNE_H */

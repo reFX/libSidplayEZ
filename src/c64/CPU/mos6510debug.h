@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,13 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MOS6510DEBUG_H
-#define MOS6510DEBUG_H
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
 #ifdef DEBUG
 
 #include "Event.h"
@@ -44,5 +38,3 @@ namespace MOS6510Debug
 }
 
 #endif // DEBUG
-
-#endif // MOS6510DEBUG_H

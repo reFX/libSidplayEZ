@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,14 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef C64ENV_H
-#define C64ENV_H
-
 #include "EventScheduler.h"
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
 
 namespace libsidplayfp
 {
@@ -63,5 +57,3 @@ protected:
 };
 
 }
-
-#endif // C64ENV_H

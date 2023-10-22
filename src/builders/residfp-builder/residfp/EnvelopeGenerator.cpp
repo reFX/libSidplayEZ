@@ -21,43 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#define ENVELOPEGENERATOR_CPP
-
 #include "EnvelopeGenerator.h"
 
 namespace reSIDfp
 {
-
-/**
- * Lookup table to convert from attack, decay, or release value to rate
- * counter period.
- *
- * The rate counter is a 15 bit register which is left shifted each cycle.
- * When the counter reaches a specific comparison value,
- * the envelope counter is incremented (attack) or decremented
- * (decay/release) and the rate counter is resetted.
- *
- * see [kevtris.org](http://blog.kevtris.org/?p=13)
- */
-const unsigned int EnvelopeGenerator::adsrtable[16] =
-{
-    0x007f,
-    0x3000,
-    0x1e00,
-    0x0660,
-    0x0182,
-    0x5573,
-    0x000e,
-    0x3805,
-    0x2424,
-    0x2220,
-    0x090c,
-    0x0ecd,
-    0x010e,
-    0x23f7,
-    0x5237,
-    0x64a8
-};
 
 void EnvelopeGenerator::reset()
 {
@@ -86,52 +53,43 @@ void EnvelopeGenerator::reset()
 
 void EnvelopeGenerator::writeCONTROL_REG(unsigned char control)
 {
-    const bool gate_next = (control & 0x01) != 0;
+	const auto  gate_next = ( control & 0x01 ) != 0;
 
-    if (gate_next != gate)
-    {
-        gate = gate_next;
+    if ( gate_next == gate )
+        return;
 
-        // The rate counter is never reset, thus there will be a delay before the
-        // envelope counter starts counting up (attack) or down (release).
+    gate = gate_next;
 
-        if (gate_next)
-        {
-            // Gate bit on:  Start attack, decay, sustain.
-            next_state = ATTACK;
-            state_pipeline = 2;
+    // The rate counter is never reset, thus there will be a delay before the
+    // envelope counter starts counting up (attack) or down (release).
+	if ( gate_next )
+	{
+		// Gate bit on:  Start attack, decay, sustain.
+		next_state = ATTACK;
+		state_pipeline = 2;
 
-            if (resetLfsr || (exponential_pipeline == 2))
-            {
-                envelope_pipeline = (exponential_counter_period == 1) || (exponential_pipeline == 2) ? 2 : 4;
-            }
-            else if (exponential_pipeline == 1)
-            {
-                state_pipeline = 3;
-            }
-        }
-        else
-        {
-            // Gate bit off: Start release.
-            next_state = RELEASE;
-            state_pipeline = envelope_pipeline > 0 ? 3 : 2;
-        }
-    }
+		if ( resetLfsr || ( exponential_pipeline == 2 ) )
+			envelope_pipeline = ( exponential_counter_period == 1 ) || ( exponential_pipeline == 2 ) ? 2 : 4;
+		else if ( exponential_pipeline == 1 )
+			state_pipeline = 3;
+	}
+	else
+	{
+		// Gate bit off: Start release.
+		next_state = RELEASE;
+		state_pipeline = envelope_pipeline > 0 ? 3 : 2;
+	}
 }
 
 void EnvelopeGenerator::writeATTACK_DECAY(unsigned char attack_decay)
 {
-    attack = (attack_decay >> 4) & 0x0f;
-    decay = attack_decay & 0x0f;
+	attack = ( attack_decay >> 4 ) & 0x0f;
+	decay = attack_decay & 0x0f;
 
-    if (state == ATTACK)
-    {
-        rate = adsrtable[attack];
-    }
-    else if (state == DECAY_SUSTAIN)
-    {
-        rate = adsrtable[decay];
-    }
+	if ( state == ATTACK )
+		rate = adsrtable[ attack ];
+	else if ( state == DECAY_SUSTAIN )
+		rate = adsrtable[ decay ];
 }
 
 void EnvelopeGenerator::writeSUSTAIN_RELEASE(unsigned char sustain_release)
@@ -142,14 +100,12 @@ void EnvelopeGenerator::writeSUSTAIN_RELEASE(unsigned char sustain_release)
     //
     // For a detailed description see:
     // http://ploguechipsounds.blogspot.it/2010/11/new-research-on-sid-adsr.html
-    sustain = (sustain_release & 0xf0) | ((sustain_release >> 4) & 0x0f);
+	sustain = ( sustain_release & 0xf0 ) | ( ( sustain_release >> 4 ) & 0x0f );
 
-    release = sustain_release & 0x0f;
+	release = sustain_release & 0x0f;
 
-    if (state == RELEASE)
-    {
-        rate = adsrtable[release];
-    }
+	if ( state == RELEASE )
+		rate = adsrtable[ release ];
 }
 
 } // namespace reSIDfp

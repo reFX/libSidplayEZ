@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,18 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RESIDFP_EMU_H
-#define RESIDFP_EMU_H
-
 #include <stdint.h>
 
 #include "residfp/SID.h"
 #include "sidplayfp/SidConfig.h"
 #include "sidemu.h"
 #include "Event.h"
-
-#include "sidcxx11.h"
-
 
 class sidbuilder;
 
@@ -44,11 +39,11 @@ private:
     reSIDfp::SID &m_sid;
 
 public:
-    static const char* getCredits();
+	static const char* getCredits ();
 
 public:
     ReSIDfp(sidbuilder *builder);
-    ~ReSIDfp();
+    ~ReSIDfp() override;
 
     bool getStatus() const { return m_status; }
 
@@ -61,8 +56,7 @@ public:
     // Standard SID emu functions
     void clock() override;
 
-    void sampling(float systemclock, float freq,
-        SidConfig::sampling_method_t method, bool) override;
+    void sampling(float systemclock, float freq, SidConfig::sampling_method_t method, bool) override;
 
     void voice(unsigned int num, bool mute) override { m_sid.mute(num, mute); }
 
@@ -75,5 +69,3 @@ public:
 };
 
 }
-
-#endif // RESIDFP_EMU_H

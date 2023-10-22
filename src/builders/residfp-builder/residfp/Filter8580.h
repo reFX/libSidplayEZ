@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,18 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILTER8580_H
-#define FILTER8580_H
-
-#include "siddefs-fp.h"
-
 #include <memory>
 
 #include "Filter.h"
 #include "FilterModelConfig8580.h"
 #include "Integrator8580.h"
-
-#include "sidcxx11.h"
 
 namespace reSIDfp
 {
@@ -328,7 +322,7 @@ public:
         input(0);
     }
 
-    ~Filter8580();
+    ~Filter8580() override;
 
     unsigned short clock(int voice1, int voice2, int voice3) override;
 
@@ -342,15 +336,7 @@ public:
     void setFilterCurve(double curvePosition);
 };
 
-} // namespace reSIDfp
-
-#if RESID_INLINING || defined(FILTER8580_CPP)
-
-namespace reSIDfp
-{
-
-RESID_INLINE
-unsigned short Filter8580::clock(int voice1, int voice2, int voice3)
+inline unsigned short Filter8580::clock(int voice1, int voice2, int voice3)
 {
     voice1 = (voice1 * voiceScaleS11 >> 15) + voiceDC;
     voice2 = (voice2 * voiceScaleS11 >> 15) + voiceDC;
@@ -377,7 +363,3 @@ unsigned short Filter8580::clock(int voice1, int voice2, int voice3)
 }
 
 } // namespace reSIDfp
-
-#endif
-
-#endif

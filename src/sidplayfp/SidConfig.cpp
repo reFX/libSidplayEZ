@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -23,8 +24,6 @@
 #include "SidConfig.h"
 
 #include "mixer.h"
-
-#include "sidcxx11.h"
 
 SidConfig::SidConfig() :
     defaultC64Model(PAL),

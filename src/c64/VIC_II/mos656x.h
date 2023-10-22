@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -21,19 +22,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MOS656X_H
-#define MOS656X_H
-
 #include <stdint.h>
-
 
 #include "lightpen.h"
 #include "sprites.h"
 #include "Event.h"
 #include "EventCallback.h"
 #include "EventScheduler.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -65,7 +60,7 @@ private:
     } model_data_t;
 
 private:
-    static const model_data_t modelData[];
+    model_data_t modelData[5];
 
     /// raster IRQ flag
     static const int IRQ_RASTER = 1 << 0;
@@ -385,5 +380,3 @@ inline void MOS656X::endDma<7>()
 }
 
 }
-
-#endif // MOS656X_H

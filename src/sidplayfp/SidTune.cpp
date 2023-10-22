@@ -1,4 +1,4 @@
- /*
+/*
  * This file is part of libsidplayfp, a SID player engine.
  *
  * Copyright 2012-2021 Leandro Nini <drfiemost@users.sourceforge.net>
@@ -19,10 +19,7 @@
  */
 
 #include "SidTune.h"
-
 #include "sidtune/SidTuneBase.h"
-
-#include "sidcxx11.h"
 
 using namespace libsidplayfp;
 

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,16 +21,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef SIDTUNEINFOIMPL_H
-#define SIDTUNEINFOIMPL_H
-
 #include <stdint.h>
 #include <vector>
 #include <string>
 
 #include "sidplayfp/SidTuneInfo.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -123,7 +119,7 @@ public:
         return i < m_sidChipAddresses.size() ? m_sidChipAddresses[i] : 0;
     }
 
-    int getSidChips() const override { return m_sidChipAddresses.size(); }
+    int getSidChips() const override { return int ( m_sidChipAddresses.size() ); }
 
     int getSongSpeed() const override { return m_songSpeed; }
 
@@ -138,10 +134,10 @@ public:
 
     compatibility_t getCompatibility() const override { return m_compatibility; }
 
-    unsigned int getNumberOfInfoStrings() const override { return m_infoString.size(); }
+    unsigned int getNumberOfInfoStrings() const override { return (unsigned int)m_infoString.size(); }
     const char* getInfoString(unsigned int i) const override { return i<getNumberOfInfoStrings() ? m_infoString[i].c_str() : ""; }
 
-    unsigned int getNumberOfCommentStrings() const override { return m_commentString.size(); }
+    unsigned int getNumberOfCommentStrings() const override { return (unsigned int)m_commentString.size(); }
     const char* getCommentString(unsigned int i) const override { return i<getNumberOfCommentStrings() ? m_commentString[i].c_str() : ""; }
 
     uint_least32_t getDataFileLen() const override { return m_dataFileLen; }
@@ -162,5 +158,3 @@ public:
 };
 
 }
-
-#endif  /* SIDTUNEINFOIMPL_H */

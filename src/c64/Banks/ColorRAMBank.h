@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,15 +20,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef COLORRAMBANK_H
-#define COLORRAMBANK_H
-
 #include <stdint.h>
 #include <cstring>
 
 #include "Bank.h"
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -42,25 +38,13 @@ namespace libsidplayfp
 class ColorRAMBank final : public Bank
 {
 private:
-    uint8_t ram[0x400];
+	uint8_t ram[ 0x0400 ];
 
 public:
-    void reset()
-    {
-         memset(ram, 0, sizeof(ram));
-    }
+	void reset () { std::fill_n ( ram, std::size ( ram ), 0 ); }
 
-    void poke(uint_least16_t address, uint8_t value) override
-    {
-        ram[address & 0x3ff] = value & 0xf;
-    }
-
-    uint8_t peek(uint_least16_t address) override
-    {
-        return ram[address & 0x3ff];
-    }
+	void poke ( uint_least16_t address, uint8_t value ) override { ram[ address & 0x3ff ] = value & 0xf; }
+	uint8_t peek ( uint_least16_t address ) override { return ram[ address & 0x3ff ]; }
 };
 
 }
-
-#endif

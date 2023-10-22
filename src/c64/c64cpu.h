@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -18,13 +19,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef C64CPU_H
-#define C64CPU_H
-
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
 #include "c64/c64env.h"
 #include "CPU/mos6510.h"
 
@@ -34,8 +28,6 @@
 #endif
 
 //#define PRINTSCREENCODES
-
-#include "sidcxx11.h"
 
 namespace libsidplayfp
 {
@@ -75,29 +67,28 @@ protected:
 
     void cpuWrite(uint_least16_t addr, uint8_t data) override
     {
-#ifdef PRINTSCREENCODES
-        if (addr >= 1024 && addr <= 2047)
-        {
-            std::cout << CHRtab[data];
-        }
-#endif
-#ifdef VICE_TESTSUITE
-        // for VICE tests
-        if (addr == 0xd7ff)
-        {
-            if (data == 0)
-            {
-                std::cout << std::endl << "OK" << std::endl;
-                exit(EXIT_SUCCESS);
-            }
-            else if (data == 0xff)
-            {
-                std::cout << std::endl << "KO" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-        }
-#endif
-        m_env.cpuWrite(addr, data);
+		#ifdef PRINTSCREENCODES
+		    if ( addr >= 1024 && addr <= 2047 )
+			    std::cout << CHRtab[ data ];
+	    #endif
+
+		#ifdef VICE_TESTSUITE
+			// for VICE tests
+			if ( addr == 0xd7ff )
+			{
+				if ( data == 0 )
+				{
+					std::cout << std::endl << "OK" << std::endl;
+					exit ( EXIT_SUCCESS );
+				}
+				else if ( data == 0xff )
+				{
+					std::cout << std::endl << "KO" << std::endl;
+					exit ( EXIT_FAILURE );
+				}
+			}
+		#endif
+		m_env.cpuWrite ( addr, data );
     }
 
 public:
@@ -107,5 +98,3 @@ public:
 };
 
 }
-
-#endif // C64CPU_H

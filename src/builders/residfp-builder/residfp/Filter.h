@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILTER_H
-#define FILTER_H
-
 namespace reSIDfp
 {
 
@@ -33,47 +31,47 @@ class Filter
 {
 protected:
     /// Current volume amplifier setting.
-    unsigned short* currentGain;
+    unsigned short* currentGain = nullptr;
 
     /// Current filter/voice mixer setting.
-    unsigned short* currentMixer;
+    unsigned short* currentMixer = nullptr;
 
     /// Filter input summer setting.
-    unsigned short* currentSummer;
+    unsigned short* currentSummer = nullptr;
 
     /// Filter resonance value.
-    unsigned short* currentResonance;
+    unsigned short* currentResonance = nullptr;
 
     /// Filter highpass state.
-    int Vhp;
+    int Vhp = 0;
 
     /// Filter bandpass state.
-    int Vbp;
+    int Vbp = 0;
 
     /// Filter lowpass state.
-    int Vlp;
+    int Vlp = 0;
 
     /// Filter external input.
-    int ve;
+    int ve = 0;
 
     /// Filter cutoff frequency.
-    unsigned int fc;
+    unsigned int fc = 0;
 
     /// Routing to filter or outside filter
-    bool filt1, filt2, filt3, filtE;
+    bool filt1 = false, filt2 = false, filt3 = false, filtE = false;
 
     /// Switch voice 3 off.
-    bool voice3off;
+    bool voice3off = false;
 
     /// Highpass, bandpass, and lowpass filter modes.
-    bool hp, bp, lp;
+    bool hp = false, bp = false, lp = false;
 
     /// Current volume.
-    unsigned char vol;
+    unsigned char vol = 0;
 
 private:
     /// Filter enabled.
-    bool enabled;
+    bool enabled = true;
 
     /// Selects which inputs to route through filter.
     unsigned char filt;
@@ -95,28 +93,7 @@ protected:
     virtual void updatedMixing() = 0;
 
 public:
-    Filter() :
-        currentGain(nullptr),
-        currentMixer(nullptr),
-        currentSummer(nullptr),
-        currentResonance(nullptr),
-        Vhp(0),
-        Vbp(0),
-        Vlp(0),
-        ve(0),
-        fc(0),
-        filt1(false),
-        filt2(false),
-        filt3(false),
-        filtE(false),
-        voice3off(false),
-        hp(false),
-        bp(false),
-        lp(false),
-        vol(0),
-        enabled(true),
-        filt(0) {}
-
+    Filter () {}
     virtual ~Filter() {}
 
     /**
@@ -173,5 +150,3 @@ public:
 };
 
 } // namespace reSIDfp
-
-#endif

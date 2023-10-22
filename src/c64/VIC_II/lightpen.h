@@ -69,7 +69,7 @@ private:
             lineCycle--;
         }
 
-        return lineCycle << 2;
+        return uint8_t ( lineCycle << 2 );
     }
 
 public:
@@ -98,12 +98,12 @@ public:
     /**
      * Return the low byte of x coordinate.
      */
-    uint8_t getX() const { return lpx; }
+    uint8_t getX() const { return uint8_t ( lpx ); }
 
     /**
      * Return the low byte of y coordinate.
      */
-    uint8_t getY() const { return lpy; }
+    uint8_t getY() const { return uint8_t ( lpy ); }
 
     /**
      * Retrigger lightpen on vertical blank.
