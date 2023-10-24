@@ -63,17 +63,9 @@ public:
         NTSC,          ///< American/Japanese NTSC model (MOS 6567 R8)
         OLD_NTSC,      ///< Older NTSC model with different video chip revision (MOS 6567 R56A)
         DREAN,         ///< Argentinian PAL-N model (MOS 6572)
-        PAL_M          ///< Brasilian PAL-M model (MOS 6573)
+        PAL_M          ///< Brazilian PAL-M model (MOS 6573)
     } c64_model_t;
 
-    /// Sampling method
-    typedef enum
-    {
-        INTERPOLATE,            ///< Interpolation
-        RESAMPLE_INTERPOLATE    ///< Resampling
-    } sampling_method_t;
-
-public:
     /**
      * Maximum power on delay.
      * - Delays <= MAX produce constant results
@@ -84,94 +76,84 @@ public:
 
     static const uint_least32_t DEFAULT_SAMPLING_FREQ  = 44100;
 
-public:
     /**
      * Intended c64 model when unknown or forced.
      */
-    c64_model_t defaultC64Model;
+    c64_model_t defaultC64Model = PAL;
 
     /**
      * Force the model to #defaultC64Model ignoring tune's clock setting.
      */
-    bool forceC64Model;
+    bool forceC64Model = false;
 
     /**
      * Intended sid model when unknown or forced.
      */
-    sid_model_t defaultSidModel;
+    sid_model_t defaultSidModel = MOS6581;
 
     /**
      * Force the sid model to #defaultSidModel.
      */
-    bool forceSidModel;
+    bool forceSidModel = false;
 
     /**
      * Enable digiboost when 8580 SID model is used.
      */
-    bool digiBoost;
+    bool digiBoost = false;
 
     /**
      * Intended cia model.
      */
-    cia_model_t ciaModel;
+    cia_model_t ciaModel = MOS6526;
 
     /**
      * Playbak mode.
      */
-    playback_t playback;
+    playback_t playback = MONO;
 
     /**
      * Sampling frequency.
      */
-    uint_least32_t frequency;
+    uint_least32_t frequency = DEFAULT_SAMPLING_FREQ;
 
     /**
      * Extra SID chips addresses.
      */
     //@{
-    uint_least16_t secondSidAddress;
-    uint_least16_t thirdSidAddress;
+    uint_least16_t secondSidAddress = 0;
+    uint_least16_t thirdSidAddress = 0;
     //@}
 
     /**
      * Pointer to selected emulation,
      * reSIDfp, reSID, hardSID or exSID.
      */
-    sidbuilder *sidEmulation;
-
-    /**
-     * Left channel volume.
-     */
-    uint_least32_t leftVolume;
-
-    /**
-     * Right channel volume.
-     */
-    uint_least32_t rightVolume;
+    sidbuilder *sidEmulation = nullptr;
 
     /**
      * Power on delay cycles.
      */
-    uint_least16_t powerOnDelay;
-
-    /**
-     * Sampling method.
-     */
-    sampling_method_t samplingMethod;
-
-    /**
-     * Faster low-quality emulation,
-     * available only for reSID.
-     */
-    bool fastSampling;
+    uint_least16_t powerOnDelay = DEFAULT_POWER_ON_DELAY;
 
     /**
      * Compare two config objects.
      *
      * @return true if different
      */
-    bool compare(const SidConfig &config);
 
-public:
-    SidConfig();
+	bool compare ( const SidConfig& config ) const
+	{
+		return	    defaultC64Model != config.defaultC64Model
+			    ||  forceC64Model != config.forceC64Model
+			    ||  defaultSidModel != config.defaultSidModel
+			    ||  forceSidModel != config.forceSidModel
+			    ||  digiBoost != config.digiBoost
+			    ||  ciaModel != config.ciaModel
+			    ||  playback != config.playback
+			    ||  frequency != config.frequency
+			    ||  secondSidAddress != config.secondSidAddress
+			    ||  thirdSidAddress != config.thirdSidAddress
+			    ||  sidEmulation != config.sidEmulation
+			    ||  powerOnDelay != config.powerOnDelay;
+	}
 };

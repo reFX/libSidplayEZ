@@ -32,40 +32,35 @@ class sidbuilder;
 
 namespace libsidplayfp
 {
-
 class ReSIDfp final : public sidemu
 {
 private:
-    reSIDfp::SID &m_sid;
+	reSIDfp::SID& m_sid;
 
 public:
 	static const char* getCredits ();
 
 public:
-    ReSIDfp(sidbuilder *builder);
-    ~ReSIDfp() override;
+	ReSIDfp ( sidbuilder* builder );
+	~ReSIDfp () override;
 
-    bool getStatus() const { return m_status; }
+	bool getStatus () const { return m_status; }
 
-    uint8_t read(uint_least8_t addr) override;
-    void write(uint_least8_t addr, uint8_t data) override;
+	uint8_t read ( uint_least8_t addr ) override;
+	void write ( uint_least8_t addr, uint8_t data ) override;
 
-    // c64sid functions
-    void reset(uint8_t volume) override;
+	// c64sid functions
+	void reset ( uint8_t volume ) override;
 
-    // Standard SID emu functions
-    void clock() override;
+	// Standard SID emu functions
+	void clock () override;
 
-    void sampling(float systemclock, float freq, SidConfig::sampling_method_t method, bool) override;
+	void sampling ( float systemclock, float freq ) override;
 
-    void voice(unsigned int num, bool mute) override { m_sid.mute(num, mute); }
+	void model ( SidConfig::sid_model_t model, bool digiboost ) override;
 
-    void model(SidConfig::sid_model_t model, bool digiboost) override;
-
-    // Specific to resid
-    void filter(bool enable);
-    void filter6581Curve(double filterCurve);
-    void filter8580Curve(double filterCurve);
+	// Specific to resid
+	void filter6581Curve ( double filterCurve );
+	void filter8580Curve ( double filterCurve );
 };
-
 }

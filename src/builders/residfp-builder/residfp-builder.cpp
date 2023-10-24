@@ -27,56 +27,67 @@
 
 #include "residfp-emu.h"
 
-ReSIDfpBuilder::~ReSIDfpBuilder()
-{   // Remove all SID emulations
-    remove();
+ //-----------------------------------------------------------------------------
+
+ReSIDfpBuilder::ReSIDfpBuilder ( const char* const name )
+	: sidbuilder ( name )
+{
 }
+//-----------------------------------------------------------------------------
+
+ReSIDfpBuilder::~ReSIDfpBuilder ()
+{
+	// Remove all SID emulations
+	remove ();
+}
+//-----------------------------------------------------------------------------
 
 // Create a new sid emulation.
-unsigned int ReSIDfpBuilder::create(unsigned int sids)
+unsigned int ReSIDfpBuilder::create ( unsigned int sids )
 {
-    m_status = true;
+	m_status = true;
 
-    // Check available devices
-    unsigned int count = availDevices();
+	// Check available devices
+	auto	count = availDevices ();
 
-    if (count && (count < sids))
-        sids = count;
+	if ( count && ( count < sids ) )
+		sids = count;
 
-    for (count = 0; count < sids; count++)
-    {
-        try
-        {
-            sidobjs.insert(new libsidplayfp::ReSIDfp(this));
-        }
-        // Memory alloc failed?
-        catch (std::bad_alloc const &)
-        {
-            m_errorBuffer.assign(name()).append(" ERROR: Unable to create ReSIDfp object");
-            m_status = false;
-            break;
-        }
-    }
-    return count;
+	for ( count = 0; count < sids; count++ )
+	{
+		try
+		{
+			sidobjs.insert ( new libsidplayfp::ReSIDfp ( this ) );
+		}
+		// Memory alloc failed?
+		catch ( std::bad_alloc const& )
+		{
+			m_errorBuffer.assign ( name () ).append ( " ERROR: Unable to create ReSIDfp object" );
+			m_status = false;
+			break;
+		}
+	}
 
+	return count;
 }
+//-----------------------------------------------------------------------------
 
-const char *ReSIDfpBuilder::credits() const
+const char* ReSIDfpBuilder::credits () const
 {
-    return libsidplayfp::ReSIDfp::getCredits();
+	return libsidplayfp::ReSIDfp::getCredits ();
 }
+//-----------------------------------------------------------------------------
 
-void ReSIDfpBuilder::filter(bool enable)
+void ReSIDfpBuilder::filter6581Curve ( double filterCurve )
 {
-    std::for_each(sidobjs.begin(), sidobjs.end(), applyParameter<libsidplayfp::ReSIDfp, bool>(&libsidplayfp::ReSIDfp::filter, enable));
+	for ( auto emu : sidobjs )
+		reinterpret_cast<libsidplayfp::ReSIDfp*> ( emu )->filter6581Curve ( filterCurve );
 }
+//-----------------------------------------------------------------------------
 
-void ReSIDfpBuilder::filter6581Curve(double filterCurve)
+void ReSIDfpBuilder::filter8580Curve ( double filterCurve )
 {
-    std::for_each(sidobjs.begin(), sidobjs.end(), applyParameter<libsidplayfp::ReSIDfp, double>(&libsidplayfp::ReSIDfp::filter6581Curve, filterCurve));
+	for ( auto emu : sidobjs )
+		reinterpret_cast<libsidplayfp::ReSIDfp*> ( emu )->filter8580Curve ( filterCurve );
 }
-
-void ReSIDfpBuilder::filter8580Curve(double filterCurve)
-{
-    std::for_each(sidobjs.begin(), sidobjs.end(), applyParameter<libsidplayfp::ReSIDfp, double>(&libsidplayfp::ReSIDfp::filter8580Curve, filterCurve));
-}
+//-----------------------------------------------------------------------------

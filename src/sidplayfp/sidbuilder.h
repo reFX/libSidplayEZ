@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,9 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SIDBUILDER_H
-#define SIDBUILDER_H
-
 #include <set>
 #include <string>
 
@@ -30,8 +28,8 @@
 
 namespace libsidplayfp
 {
-class sidemu;
-class EventScheduler;
+	class sidemu;
+	class EventScheduler;
 }
 
 /**
@@ -40,121 +38,91 @@ class EventScheduler;
 class sidbuilder
 {
 protected:
-    typedef std::set<libsidplayfp::sidemu*> emuset_t;
+	typedef std::set<libsidplayfp::sidemu*> emuset_t;
 
 private:
-    const char * const m_name;
+	const char* const m_name;
 
 protected:
-    std::string m_errorBuffer;
+	std::string m_errorBuffer = "N/A";
 
-    emuset_t sidobjs;
+	emuset_t sidobjs;
 
-    bool m_status;
-
-protected:
-    /**
-     * Utility class for setting emu parameters in builders.
-     */
-    template<class Temu, typename Tparam>
-    class applyParameter
-    {
-    protected:
-        Tparam m_param;
-        void (Temu::*m_method)(Tparam);
-
-    public:
-        applyParameter(void (Temu::*method)(Tparam), Tparam param) :
-            m_param(param),
-            m_method(method) {}
-        void operator() (libsidplayfp::sidemu *e) { (static_cast<Temu*>(e)->*m_method)(m_param); }
-    };
+	bool	m_status = true;
 
 public:
-    sidbuilder(const char * const name) :
-        m_name(name),
-        m_errorBuffer("N/A"),
-        m_status(true) {}
-    virtual ~sidbuilder() {}
+	sidbuilder ( const char* const name ) :	m_name ( name ) {}
+	virtual ~sidbuilder () {}
 
-    /**
-     * The number of used devices.
-     *
-     * @return number of used sids, 0 if none.
-     */
-    unsigned int usedDevices() const { return (unsigned int)sidobjs.size(); }
+	/**
+	 * The number of used devices.
+	 *
+	 * @return number of used sids, 0 if none.
+	 */
+	unsigned int usedDevices () const { return (unsigned int)sidobjs.size (); }
 
-    /**
-     * Available devices.
-     *
-     * @return the number of available sids, 0 = endless.
-     */
-    virtual unsigned int availDevices() const = 0;
+	/**
+	 * Available devices.
+	 *
+	 * @return the number of available sids, 0 = endless.
+	 */
+	virtual unsigned int availDevices () const = 0;
 
-    /**
-     * Create the sid emu.
-     *
-     * @param sids the number of required sid emu
-     * @return the number of actually created sid emus
-     */
-    virtual unsigned int create(unsigned int sids) = 0;
+	/**
+	 * Create the sid emu.
+	 *
+	 * @param sids the number of required sid emu
+	 * @return the number of actually created sid emus
+	 */
+	virtual unsigned int create ( unsigned int sids ) = 0;
 
-    /**
-     * Find a free SID of the required specs
-     *
-     * @param env the event context
-     * @param model the required sid model
-     * @param digiboost whether to enable digiboost for 8580
-     * @return pointer to the locked sid emu
-     */
-    libsidplayfp::sidemu *lock(libsidplayfp::EventScheduler *scheduler, SidConfig::sid_model_t model, bool digiboost);
+	/**
+	 * Find a free SID of the required specs
+	 *
+	 * @param env the event context
+	 * @param model the required sid model
+	 * @param digiboost whether to enable digiboost for 8580
+	 * @return pointer to the locked sid emu
+	 */
+	libsidplayfp::sidemu* lock ( libsidplayfp::EventScheduler* scheduler, SidConfig::sid_model_t model, bool digiboost );
 
-    /**
-     * Release this SID.
-     *
-     * @param device the sid emu to unlock
-     */
-    void unlock(libsidplayfp::sidemu *device);
+	/**
+	 * Release this SID.
+	 *
+	 * @param device the sid emu to unlock
+	 */
+	void unlock ( libsidplayfp::sidemu* device );
 
-    /**
-     * Remove all SID emulations.
-     */
-    void remove();
+	/**
+	 * Remove all SID emulations.
+	 */
+	void remove ();
 
-    /**
-     * Get the builder's name.
-     *
-     * @return the name
-     */
-    const char *name() const { return m_name; }
+	/**
+	 * Get the builder's name.
+	 *
+	 * @return the name
+	 */
+	const char* name () const { return m_name; }
 
-    /**
-     * Error message.
-     *
-     * @return string error message.
-     */
-    const char *error() const { return m_errorBuffer.c_str(); }
+	/**
+	 * Error message.
+	 *
+	 * @return string error message.
+	 */
+	const char* error () const { return m_errorBuffer.c_str (); }
 
-    /**
-     * Determine current state of object.
-     *
-     * @return true = okay, false = error
-     */
-    bool getStatus() const { return m_status; }
+	/**
+	 * Determine current state of object.
+	 *
+	 * @return true = okay, false = error
+	 */
+	bool getStatus () const { return m_status; }
 
-    /**
-     * Get the builder's credits.
-     *
-     * @return credits
-     */
-    virtual const char *credits() const = 0;
-
-    /**
-     * Toggle sid filter emulation.
-     *
-     * @param enable true = enable, false = disable
-     */
-    virtual void filter(bool enable) = 0;
+	/**
+	 * Get the builder's credits.
+	 *
+	 * @return credits
+	 */
+	virtual const char* credits () const = 0;
 };
-
-#endif // SIDBUILDER_H

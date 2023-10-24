@@ -23,27 +23,29 @@
 
 #include "Event.h"
 
-namespace libsidplayfp
-{
+namespace libsidplayfp {
+
 template< class This >
 class EventCallback final : public Event
 {
 private:
-    typedef void (This::*Callback) ();
+	typedef void ( This::* Callback ) ();
 
 private:
-    This &m_this;
-    Callback const m_callback;
+	This& m_this;
+	Callback const m_callback;
 
 private:
-    void event() override { (m_this.*m_callback)(); }
+	void event () override { ( m_this.*m_callback )( ); }
 
 public:
-    EventCallback(const char* const name, This &object, Callback callback) :
-        Event(name),
-        m_this(object),
-        m_callback(callback)
-    {}
+	EventCallback ( const char* const name, This& object, Callback callback ) :
+		Event ( name ),
+		m_this ( object ),
+		m_callback ( callback )
+	{
+	}
 };
 
 }
+//-----------------------------------------------------------------------------

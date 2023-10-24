@@ -27,12 +27,11 @@
 #include "Filter.h"
 #include "ExternalFilter.h"
 #include "Voice.h"
-#include "resample/Resampler.h"
+#include "resample/TwoPassSincResampler.h"
 
 namespace reSIDfp
 {
 typedef enum { MOS6581 = 1, MOS8580 } ChipModel;
-typedef enum { DECIMATE = 1, RESAMPLE } SamplingMethod;
 
 class Filter;
 class Filter6581;
@@ -78,7 +77,7 @@ private:
     std::unique_ptr<ExternalFilter> const externalFilter;
 
     /// Resampler used by audio generation code.
-    std::unique_ptr<Resampler> resampler;
+    std::unique_ptr<TwoPassSincResampler> resampler;
 
     /// Paddle X register support
     std::unique_ptr<Potentiometer> const potX;
@@ -239,7 +238,7 @@ public:
      * @param highestAccurateFrequency
      * @throw SIDError
      */
-    void setSamplingParameters(double clockFrequency, SamplingMethod method, double samplingFrequency, double highestAccurateFrequency);
+    void setSamplingParameters(double clockFrequency, double samplingFrequency, double highestAccurateFrequency);
 
     /**
      * Clock SID forward using chosen output sampling algorithm.
@@ -328,7 +327,7 @@ inline int SID::clock ( unsigned int cycles, short* buf )
 				voice[ 2 ]->envelope ()->clock ();
 
 				if ( resampler->input ( output () ) )
-					buf[ s++ ] = resampler->getOutput ();
+					buf[ s++ ] = short ( resampler->output () );
 			}
 
             cycles -= delta_t;

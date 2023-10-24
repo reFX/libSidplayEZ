@@ -25,13 +25,14 @@
 #include "sidbuilder.h"
 #include "sidemu.h"
 
+ //-----------------------------------------------------------------------------
+
 libsidplayfp::sidemu* sidbuilder::lock ( libsidplayfp::EventScheduler* env, SidConfig::sid_model_t model, bool digiboost )
 {
-    m_status = true;
+	m_status = true;
 
-	for ( auto it = sidobjs.begin (); it != sidobjs.end (); ++it )
+	for ( auto sid : sidobjs )
 	{
-		libsidplayfp::sidemu* sid = ( *it );
 		if ( sid->lock ( env ) )
 		{
 			sid->model ( model, digiboost );
@@ -39,25 +40,25 @@ libsidplayfp::sidemu* sidbuilder::lock ( libsidplayfp::EventScheduler* env, SidC
 		}
 	}
 
-    // Unable to locate free SID
-    m_status = false;
-    m_errorBuffer.assign(name()).append(" ERROR: No available SIDs to lock");
-    return nullptr;
+	// Unable to locate free SID
+	m_status = false;
+	m_errorBuffer.assign ( name () ).append ( " ERROR: No available SIDs to lock" );
+	return nullptr;
 }
+//-----------------------------------------------------------------------------
 
 void sidbuilder::unlock ( libsidplayfp::sidemu* device )
 {
-    auto    it = sidobjs.find(device);
-	if ( it != sidobjs.end () )
-		( *it )->unlock ();
+	if ( auto it = sidobjs.find ( device ); it != sidobjs.end () )
+		device->unlock ();
 }
-
-template<class T>
-void Delete(T s) { delete s; }
+//-----------------------------------------------------------------------------
 
 void sidbuilder::remove ()
 {
-	std::for_each ( sidobjs.begin (), sidobjs.end (), Delete<emuset_t::value_type> );
+	for ( auto sid : sidobjs )
+		delete sid;
 
 	sidobjs.clear ();
 }
+//-----------------------------------------------------------------------------

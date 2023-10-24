@@ -55,7 +55,7 @@ void MOS6510Debug::DumpState (event_clock_t time, MOS6510 &cpu)
     fprintf(cpu.m_fdbg, cpu.flags.getZ() ? "1" : "0");
     fprintf(cpu.m_fdbg, cpu.flags.getC() ? "1" : "0");
 
-    const int opcode = cpu.instrStartPC < 0 ? BRKn : cpu.cpuRead(cpu.instrStartPC);
+    const int opcode = cpu.instrStartPC < 0 ? BRKn : cpu.cpuRead(uint16_t ( cpu.instrStartPC ));
 
     fprintf(cpu.m_fdbg, "  %02x ", opcode);
 

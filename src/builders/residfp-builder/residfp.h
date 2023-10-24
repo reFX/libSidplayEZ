@@ -23,52 +23,43 @@
 
 #include "sidplayfp/sidbuilder.h"
 
-/**
- * ReSIDfp Builder Class
- */
-class ReSIDfpBuilder: public sidbuilder
+ /**
+  * ReSIDfp Builder Class
+  */
+class ReSIDfpBuilder : public sidbuilder
 {
 public:
-    ReSIDfpBuilder(const char * const name) :
-        sidbuilder(name) {}
-    ~ReSIDfpBuilder();
+	ReSIDfpBuilder ( const char* const name );
+	~ReSIDfpBuilder () override;
 
-    /**
-     * Available sids.
-     *
-     * @return the number of available sids, 0 = endless.
-     */
-    unsigned int availDevices() const { return 0; }
+	/**
+	 * Available sids.
+	 *
+	 * @return the number of available sids, 0 = endless.
+	 */
+	unsigned int availDevices () const override { return 0; }
 
-    /**
-     * Create the sid emu.
-     *
-     * @param sids the number of required sid emu
-     */
-    unsigned int create(unsigned int sids);
+	/**
+	 * Create the sid emu.
+	 *
+	 * @param sids the number of required sid emu
+	 */
+	unsigned int create ( unsigned int sids ) override;
 
-    const char *credits() const;
+	const char* credits () const override;
 
-    /// @name global settings
-    /// Settings that affect all SIDs.
-    //@{
-    /**
-     * enable/disable filter.
-     */
-    void filter(bool enable);
+	/**
+	 * Set 6581 filter curve.
+	 *
+	 * @param filterCurve from 0.0 (light) to 1.0 (dark) (default 0.5)
+	 */
+	void filter6581Curve ( double filterCurve );
 
-    /**
-     * Set 6581 filter curve.
-     *
-     * @param filterCurve from 0.0 (light) to 1.0 (dark) (default 0.5)
-     */
-    void filter6581Curve(double filterCurve);
-
-    /**
-     * Set 8580 filter curve.
-     *
-     * @param filterCurve curve center frequency (default 12500)
-     */
-    void filter8580Curve(double filterCurve);
-    //@}
+	/**
+	 * Set 8580 filter curve.
+	 *
+	 * @param filterCurve curve center frequency (default 12500)
+	 */
+	void filter8580Curve ( double filterCurve );
+	//@}
 };

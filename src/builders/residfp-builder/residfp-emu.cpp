@@ -26,133 +26,129 @@
 #include <string>
 #include <algorithm>
 
+ //-----------------------------------------------------------------------------
+
 namespace libsidplayfp
 {
-	const char* ReSIDfp::getCredits ()
-	{
-		static const char*  credits = {
-		    "ReSIDfp V" VERSION " Engine:\n"
-		    "\t(C) 1999-2002 Simon White\n"
-		    "MOS6581 (SID) Emulation (ReSIDfp V" VERSION "):\n"
-		    "\t(C) 1999-2002 Dag Lem\n"
-		    "\t(C) 2005-2011 Antti S. Lankila\n"
-		    "\t(C) 2010-2015 Leandro Nini\n"
-		};
-
-        return credits;
-	}
-
-	ReSIDfp::ReSIDfp ( sidbuilder* builder ) :
-    sidemu(builder),
-    m_sid(*(new reSIDfp::SID))
+const char* ReSIDfp::getCredits ()
 {
-    m_buffer = new short[OUTPUTBUFFERSIZE];
-    reset(0);
-}
+	static const char* credits = {
+		"ReSIDfp V" VERSION " Engine:\n"
+		"\t(C) 1999-2002 Simon White\n"
+		"MOS6581 (SID) Emulation (ReSIDfp V" VERSION "):\n"
+		"\t(C) 1999-2002 Dag Lem\n"
+		"\t(C) 2005-2011 Antti S. Lankila\n"
+		"\t(C) 2010-2015 Leandro Nini\n"
+	};
 
-ReSIDfp::~ReSIDfp()
-{
-    delete &m_sid;
-    delete[] m_buffer;
+	return credits;
 }
+//-----------------------------------------------------------------------------
 
-void ReSIDfp::filter6581Curve(double filterCurve)
+ReSIDfp::ReSIDfp ( sidbuilder* builder )
+	: sidemu ( builder )
+	, m_sid ( *( new reSIDfp::SID ) )
 {
-   m_sid.setFilter6581Curve(filterCurve);
+	m_buffer = new short[ OUTPUTBUFFERSIZE ];
+	reset ( 0 );
 }
+//-----------------------------------------------------------------------------
 
-void ReSIDfp::filter8580Curve(double filterCurve)
+ReSIDfp::~ReSIDfp ()
 {
-   m_sid.setFilter8580Curve(filterCurve);
+	delete& m_sid;
+	delete[] m_buffer;
 }
+//-----------------------------------------------------------------------------
+
+void ReSIDfp::filter6581Curve ( double filterCurve )
+{
+	m_sid.setFilter6581Curve ( filterCurve );
+}
+//-----------------------------------------------------------------------------
+
+void ReSIDfp::filter8580Curve ( double filterCurve )
+{
+	m_sid.setFilter8580Curve ( filterCurve );
+}
+//-----------------------------------------------------------------------------
 
 // Standard component options
-void ReSIDfp::reset(uint8_t volume)
+void ReSIDfp::reset ( uint8_t volume )
 {
-    m_accessClk = 0;
-    m_sid.reset();
-    m_sid.write(0x18, volume);
+	m_accessClk = 0;
+	m_sid.reset ();
+	m_sid.write ( 0x18, volume );
 }
+//-----------------------------------------------------------------------------
 
-uint8_t ReSIDfp::read(uint_least8_t addr)
+uint8_t ReSIDfp::read ( uint_least8_t addr )
 {
-    clock();
-    return m_sid.read(addr);
+	clock ();
+	return m_sid.read ( addr );
 }
+//-----------------------------------------------------------------------------
 
-void ReSIDfp::write(uint_least8_t addr, uint8_t data)
+void ReSIDfp::write ( uint_least8_t addr, uint8_t data )
 {
-    clock();
-    m_sid.write(addr, data);
+	clock ();
+	m_sid.write ( addr, data );
 }
+//-----------------------------------------------------------------------------
 
-void ReSIDfp::clock()
+void ReSIDfp::clock ()
 {
-    const event_clock_t cycles = eventScheduler->getTime(EVENT_CLOCK_PHI1) - m_accessClk;
-    m_accessClk += cycles;
+	const event_clock_t cycles = eventScheduler->getTime ( EVENT_CLOCK_PHI1 ) - m_accessClk;
+	m_accessClk += cycles;
 	m_bufferpos += m_sid.clock ( (unsigned int)cycles, m_buffer + m_bufferpos );
 }
+//-----------------------------------------------------------------------------
 
-void ReSIDfp::filter(bool enable)
+void ReSIDfp::sampling ( float systemclock, float freq )
 {
-      m_sid.enableFilter(enable);
-}
+	try
+	{
+		const auto  halfFreq = int ( std::min ( freq * ( 20000.0f / 44100.0f ), 20000.0f ) );
+		m_sid.setSamplingParameters ( systemclock, freq, halfFreq );
+	}
+	catch ( reSIDfp::SIDError const& )
+	{
+		m_status = false;
+		m_error = ERR_UNSUPPORTED_FREQ;
+		return;
+	}
 
-void ReSIDfp::sampling(float systemclock, float freq,
-        SidConfig::sampling_method_t method, bool)
+	m_status = true;
+}
+//-----------------------------------------------------------------------------
+
+void ReSIDfp::model ( SidConfig::sid_model_t model, bool digiboost )
 {
-    reSIDfp::SamplingMethod sampleMethod;
-    switch (method)
-    {
-    case SidConfig::INTERPOLATE:
-        sampleMethod = reSIDfp::DECIMATE;
-        break;
-    case SidConfig::RESAMPLE_INTERPOLATE:
-        sampleMethod = reSIDfp::RESAMPLE;
-        break;
-    default:
-        m_status = false;
-        m_error = ERR_INVALID_SAMPLING;
-        return;
-    }
+	//
+	// Set the emulated SID model
+	//
+	reSIDfp::ChipModel chipModel;
 
-    try
-    {
-		const auto  halfFreq = ( freq > 44000.0f ) ? 20000 : int ( 9 * freq / 20 );
-		m_sid.setSamplingParameters ( systemclock, sampleMethod, freq, halfFreq );
-    }
-    catch (reSIDfp::SIDError const &)
-    {
-        m_status = false;
-        m_error = ERR_UNSUPPORTED_FREQ;
-        return;
-    }
+	switch ( model )
+	{
+		case SidConfig::MOS6581:
+			chipModel = reSIDfp::MOS6581;
+			m_sid.input ( 0 );
+			break;
 
-    m_status = true;
+		case SidConfig::MOS8580:
+			chipModel = reSIDfp::MOS8580;
+			m_sid.input ( digiboost ? -32768 : 0 );
+			break;
+
+		default:
+			m_status = false;
+			m_error = ERR_INVALID_CHIP;
+			return;
+	}
+
+	m_sid.setChipModel ( chipModel );
+	m_status = true;
 }
-
-// Set the emulated SID model
-void ReSIDfp::model(SidConfig::sid_model_t model, bool digiboost)
-{
-    reSIDfp::ChipModel chipModel;
-    switch (model)
-    {
-        case SidConfig::MOS6581:
-            chipModel = reSIDfp::MOS6581;
-            m_sid.input(0);
-            break;
-        case SidConfig::MOS8580:
-            chipModel = reSIDfp::MOS8580;
-            m_sid.input(digiboost ? -32768 : 0);
-            break;
-        default:
-            m_status = false;
-            m_error = ERR_INVALID_CHIP;
-            return;
-    }
-
-    m_sid.setChipModel(chipModel);
-    m_status = true;
-}
-
+//-----------------------------------------------------------------------------
 }

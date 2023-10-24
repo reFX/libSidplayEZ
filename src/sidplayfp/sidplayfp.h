@@ -24,16 +24,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "player.h"
+
 class  SidConfig;
 class  SidTune;
 class  SidInfo;
 class  EventContext;
-
-// Private Sidplayer
-namespace libsidplayfp
-{
-    class Player;
-}
 
 /**
  * sidplayfp
@@ -41,149 +37,136 @@ namespace libsidplayfp
 class sidplayfp
 {
 private:
-    libsidplayfp::Player &sidplayer;
+	libsidplayfp::Player	sidplayer;
 
 public:
-    sidplayfp();
-    ~sidplayfp();
+	/**
+	 * Get the current engine configuration.
+	 *
+	 * @return a const reference to the current configuration.
+	 */
+	const SidConfig& config () const {	return sidplayer.config ();	}
 
-    /**
-     * Get the current engine configuration.
-     *
-     * @return a const reference to the current configuration.
-     */
-    const SidConfig &config() const;
+	/**
+	 * Get the current player informations.
+	 *
+	 * @return a const reference to the current info.
+	 */
+	const SidInfo& info () const {	return sidplayer.info ();	}
 
-    /**
-     * Get the current player informations.
-     *
-     * @return a const reference to the current info.
-     */
-    const SidInfo &info() const;
+	/**
+	 * Configure the engine.
+	 * Check #error for detailed message if something goes wrong.
+	 *
+	 * @param cfg the new configuration
+	 * @return true on success, false otherwise.
+	 */
+	bool config ( const SidConfig& cfg ) {	return sidplayer.config ( cfg );	}
 
-    /**
-     * Configure the engine.
-     * Check #error for detailed message if something goes wrong.
-     *
-     * @param cfg the new configuration
-     * @return true on success, false otherwise.
-     */
-    bool config(const SidConfig &cfg);
+	/**
+	 * Error message.
+	 *
+	 * @return string error message.
+	 */
+	const char* error () const { return sidplayer.error (); }
 
-    /**
-     * Error message.
-     *
-     * @return string error message.
-     */
-    const char *error() const;
+	/**
+	 * Load a tune.
+	 * Check #error for detailed message if something goes wrong.
+	 *
+	 * @param tune the SidTune to load, 0 unloads current tune.
+	 * @return true on sucess, false otherwise.
+	 */
+	bool load ( SidTune* tune )	{	return sidplayer.load(tune);	}
 
-    /**
-     * Set the fast-forward factor.
-     *
-     * @param percent
-     */
-    bool fastForward(unsigned int percent);
+	/**
+	 * Run the emulation and produce samples to play if a buffer is given.
+	 *
+	 * @param buffer pointer to the buffer to fill with samples.
+	 * @param count the size of the buffer measured in 16 bit samples
+	 *              or 0 if no output is needed (e.g. Hardsid)
+	 * @return the number of produced samples. If less than requested
+	 *         or #isPlaying() is false an error occurred, use #error()
+	 *         to get a detailed message.
+	 */
+	uint_least32_t play ( short* buffer, uint_least32_t count ) {	return sidplayer.play ( buffer, count );	}
 
-    /**
-     * Load a tune.
-     * Check #error for detailed message if something goes wrong.
-     *
-     * @param tune the SidTune to load, 0 unloads current tune.
-     * @return true on sucess, false otherwise.
-     */
-    bool load(SidTune *tune);
+	/**
+	 * Check if the engine is playing or stopped.
+	 *
+	 * @return true if playing, false otherwise.
+	 */
+	bool isPlaying () const { return sidplayer.isPlaying (); }
 
-    /**
-     * Run the emulation and produce samples to play if a buffer is given.
-     *
-     * @param buffer pointer to the buffer to fill with samples.
-     * @param count the size of the buffer measured in 16 bit samples
-     *              or 0 if no output is needed (e.g. Hardsid)
-     * @return the number of produced samples. If less than requested
-     *         or #isPlaying() is false an error occurred, use #error()
-     *         to get a detailed message.
-     */
-    uint_least32_t play(short *buffer, uint_least32_t count);
+	/**
+	 * Stop the engine.
+	 */
+	void stop () { 	sidplayer.stop ();	}
 
-    /**
-     * Check if the engine is playing or stopped.
-     *
-     * @return true if playing, false otherwise.
-     */
-    bool isPlaying() const;
+	/**
+	 * Control debugging.
+	 * Only has effect if library have been compiled
+	 * with the --enable-debug option.
+	 *
+	 * @param enable enable/disable debugging.
+	 * @param out the file where to redirect the debug info.
+	 */
+	void debug ( bool enable, FILE* out ) { sidplayer.debug ( enable, out ); }
 
-    /**
-     * Stop the engine.
-     */
-    void stop();
+	/**
+	 * Get the current playing time.
+	 *
+	 * @return the current playing time measured in seconds.
+	 */
+	uint_least32_t time () const { return sidplayer.timeMs () / 1000; }
 
-    /**
-     * Control debugging.
-     * Only has effect if library have been compiled
-     * with the --enable-debug option.
-     *
-     * @param enable enable/disable debugging.
-     * @param out the file where to redirect the debug info.
-     */
-    void debug(bool enable, FILE *out);
+	/**
+	 * Get the current playing time.
+	 *
+	 * @return the current playing time measured in milliseconds.
+	 * @since 2.0
+	 */
+	uint_least32_t timeMs () const { return sidplayer.timeMs (); }
 
-    /**
-     * Mute/unmute a SID channel.
-     *
-     * @param sidNum the SID chip, 0 for the first one, 1 for the second.
-     * @param voice the channel to mute/unmute.
-     * @param enable true unmutes the channel, false mutes it.
-     */
-    void mute(unsigned int sidNum, unsigned int voice, bool enable);
+	/**
+	 * Set ROM images.
+	 *
+	 * @param kernal pointer to Kernal ROM.
+	 * @param basic pointer to Basic ROM, generally needed only for BASIC tunes.
+	 * @param character pointer to character generator ROM.
+	 */
+	void setRoms ( const uint8_t* kernal, const uint8_t* basic = 0, const uint8_t* character = 0 )
+	{
+		setKernal ( kernal );
+		setBasic ( basic );
+		setChargen ( character );
+	}
 
-    /**
-     * Get the current playing time.
-     *
-     * @return the current playing time measured in seconds.
-     */
-    uint_least32_t time() const;
+	/**
+	 * Set the ROM banks.
+	 *
+	 * @param rom pointer to the ROM data.
+	 * @since 2.2
+	 */
+	 //@{
+	void setKernal ( const uint8_t* rom )	{	sidplayer.setKernal ( rom );	}
+	void setBasic ( const uint8_t* rom )	{	sidplayer.setBasic ( rom );		}
+	void setChargen ( const uint8_t* rom )	{	sidplayer.setChargen ( rom );	}
+	//@}
 
-    /**
-     * Get the current playing time.
-     *
-     * @return the current playing time measured in milliseconds.
-     * @since 2.0
-     */
-    uint_least32_t timeMs() const;
+	/**
+	 * Get the CIA 1 Timer A programmed value.
+	 */
+	uint_least16_t getCia1TimerA () const	{	return sidplayer.getCia1TimerA ();	}
 
-    /**
-     * Set ROM images.
-     *
-     * @param kernal pointer to Kernal ROM.
-     * @param basic pointer to Basic ROM, generally needed only for BASIC tunes.
-     * @param character pointer to character generator ROM.
-     */
-    void setRoms(const uint8_t* kernal, const uint8_t* basic=0, const uint8_t* character=0);
-
-    /**
-     * Set the ROM banks.
-     *
-     * @param rom pointer to the ROM data.
-     * @since 2.2
-     */
-    //@{
-    void setKernal(const uint8_t* rom);
-    void setBasic(const uint8_t* rom);
-    void setChargen(const uint8_t* rom);
-    //@}
-
-    /**
-     * Get the CIA 1 Timer A programmed value.
-     */
-    uint_least16_t getCia1TimerA() const;
-
-    /**
-     * Get the SID registers programmed value.
-     *
-     * @param sidNum the SID chip, 0 for the first one, 1 for the second and 2 for the third.
-     * @param regs an array that will be filled with the last values written to the chip.
-     * @return false if the requested chip doesn't exist.
-     * @since 2.2
-     */
-    bool getSidStatus(unsigned int sidNum, uint8_t regs[32]);
+	/**
+	 * Get the SID registers programmed value.
+	 *
+	 * @param sidNum the SID chip, 0 for the first one, 1 for the second and 2 for the third.
+	 * @param regs an array that will be filled with the last values written to the chip.
+	 * @return false if the requested chip doesn't exist.
+	 * @since 2.2
+	 */
+	bool getSidStatus ( unsigned int sidNum, uint8_t regs[ 32 ] ) {	return sidplayer.getSidStatus ( sidNum, regs );	}
 };
+//-----------------------------------------------------------------------------

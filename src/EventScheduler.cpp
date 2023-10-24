@@ -22,43 +22,44 @@
 
 #include "EventScheduler.h"
 
-
-namespace libsidplayfp
+namespace libsidplayfp {
+//-----------------------------------------------------------------------------
+	
+void EventScheduler::reset ()
 {
-
-void EventScheduler::reset()
-{
-    firstEvent = nullptr;
-    currentTime = 0;
+	firstEvent = nullptr;
+	currentTime = 0;
 }
+//-----------------------------------------------------------------------------
 
-void EventScheduler::cancel(Event &event)
+void EventScheduler::cancel ( Event& event )
 {
-    Event **scan = &firstEvent;
+	auto    scan = &firstEvent;
 
-    while (*scan != nullptr)
-    {
-        if (&event == *scan)
-        {
-            *scan = (*scan)->next;
-            break;
-        }
-        scan = &((*scan)->next);
-    }
+	while ( *scan )
+	{
+		if ( &event == *scan )
+		{
+			*scan = ( *scan )->next;
+			break;
+		}
+		scan = &( ( *scan )->next );
+	}
 }
+//-----------------------------------------------------------------------------
 
-bool EventScheduler::isPending(Event &event) const
+bool EventScheduler::isPending ( Event& event ) const
 {
-    Event *scan = firstEvent;
-    while (scan != nullptr)
-    {
-        if (&event == scan)
-        {
-            return true;
-        }
-        scan = scan->next;
-    }
-    return false;
-}
+	auto	scan = firstEvent;
+	while ( scan )
+	{
+		if ( &event == scan )
+			return true;
 
+		scan = scan->next;
+	}
+
+	return false;
+}
+//-----------------------------------------------------------------------------
 }

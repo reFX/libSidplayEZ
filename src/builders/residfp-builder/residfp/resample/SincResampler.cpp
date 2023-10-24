@@ -25,6 +25,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <map>
 #include <iostream>
 #include <sstream>
 
@@ -227,17 +228,14 @@ int SincResampler::fir ( int subcycle )
 	return v1 + ( firTableOffset * ( v2 - v1 ) >> 10 );
 }
 
-SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency ) :
-	sampleIndex ( 0 ),
-	cyclesPerSample ( static_cast<int>( clockFrequency / samplingFrequency * 1024. ) ),
-	sampleOffset ( 0 ),
-	outputValue ( 0 )
+SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
+	: cyclesPerSample ( static_cast<int>( clockFrequency / samplingFrequency * 1024. ) )
 {
 	// 16 bits -> -96dB stopband attenuation.
-	const double A = -20. * std::log10 ( 1.0 / ( 1 << BITS ) );
+	const double A = -20.0 * std::log10 ( 1.0 / ( 1 << BITS ) );
 	// A fraction of the bandwidth is allocated to the transition band, which we double
 	// because we design the filter to transition halfway at nyquist.
-	const double dw = ( 1. - 2. * highestAccurateFrequency / samplingFrequency ) * M_PI * 2.;
+	const double dw = ( 1.0 - 2.0 * highestAccurateFrequency / samplingFrequency ) * M_PI * 2.0;
 
 	// For calculation of beta and N see the reference for the kaiserord
 	// function in the MATLAB Signal Processing Toolbox:
@@ -326,7 +324,7 @@ SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, 
 
 bool SincResampler::input ( int input )
 {
-	bool ready = false;
+	auto	ready = false;
 
 	/*
 		* Clip the input as it may overflow the 16 bit range.
@@ -352,7 +350,7 @@ bool SincResampler::input ( int input )
 
 void SincResampler::reset ()
 {
-	memset ( sample, 0, sizeof ( sample ) );
+	std::fill_n ( sample, std::size ( sample ), 0 );
 	sampleOffset = 0;
 }
 

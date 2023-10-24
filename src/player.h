@@ -39,7 +39,6 @@ class SidTune;
 class SidInfo;
 class sidbuilder;
 
-
 namespace libsidplayfp
 {
 
@@ -116,8 +115,7 @@ private:
      * @param sampling the sampling method to use
      * @param fastSampling true to enable fast low quality resampling (only for reSID)
      */
-    void sidParams(double cpuFreq, int frequency,
-                    SidConfig::sampling_method_t sampling, bool fastSampling);
+    void sidParams ( double cpuFreq, int frequency );
 
     inline void run(unsigned int events);
 
@@ -131,8 +129,6 @@ public:
 
     bool config(const SidConfig &cfg, bool force=false);
 
-    bool fastForward(unsigned int percent);
-
     bool load(SidTune *tune);
 
     uint_least32_t play(short *buffer, uint_least32_t samples);
@@ -144,8 +140,6 @@ public:
     uint_least32_t timeMs() const { return m_c64.getTimeMs(); }
 
     void debug(const bool enable, FILE *out) { m_c64.debug(enable, out); }
-
-    void mute(unsigned int sidNum, unsigned int voice, bool enable);
 
     const char *error() const { return m_errorString; }
 
