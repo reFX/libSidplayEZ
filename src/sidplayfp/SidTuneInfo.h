@@ -66,17 +66,17 @@ public:
     /**
      * Load Address.
      */
-    uint_least16_t loadAddr() const;
+    uint16_t loadAddr() const;
 
     /**
      * Init Address.
      */
-    uint_least16_t initAddr() const;
+    uint16_t initAddr() const;
 
     /**
      * Play Address.
      */
-    uint_least16_t playAddr() const;
+    uint16_t playAddr() const;
 
     /**
      * The number of songs.
@@ -99,7 +99,7 @@ public:
      * - 0xD400 for the 1st SID
      * - 0 if the nth SID is not required
      */
-    uint_least16_t sidChipBase(unsigned int i) const;
+    uint16_t sidChipBase(unsigned int i) const;
 
     /**
      * The number of SID chips required by the tune.
@@ -114,12 +114,12 @@ public:
     /**
      * First available page for relocation.
      */
-    uint_least8_t relocStartPage() const;
+    uint8_t relocStartPage() const;
 
     /**
      * Number of pages available for relocation.
      */
-    uint_least8_t relocPages() const;
+    uint8_t relocPages() const;
 
     /**
      * @name SID model
@@ -156,12 +156,12 @@ public:
     /**
      * Length of single-file sidtune file.
      */
-    uint_least32_t dataFileLen() const;
+    uint32_t dataFileLen() const;
 
     /**
      * Length of raw C64 data without load address.
      */
-    uint_least32_t c64dataLen() const;
+    uint32_t c64dataLen() const;
 
     /**
      * The tune clock speed.
@@ -195,11 +195,11 @@ public:
     const char* infoFileName() const;
 
 private:
-    virtual uint_least16_t getLoadAddr() const =0;
+    virtual uint16_t getLoadAddr() const =0;
 
-    virtual uint_least16_t getInitAddr() const =0;
+    virtual uint16_t getInitAddr() const =0;
 
-    virtual uint_least16_t getPlayAddr() const =0;
+    virtual uint16_t getPlayAddr() const =0;
 
     virtual unsigned int getSongs() const =0;
 
@@ -207,15 +207,15 @@ private:
 
     virtual unsigned int getCurrentSong() const =0;
 
-    virtual uint_least16_t getSidChipBase(unsigned int i) const =0;
+    virtual uint16_t getSidChipBase(unsigned int i) const =0;
 
     virtual int getSidChips() const =0;
 
     virtual int getSongSpeed() const =0;
 
-    virtual uint_least8_t getRelocStartPage() const =0;
+    virtual uint8_t getRelocStartPage() const =0;
 
-    virtual uint_least8_t getRelocPages() const =0;
+    virtual uint8_t getRelocPages() const =0;
 
     virtual model_t getSidModel(unsigned int i) const =0;
 
@@ -227,9 +227,9 @@ private:
     virtual unsigned int getNumberOfCommentStrings() const =0;
     virtual const char* getCommentString(unsigned int i) const =0;
 
-    virtual uint_least32_t getDataFileLen() const =0;
+    virtual uint32_t getDataFileLen() const =0;
 
-    virtual uint_least32_t getC64dataLen() const =0;
+    virtual uint32_t getC64dataLen() const =0;
 
     virtual clock_t getClockSpeed() const =0;
 

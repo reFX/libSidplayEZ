@@ -48,17 +48,17 @@ public:
 
     compatibility_t m_compatibility;
 
-    uint_least32_t m_dataFileLen;
+    uint32_t m_dataFileLen;
 
-    uint_least32_t m_c64dataLen;
+    uint32_t m_c64dataLen;
 
-    uint_least16_t m_loadAddr;
-    uint_least16_t m_initAddr;
-    uint_least16_t m_playAddr;
+    uint16_t m_loadAddr;
+    uint16_t m_initAddr;
+    uint16_t m_playAddr;
 
-    uint_least8_t m_relocStartPage;
+    uint8_t m_relocStartPage;
 
-    uint_least8_t m_relocPages;
+    uint8_t m_relocPages;
 
     std::string m_path;
 
@@ -68,7 +68,7 @@ public:
 
     std::vector<model_t> m_sidModels;
 
-    std::vector<uint_least16_t> m_sidChipAddresses;
+    std::vector<uint16_t> m_sidChipAddresses;
 
     std::vector<std::string> m_infoString;
 
@@ -102,11 +102,11 @@ public:
         m_sidChipAddresses.push_back(0xd400);
     }
 
-    uint_least16_t getLoadAddr() const override { return m_loadAddr; }
+    uint16_t getLoadAddr() const override { return m_loadAddr; }
 
-    uint_least16_t getInitAddr() const override { return m_initAddr; }
+    uint16_t getInitAddr() const override { return m_initAddr; }
 
-    uint_least16_t getPlayAddr() const override { return m_playAddr; }
+    uint16_t getPlayAddr() const override { return m_playAddr; }
 
     unsigned int getSongs() const override { return m_songs; }
 
@@ -114,7 +114,7 @@ public:
 
     unsigned int getCurrentSong() const override { return m_currentSong; }
 
-    uint_least16_t getSidChipBase(unsigned int i) const override
+    uint16_t getSidChipBase(unsigned int i) const override
     {
         return i < m_sidChipAddresses.size() ? m_sidChipAddresses[i] : 0;
     }
@@ -123,9 +123,9 @@ public:
 
     int getSongSpeed() const override { return m_songSpeed; }
 
-    uint_least8_t getRelocStartPage() const override { return m_relocStartPage; }
+    uint8_t getRelocStartPage() const override { return m_relocStartPage; }
 
-    uint_least8_t getRelocPages() const override { return m_relocPages; }
+    uint8_t getRelocPages() const override { return m_relocPages; }
 
     model_t getSidModel(unsigned int i) const override
     {
@@ -140,9 +140,9 @@ public:
     unsigned int getNumberOfCommentStrings() const override { return (unsigned int)m_commentString.size(); }
     const char* getCommentString(unsigned int i) const override { return i<getNumberOfCommentStrings() ? m_commentString[i].c_str() : ""; }
 
-    uint_least32_t getDataFileLen() const override { return m_dataFileLen; }
+    uint32_t getDataFileLen() const override { return m_dataFileLen; }
 
-    uint_least32_t getC64dataLen() const override { return m_c64dataLen; }
+    uint32_t getC64dataLen() const override { return m_c64dataLen; }
 
     clock_t getClockSpeed() const override { return m_clockSpeed; }
 

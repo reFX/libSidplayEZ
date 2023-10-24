@@ -26,7 +26,7 @@
 #include <string>
 #include <utility>
 
-#include "sidmd5.h"
+#include "MD5/MD5.h"
 
 namespace libsidplayfp
 {
@@ -64,18 +64,12 @@ private:
      */
     std::string checksum() const
     {
-        try
-        {
-            sidmd5 md5;
-            md5.append(m_rom, m_size);
-            md5.finish();
+		MD5 md5;
 
-            return md5.getDigest();
-        }
-        catch (md5Error const &)
-        {
-            return std::string();
-        }
+		md5.append ( m_rom, m_size );
+		md5.finish ();
+
+		return md5.getAscIIDigest ();
     }
 
 protected:
