@@ -314,7 +314,7 @@ protected:
 	* @param addr
 	*            Register to read.
 	*/
-	uint8_t read ( uint_least8_t addr );
+	uint8_t read ( uint8_t addr );
 
 	/**
 	* Write to VIC register.
@@ -324,7 +324,7 @@ protected:
 	* @param data
 	*            Data byte to write.
 	*/
-	void write ( uint_least8_t addr, uint8_t data );
+	void write ( uint8_t addr, uint8_t data );
 
 public:
 	void event () override;

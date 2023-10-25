@@ -66,7 +66,7 @@ public:
 
 	void poke ( uint16_t address, uint8_t value ) override
 	{
-		const auto  addr = endian_16lo8 ( address );
+		const auto  addr = endian_get16_lo8 ( address );
 		write ( addr, value );
 
 		// Save the value written to Timer A
@@ -77,7 +77,7 @@ public:
 
 	uint8_t peek ( uint16_t address ) override
 	{
-		return read ( endian_16lo8 ( address ) );
+		return read ( endian_get16_lo8 ( address ) );
 	}
 
 	void reset () override
@@ -117,12 +117,12 @@ public:
 
 	void poke ( uint16_t address, uint8_t value ) override
 	{
-		write ( endian_16lo8 ( address ), value );
+		write ( endian_get16_lo8 ( address ), value );
 	}
 
 	uint8_t peek ( uint16_t address ) override
 	{
-		return read ( endian_16lo8 ( address ) );
+		return read ( endian_get16_lo8 ( address ) );
 	}
 };
 

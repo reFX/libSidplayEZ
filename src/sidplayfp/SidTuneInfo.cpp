@@ -22,11 +22,11 @@
 
 #include "SidTuneInfo.h"
 
-uint_least16_t SidTuneInfo::loadAddr() const { return getLoadAddr(); }
+uint16_t SidTuneInfo::loadAddr() const { return getLoadAddr(); }
 
-uint_least16_t SidTuneInfo::initAddr() const { return getInitAddr(); }
+uint16_t SidTuneInfo::initAddr() const { return getInitAddr(); }
 
-uint_least16_t SidTuneInfo::playAddr() const { return getPlayAddr(); }
+uint16_t SidTuneInfo::playAddr() const { return getPlayAddr(); }
 
 unsigned int SidTuneInfo::songs() const { return getSongs(); }
 
@@ -34,15 +34,15 @@ unsigned int SidTuneInfo::startSong() const { return getStartSong(); }
 
 unsigned int SidTuneInfo::currentSong() const { return getCurrentSong(); }
 
-uint_least16_t SidTuneInfo::sidChipBase(unsigned int i) const { return getSidChipBase(i); }
+uint16_t SidTuneInfo::sidChipBase(unsigned int i) const { return getSidChipBase(i); }
 
 int SidTuneInfo::sidChips() const { return getSidChips(); }
 
 int SidTuneInfo::songSpeed() const { return getSongSpeed(); }
 
-uint_least8_t SidTuneInfo::relocStartPage() const { return getRelocStartPage(); }
+uint8_t SidTuneInfo::relocStartPage() const { return getRelocStartPage(); }
 
-uint_least8_t SidTuneInfo::relocPages() const { return getRelocPages(); }
+uint8_t SidTuneInfo::relocPages() const { return getRelocPages(); }
 
 SidTuneInfo::model_t SidTuneInfo::sidModel(unsigned int i) const { return getSidModel(i); }
 
@@ -55,9 +55,9 @@ const char* SidTuneInfo::infoString(unsigned int i) const { return getInfoString
 unsigned int SidTuneInfo::numberOfCommentStrings() const{ return getNumberOfCommentStrings(); }
 const char* SidTuneInfo::commentString(unsigned int i) const{ return getCommentString(i); }
 
-uint_least32_t SidTuneInfo::dataFileLen() const { return getDataFileLen(); }
+uint32_t SidTuneInfo::dataFileLen() const { return getDataFileLen(); }
 
-uint_least32_t SidTuneInfo::c64dataLen() const { return getC64dataLen(); }
+uint32_t SidTuneInfo::c64dataLen() const { return getC64dataLen(); }
 
 SidTuneInfo::clock_t SidTuneInfo::clockSpeed() const { return getClockSpeed(); }
 

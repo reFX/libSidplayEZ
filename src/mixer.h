@@ -40,18 +40,18 @@ public:
 	/// Maximum number of supported SIDs
 	static const unsigned int MAX_SIDS = 3;
 
-	static const int_least32_t SCALE_FACTOR = 1 << 16;
+	static const int32_t SCALE_FACTOR = 1 << 16;
 	static constexpr double SQRT_0_5 = 0.70710678118654746;
-	static const int_least32_t C1 = static_cast<int_least32_t>( 1.0 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
-	static const int_least32_t C2 = static_cast<int_least32_t>( SQRT_0_5 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
+	static const int32_t C1 = static_cast<int32_t>( 1.0 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
+	static const int32_t C2 = static_cast<int32_t>( SQRT_0_5 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
 
 private:
-	typedef int_least32_t ( Mixer::* mixer_func_t )( ) const;
+	typedef int32_t ( Mixer::* mixer_func_t )( ) const;
 
 	std::vector<sidemu*> m_chips;
 	std::vector<short*> m_buffers;
 
-	std::vector<int_least32_t> m_iSamples;
+	std::vector<int32_t> m_iSamples;
 
 	std::vector<mixer_func_t> m_mix;
 
@@ -59,10 +59,10 @@ private:
 
 	// Mixer settings
 	short* m_sampleBuffer;
-	uint_least32_t m_sampleCount = 0;
-	uint_least32_t m_sampleIndex;
+	uint32_t m_sampleCount = 0;
+	uint32_t m_sampleIndex;
 
-	uint_least32_t m_sampleRate = 0;
+	uint32_t m_sampleRate = 0;
 
 	bool	m_stereo = false;
 
@@ -90,29 +90,29 @@ private:
 		*/
 
 	// Mono mixing
-	int_least32_t mono1 () const
+	int32_t mono1 () const
 	{
 		return m_iSamples[ 0 ];
 	}
 
-	int_least32_t mono2 () const
+	int32_t mono2 () const
 	{
 		return ( m_iSamples[ 0 ] + m_iSamples[ 1 ] ) / 2;
 	}
 
-	int_least32_t mono3 () const
+	int32_t mono3 () const
 	{
 		return ( m_iSamples[ 0 ] + m_iSamples[ 1 ] + m_iSamples[ 2 ] ) / 3;
 	}
 
 	// Stereo mixing
-	int_least32_t stereo_OneChip () const { return m_iSamples[ 0 ]; }
+	int32_t stereo_OneChip () const { return m_iSamples[ 0 ]; }
 
-	int_least32_t stereo_ch1_TwoChips () const { return m_iSamples[ 0 ]; }
-	int_least32_t stereo_ch2_TwoChips () const { return m_iSamples[ 1 ]; }
+	int32_t stereo_ch1_TwoChips () const { return m_iSamples[ 0 ]; }
+	int32_t stereo_ch2_TwoChips () const { return m_iSamples[ 1 ]; }
 
-	int_least32_t stereo_ch1_ThreeChips () const { return ( C1 * m_iSamples[ 0 ] + C2 * m_iSamples[ 1 ] ) / SCALE_FACTOR; }
-	int_least32_t stereo_ch2_ThreeChips () const { return ( C2 * m_iSamples[ 1 ] + C1 * m_iSamples[ 2 ] ) / SCALE_FACTOR; }
+	int32_t stereo_ch1_ThreeChips () const { return ( C1 * m_iSamples[ 0 ] + C2 * m_iSamples[ 1 ] ) / SCALE_FACTOR; }
+	int32_t stereo_ch2_ThreeChips () const { return ( C2 * m_iSamples[ 1 ] + C1 * m_iSamples[ 2 ] ) / SCALE_FACTOR; }
 
 public:
 	/**
@@ -146,7 +146,7 @@ public:
 		*
 		* @throws badBufferSize
 		*/
-	void begin ( short* buffer, uint_least32_t count );
+	void begin ( short* buffer, uint32_t count );
 
 	/**
 		* Remove all SIDs from the mixer.
@@ -180,7 +180,7 @@ public:
 		*
 		* @param rate sample rate in Hertz
 		*/
-	void setSamplerate ( uint_least32_t rate );
+	void setSamplerate ( uint32_t rate );
 
 	/**
 		* Check if the buffer have been filled.
@@ -190,7 +190,7 @@ public:
 	/**
 		* Get the number of samples generated up to now.
 		*/
-	uint_least32_t samplesGenerated () const { return m_sampleIndex; }
+	uint32_t samplesGenerated () const { return m_sampleIndex; }
 };
 
 }

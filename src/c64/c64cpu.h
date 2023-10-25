@@ -63,9 +63,9 @@ private:
     c64env &m_env;
 
 protected:
-    uint8_t cpuRead(uint_least16_t addr) override { return m_env.cpuRead(addr); }
+    uint8_t cpuRead(uint16_t addr) override { return m_env.cpuRead(addr); }
 
-    void cpuWrite(uint_least16_t addr, uint8_t data) override
+    void cpuWrite(uint16_t addr, uint8_t data) override
     {
 		#ifdef PRINTSCREENCODES
 		    if ( addr >= 1024 && addr <= 2047 )

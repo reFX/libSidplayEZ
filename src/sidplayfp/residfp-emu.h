@@ -46,8 +46,8 @@ public:
 
 	bool getStatus () const { return m_status; }
 
-	uint8_t read ( uint_least8_t addr ) override;
-	void write ( uint_least8_t addr, uint8_t data ) override;
+	uint8_t read ( uint8_t addr ) override;
+	void write ( uint8_t addr, uint8_t data ) override;
 
 	// c64sid functions
 	void reset ( uint8_t volume ) override;

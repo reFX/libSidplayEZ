@@ -111,7 +111,7 @@ constexpr	uint32_t RSID_ID = 0x52534944;
 /**
 	* Decode SID model flags.
 	*/
-SidTuneInfo::model_t getSidModel ( uint_least16_t modelFlag )
+SidTuneInfo::model_t getSidModel ( uint16_t modelFlag )
 {
 	if ( ( modelFlag & PSID_SIDMODEL_ANY ) == PSID_SIDMODEL_ANY )
 		return SidTuneInfo::SIDMODEL_ANY;
@@ -150,7 +150,7 @@ SidTuneBase* PSID::load ( buffer_t& dataBuf )
 	if ( dataBuf.size () < 4 )
 		return nullptr;
 
-	const auto	magic = endian_big32 ( &dataBuf[ 0 ] );
+	const auto	magic = endian_getBig32 ( &dataBuf[ 0 ] );
 	if ( magic != PSID_ID && magic != RSID_ID )
 		return nullptr;
 
@@ -173,15 +173,15 @@ void PSID::readHeader ( const buffer_t& dataBuf, psidHeader& hdr )
 		throw loadError ( ERR_TRUNCATED );
 
 	// Read v1 fields
-	hdr.id = endian_big32 ( &dataBuf[ 0 ] );
-	hdr.version = endian_big16 ( &dataBuf[ 4 ] );
-	hdr.data = endian_big16 ( &dataBuf[ 6 ] );
-	hdr.load = endian_big16 ( &dataBuf[ 8 ] );
-	hdr.init = endian_big16 ( &dataBuf[ 10 ] );
-	hdr.play = endian_big16 ( &dataBuf[ 12 ] );
-	hdr.songs = endian_big16 ( &dataBuf[ 14 ] );
-	hdr.start = endian_big16 ( &dataBuf[ 16 ] );
-	hdr.speed = endian_big32 ( &dataBuf[ 18 ] );
+	hdr.id = endian_getBig32 ( &dataBuf[ 0 ] );
+	hdr.version = endian_getBig16 ( &dataBuf[ 4 ] );
+	hdr.data = endian_getBig16 ( &dataBuf[ 6 ] );
+	hdr.load = endian_getBig16 ( &dataBuf[ 8 ] );
+	hdr.init = endian_getBig16 ( &dataBuf[ 10 ] );
+	hdr.play = endian_getBig16 ( &dataBuf[ 12 ] );
+	hdr.songs = endian_getBig16 ( &dataBuf[ 14 ] );
+	hdr.start = endian_getBig16 ( &dataBuf[ 16 ] );
+	hdr.speed = endian_getBig32 ( &dataBuf[ 18 ] );
 	memcpy ( hdr.name, &dataBuf[ 22 ], PSID_MAXSTRLEN );
 	memcpy ( hdr.author, &dataBuf[ 54 ], PSID_MAXSTRLEN );
 	memcpy ( hdr.released, &dataBuf[ 86 ], PSID_MAXSTRLEN );
@@ -192,7 +192,7 @@ void PSID::readHeader ( const buffer_t& dataBuf, psidHeader& hdr )
 			throw loadError ( ERR_TRUNCATED );
 
 		// Read v2/3/4 fields
-		hdr.flags = endian_big16 ( &dataBuf[ 118 ] );
+		hdr.flags = endian_getBig16 ( &dataBuf[ 118 ] );
 		hdr.relocStartPage = dataBuf[ 120 ];
 		hdr.relocPages = dataBuf[ 121 ];
 		hdr.sidChipBase2 = dataBuf[ 122 ];
@@ -352,30 +352,35 @@ const char* PSID::createMD5 ( char* md5 )
 
 	*md5 = '\0';
 
-	// Include C64 data.
+	// Include C64 data
 	MD5	myMD5;
 	myMD5.append ( &cache[ fileOffset ], info.m_c64dataLen );
 
 	uint8_t tmp[ 2 ];
-	// Include INIT and PLAY address.
-	endian_little16 ( tmp, info.m_initAddr );
-	myMD5.append ( tmp, sizeof ( tmp ) );
-	endian_little16 ( tmp, info.m_playAddr );
+
+	// Include INIT address
+	endian_setLittle16 ( tmp, info.m_initAddr );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
-	// Include number of songs.
-	endian_little16 ( tmp, uint16_t ( info.m_songs ) );
+	// Include PLAY address
+	endian_setLittle16 ( tmp, info.m_playAddr );
+	myMD5.append ( tmp, sizeof ( tmp ) );
+
+	// Include number of songs
+	endian_setLittle16 ( tmp, uint16_t ( info.m_songs ) );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	{
-		// Include song speed for each song.
-		const unsigned int currentSong = info.m_currentSong;
-		for ( unsigned int s = 1; s <= info.m_songs; s++ )
+		// Include song speed for each song
+		const auto	currentSong = info.m_currentSong;
+
+		for ( auto s = 1u; s <= info.m_songs; s++ )
 		{
 			selectSong ( s );
-			const uint8_t songSpeed = static_cast<uint8_t>( info.m_songSpeed );
+			const auto	songSpeed = uint8_t ( info.m_songSpeed );
 			myMD5.append ( &songSpeed, sizeof ( songSpeed ) );
 		}
+
 		// Restore old song
 		selectSong ( currentSong );
 	}
@@ -398,7 +403,6 @@ const char* PSID::createMD5 ( char* md5 )
 	// either create two different fingerprints depending on
 	// the clock speed chosen by the player, or there could be
 	// two different values stored in the database/cache
-
 	myMD5.finish ();
 
 	// Get fingerprint

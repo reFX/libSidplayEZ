@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -20,61 +21,56 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-    Modified by Dag Lem <resid@nimrod.no>
-    Relocate and extract text segment from memory buffer instead of file.
-    For use with VICE VSID.
+ /*
+	 Modified by Dag Lem <resid@nimrod.no>
+	 Relocate and extract text segment from memory buffer instead of file.
+	 For use with VICE VSID.
 
-    Ported to c++ and cut down for use in libsidplayfp by Leandro Nini
-*/
-
-#ifndef RELOC65_H
-#define RELOC65_H
-
-/**
- * reloc65 -- A part of xa65 - 65xx/65816 cross-assembler and utility suite
- * o65 file relocator. Trimmed down for our needs.
+	 Ported to c++ and cut down for use in libsidplayfp by Leandro Nini
  */
+
+ /**
+  * reloc65 -- A part of xa65 - 65xx/65816 cross-assembler and utility suite
+  * o65 file relocator. Trimmed down for our needs.
+  */
 class reloc65
 {
 private:
-    const int m_tbase;
-    int m_tdiff;
+	const int	m_tbase;
+	int			m_tdiff;
 
 private:
-    int reldiff(unsigned char s);
+	int reldiff ( unsigned char s );
 
-    /**
-     * Relocate segment.
-     *
-     * @param buf segment
-     * @param len segment size
-     * @param rtab relocation table
-     * @return a pointer to the next section
-     */
-    unsigned char* reloc_seg(unsigned char *buf, int len, unsigned char *rtab);
+	/**
+	 * Relocate segment.
+	 *
+	 * @param buf segment
+	 * @param len segment size
+	 * @param rtab relocation table
+	 * @return a pointer to the next section
+	 */
+	unsigned char* reloc_seg ( unsigned char* buf, int len, unsigned char* rtab );
 
-    /**
-     * Relocate exported globals list.
-     *
-     * @param buf exported globals list
-     * @return a pointer to the next section
-     */
-    unsigned char* reloc_globals(unsigned char *buf);
+	/**
+	 * Relocate exported globals list.
+	 *
+	 * @param buf exported globals list
+	 * @return a pointer to the next section
+	 */
+	unsigned char* reloc_globals ( unsigned char* buf );
 
 public:
-    /**
-     * @param addr address of the segment to relocate
-     */
-    reloc65(int addr);
+	/**
+	 * @param addr address of the segment to relocate
+	 */
+	reloc65 ( int addr );
 
-    /**
-     * Do the relocation.
-     *
-     * @param buf beffer containing o65 data
-     * @param fsize size of the data
-     */
-    bool reloc(unsigned char **buf, int *fsize);
+	/**
+	 * Do the relocation.
+	 *
+	 * @param buf beffer containing o65 data
+	 * @param fsize size of the data
+	 */
+	bool reloc ( unsigned char** buf, int* fsize );
 };
-
-#endif

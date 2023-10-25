@@ -98,10 +98,10 @@ public:
 
 	// RAM access methods
 	uint8_t readMemByte ( uint16_t addr ) override { return ramBank.peek ( addr ); }
-	uint16_t readMemWord ( uint16_t addr ) override { return endian_little16 ( ramBank.ram + addr ); }
+	uint16_t readMemWord ( uint16_t addr ) override { return endian_getLittle16 ( ramBank.ram + addr ); }
 
 	void writeMemByte ( uint16_t addr, uint8_t value ) override { ramBank.poke ( addr, value ); }
-	void writeMemWord ( uint16_t addr, uint16_t value ) override { endian_little16 ( ramBank.ram + addr, value ); }
+	void writeMemWord ( uint16_t addr, uint16_t value ) override { endian_setLittle16 ( ramBank.ram + addr, value ); }
 
 	void fillRam ( uint16_t start, uint8_t value, unsigned int size ) override	{	std::fill_n ( ramBank.ram + start, size, value );	}
 	void fillRam ( uint16_t start, const uint8_t* source, unsigned int size ) override	{	std::copy_n ( source, size, ramBank.ram + start );	}

@@ -21,7 +21,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-
 #include "player.h"
 
 #include "sidplayfp/SidTune.h"
@@ -52,8 +51,8 @@ const char ERR_UNSUPPORTED_SIZE[] = "SIDPLAYER ERROR: Size of music data exceeds
 const char ERR_INVALID_PERCENTAGE[] = "SIDPLAYER ERROR: Percentage value out of range.";
 
 /**
-	* Configuration error exception.
-	*/
+* Configuration error exception.
+*/
 class configError
 {
 private:
@@ -65,12 +64,8 @@ public:
 };
 //-----------------------------------------------------------------------------
 
-Player::Player () :
-	// Set default settings for system
-	m_tune ( nullptr ),
-	m_errorString ( ERR_NA ),
-	m_isPlaying ( STOPPED ),
-	m_rand ( ( unsigned int )::time ( 0 ) )
+Player::Player ()
+	: m_errorString ( ERR_NA )
 {
 	// We need at least some minimal interrupt handling
 	m_c64.getMemInterface ().setKernal ( nullptr );
@@ -131,11 +126,15 @@ void Player::initialise ()
 		throw configError ( ERR_UNSUPPORTED_SIZE );
 
 	auto	powerOnDelay = m_cfg.powerOnDelay;
+
 	// Delays above MAX result in random delays
 	if ( powerOnDelay > SidConfig::MAX_POWER_ON_DELAY )
-		powerOnDelay = uint16_t ( ( m_rand.next () >> 3 ) & SidConfig::MAX_POWER_ON_DELAY );
+	{
+		std::srand ( (unsigned int)std::time ( nullptr ) );	// use current time as seed for random generator
+		powerOnDelay = uint16_t ( ( std::rand () >> 3 ) & SidConfig::MAX_POWER_ON_DELAY );
+	}
 
-	psiddrv driver ( m_tune->getInfo () );
+	psiddrv	driver ( m_tune->getInfo () );
 	driver.powerOnDelay ( powerOnDelay );
 	if ( ! driver.drvReloc () )
 		throw configError ( driver.errorString () );
@@ -302,11 +301,11 @@ bool Player::config ( const SidConfig& cfg, bool force )
 			sidRelease ();
 
 			std::vector<unsigned int> addresses;
-			const uint_least16_t secondSidAddress = tuneInfo->sidChipBase ( 1 ) != 0 ? tuneInfo->sidChipBase ( 1 ) : cfg.secondSidAddress;
+			const uint16_t secondSidAddress = tuneInfo->sidChipBase ( 1 ) != 0 ? tuneInfo->sidChipBase ( 1 ) : cfg.secondSidAddress;
 			if ( secondSidAddress )
 				addresses.push_back ( secondSidAddress );
 
-			const uint_least16_t thirdSidAddress = tuneInfo->sidChipBase ( 2 ) != 0 ? tuneInfo->sidChipBase ( 2 ) :	cfg.thirdSidAddress;
+			const uint16_t thirdSidAddress = tuneInfo->sidChipBase ( 2 ) != 0 ? tuneInfo->sidChipBase ( 2 ) :	cfg.thirdSidAddress;
 			if ( thirdSidAddress )
 				addresses.push_back ( thirdSidAddress );
 

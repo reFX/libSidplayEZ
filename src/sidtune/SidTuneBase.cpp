@@ -30,14 +30,12 @@
 #include <iterator>
 #include <fstream>
 
-#include "SmartPtr.h"
 #include "SidTuneTools.h"
 #include "SidTuneInfoImpl.h"
 #include "sidendian.h"
 #include "sidmemory.h"
 #include "stringutils.h"
 
-#include "MUS.h"
 #include "p00.h"
 #include "prg.h"
 #include "PSID.h"
@@ -61,8 +59,8 @@ const char SidTuneBase::ERR_TRUNCATED[] = "SIDTUNE ERROR: File is most likely tr
 const char SidTuneBase::ERR_INVALID[] = "SIDTUNE ERROR: File contains invalid data";
 
 /**
-	* Petscii to Ascii conversion table (0x01 = no output).
-	*/
+* Petscii to Ascii conversion table (0x01 = no output).
+*/
 const char CHR_tab[ 256 ] =
 {
 	0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x0d,0x01,0x01,
@@ -94,34 +92,41 @@ const uint32_t MAX_FILELEN = MAX_MEMORY + 2 + 0x7C;
 /// Minimum load address for real c64 only tunes
 const uint16_t SIDTUNE_R64_MIN_LOAD_ADDR = 0x07e8;
 
-SidTuneBase* SidTuneBase::load ( const char* fileName, const char** fileNameExt, bool separatorIsSlash )
-{
-	return load ( nullptr, fileName, fileNameExt, separatorIsSlash );
-}
+//-----------------------------------------------------------------------------
 
-SidTuneBase* SidTuneBase::load ( LoaderFunc loader, const char* fileName, const char** fileNameExt, bool separatorIsSlash )
+SidTuneBase* SidTuneBase::load ( const char* fileName, bool separatorIsSlash )
+{
+	return load ( nullptr, fileName, separatorIsSlash );
+}
+//-----------------------------------------------------------------------------
+
+SidTuneBase* SidTuneBase::load ( LoaderFunc loader, const char* fileName, bool separatorIsSlash )
 {
 	if ( ! fileName )
 		return nullptr;
 
-	return getFromFiles ( loader, fileName, fileNameExt, separatorIsSlash );
+	return getFromFiles ( loader, fileName, separatorIsSlash );
 }
+//-----------------------------------------------------------------------------
 
 SidTuneBase* SidTuneBase::read ( const uint8_t* sourceBuffer, uint32_t bufferLen )
 {
 	return getFromBuffer ( sourceBuffer, bufferLen );
 }
+//-----------------------------------------------------------------------------
 
 const SidTuneInfo* SidTuneBase::getInfo () const
 {
 	return &info;
 }
+//-----------------------------------------------------------------------------
 
 const SidTuneInfo* SidTuneBase::getInfo ( unsigned int songNum )
 {
 	selectSong ( songNum );
 	return &info;
 }
+//-----------------------------------------------------------------------------
 
 unsigned int SidTuneBase::selectSong ( unsigned int selectedSong )
 {
@@ -157,8 +162,7 @@ unsigned int SidTuneBase::selectSong ( unsigned int selectedSong )
 
 	return info.m_currentSong;
 }
-
-// ------------------------------------------------- private member functions
+//-----------------------------------------------------------------------------
 
 void SidTuneBase::placeSidTuneInC64mem ( sidmemory& mem )
 {
@@ -237,9 +241,6 @@ SidTuneBase* SidTuneBase::getFromBuffer ( const uint8_t* const buffer, uint32_t 
 	// Here test for the possible single file formats.
 	auto	s = PSID::load ( buf1 );
 	if ( ! s )
-		s = MUS::load ( buf1, true );
-
-	if ( ! s )
 		throw loadError ( ERR_UNRECOGNIZED_FORMAT );
 
 	s->acceptSidTune ( "-", "-", buf1, false );
@@ -271,10 +272,7 @@ void SidTuneBase::acceptSidTune ( const char* dataFileName, const char* infoFile
 	}
 
 	// Fix bad sidtune set up
-	if ( info.m_songs > MAX_SONGS )
-		info.m_songs = MAX_SONGS;
-	else if ( info.m_songs == 0 )
-		info.m_songs = 1;
+	info.m_songs = std::clamp ( info.m_songs, 1u, MAX_SONGS );
 
 	if ( info.m_startSong == 0 || info.m_startSong > info.m_songs )
 		info.m_startSong = 1;
@@ -296,7 +294,7 @@ void SidTuneBase::acceptSidTune ( const char* dataFileName, const char* infoFile
 		// We only detect an offset of two. Some position independent
 		// sidtunes contain a load address of 0xE000, but are loaded
 		// to 0x0FFE and call player at 0x1000.
-		info.m_fixLoad = ( endian_little16 ( &buf[ fileOffset ] ) == ( info.m_loadAddr + 2 ) );
+		info.m_fixLoad = ( endian_getLittle16 ( &buf[ fileOffset ] ) == ( info.m_loadAddr + 2 ) );
 	}
 
 	// Check the size of the data.
@@ -319,13 +317,13 @@ void SidTuneBase::createNewFileName ( std::string& destString, const char* sourc
 
 // Initializing the object based upon what we find in the specified file.
 
-SidTuneBase* SidTuneBase::getFromFiles ( const char* fileName, const char** fileNameExtensions, bool separatorIsSlash )
+SidTuneBase* SidTuneBase::getFromFiles ( const char* fileName, bool separatorIsSlash )
 {
-	return getFromFiles ( nullptr, fileName, fileNameExtensions, separatorIsSlash );
+	return getFromFiles ( nullptr, fileName, separatorIsSlash );
 }
 //-----------------------------------------------------------------------------
 
-SidTuneBase* SidTuneBase::getFromFiles ( LoaderFunc loader, const char* fileName, const char** fileNameExtensions, bool separatorIsSlash )
+SidTuneBase* SidTuneBase::getFromFiles ( LoaderFunc loader, const char* fileName, bool separatorIsSlash )
 {
 	buffer_t fileBuf1;
 
@@ -334,58 +332,8 @@ SidTuneBase* SidTuneBase::getFromFiles ( LoaderFunc loader, const char* fileName
 
 	loader ( fileName, fileBuf1 );
 
-	// File loaded. Now check if it is in a valid single-file-format.
+	// File loaded. Now check if it is in a valid single-file-format
 	auto	s = PSID::load ( fileBuf1 );
-	if ( ! s )
-	{
-		// Try some native C64 file formats
-		s = MUS::load ( fileBuf1, true );
-		if ( s )
-		{
-			// Try to find second file.
-			std::string	fileName2;
-			auto	n = 0;
-			while ( fileNameExtensions[ n ] )
-			{
-				createNewFileName ( fileName2, fileName, fileNameExtensions[ n ] );
-				// 1st data file was loaded into "fileBuf1",
-				// so we load the 2nd one into "fileBuf2".
-				// Do not load the first file again if names are equal.
-				if ( ! stringutils::equal ( fileName, fileName2.data (), fileName2.size () ) )
-				{
-					try
-					{
-						buffer_t fileBuf2;
-
-						loader ( fileName2.c_str (), fileBuf2 );
-						// Check if tunes in wrong order and therefore swap them here
-						if ( stringutils::equal ( fileNameExtensions[ n ], ".mus" ) )
-						{
-							auto	s2 = MUS::load ( fileBuf2, fileBuf1, 0, true );
-							if ( s2 )
-							{
-								s2->acceptSidTune ( fileName2.c_str (), fileName, fileBuf2, separatorIsSlash );
-								return s2;
-							}
-						}
-						else
-						{
-							auto	s2 = MUS::load ( fileBuf1, fileBuf2, 0, true );
-							if ( s2 )
-							{
-								s2->acceptSidTune ( fileName, fileName2.c_str (), fileBuf1, separatorIsSlash );
-								return s2;
-							}
-						}
-						// The first tune loaded ok, so ignore errors on the
-						// second tune, may find an ok one later
-					}
-					catch ( loadError const& ) {}
-				}
-				n++;
-			}
-		}
-	}
 	if ( ! s )	s = p00::load ( fileName, fileBuf1 );
 	if ( ! s )	s = prg::load ( fileName, fileBuf1 );
 
@@ -476,7 +424,7 @@ void SidTuneBase::resolveAddrs ( const uint8_t* c64data )
 		if ( info.m_c64dataLen < 2 )
 			throw loadError ( ERR_CORRUPT );
 
-		info.m_loadAddr = endian_16 ( *( c64data + 1 ), *c64data );
+		info.m_loadAddr = endian_getLittle16 ( c64data );
 		fileOffset += 2;
 		info.m_c64dataLen -= 2;
 	}
@@ -524,31 +472,29 @@ bool SidTuneBase::checkCompatibility ()
 }
 //-----------------------------------------------------------------------------
 
-std::string SidTuneBase::petsciiToAscii ( SmartPtr_sidtt<const uint8_t>& spPet )
+std::string SidTuneBase::petsciiToAscii ( std::string_view& svPet )
 {
-	std::string buffer;
+	std::string	buffer;
 
-	do
+	for ( uint8_t petsciiChar : svPet )
 	{
-		const uint8_t petsciiChar = *spPet;
-		spPet++;
-
-		if ( ( petsciiChar == 0x00 ) || ( petsciiChar == 0x0d ) )
+		if ( petsciiChar == 0x00 || petsciiChar == 0x0d )
 			break;
 
-		// If character is 0x9d (left arrow key) then move back.
-		if ( ( petsciiChar == 0x9d ) && ( !buffer.empty () ) )
+		// If character is 0x9d (left arrow key) then move back
+		if ( petsciiChar == 0x9d )
 		{
-			buffer.resize ( buffer.size () - 1 );
+			if ( buffer.size () )
+				buffer.pop_back ();
 		}
-		else
+		else if ( buffer.length () < 32 )
 		{
 			// ASCII CHR$ conversion
-			const char asciiChar = CHR_tab[ petsciiChar ];
-			if ( ( asciiChar >= 0x20 ) && ( buffer.length () <= 31 ) )
-				buffer.push_back ( asciiChar );
+			const auto	asciiChar = CHR_tab[ petsciiChar ];
+			if ( asciiChar >= 0x20 )
+				buffer += asciiChar;
 		}
-	} while ( ! spPet.fail () );
+	}
 
 	return buffer;
 }

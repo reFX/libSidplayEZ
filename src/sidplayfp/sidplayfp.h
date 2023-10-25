@@ -89,7 +89,7 @@ public:
 	 *         or #isPlaying() is false an error occurred, use #error()
 	 *         to get a detailed message.
 	 */
-	uint_least32_t play ( short* buffer, uint_least32_t count ) {	return sidplayer.play ( buffer, count );	}
+	uint32_t play ( short* buffer, uint32_t count ) {	return sidplayer.play ( buffer, count );	}
 
 	/**
 	 * Check if the engine is playing or stopped.
@@ -104,21 +104,11 @@ public:
 	void stop () { 	sidplayer.stop ();	}
 
 	/**
-	 * Control debugging.
-	 * Only has effect if library have been compiled
-	 * with the --enable-debug option.
-	 *
-	 * @param enable enable/disable debugging.
-	 * @param out the file where to redirect the debug info.
-	 */
-	void debug ( bool enable, FILE* out ) { sidplayer.debug ( enable, out ); }
-
-	/**
 	 * Get the current playing time.
 	 *
 	 * @return the current playing time measured in seconds.
 	 */
-	uint_least32_t time () const { return sidplayer.timeMs () / 1000; }
+	uint32_t time () const { return sidplayer.timeMs () / 1000; }
 
 	/**
 	 * Get the current playing time.
@@ -126,7 +116,7 @@ public:
 	 * @return the current playing time measured in milliseconds.
 	 * @since 2.0
 	 */
-	uint_least32_t timeMs () const { return sidplayer.timeMs (); }
+	uint32_t timeMs () const { return sidplayer.timeMs (); }
 
 	/**
 	 * Set ROM images.
@@ -157,7 +147,7 @@ public:
 	/**
 	 * Get the CIA 1 Timer A programmed value.
 	 */
-	uint_least16_t getCia1TimerA () const	{	return sidplayer.getCia1TimerA ();	}
+	uint16_t getCia1TimerA () const	{	return sidplayer.getCia1TimerA ();	}
 
 	/**
 	 * Get the SID registers programmed value.

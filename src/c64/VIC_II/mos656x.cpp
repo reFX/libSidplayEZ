@@ -106,7 +106,7 @@ void MOS656X::chip ( model_t model )
 }
 //-----------------------------------------------------------------------------
 
-uint8_t MOS656X::read ( uint_least8_t addr )
+uint8_t MOS656X::read ( uint8_t addr )
 {
 	addr &= 0x3f;
 
@@ -137,7 +137,7 @@ uint8_t MOS656X::read ( uint_least8_t addr )
 }
 //-----------------------------------------------------------------------------
 
-void MOS656X::write ( uint_least8_t addr, uint8_t data )
+void MOS656X::write ( uint8_t addr, uint8_t data )
 {
 	addr &= 0x3f;
 

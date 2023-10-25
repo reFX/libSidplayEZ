@@ -53,8 +53,8 @@ public:
 	{
 	}
 
-	void poke ( uint_least16_t address, uint8_t value ) override	{	write ( endian_16lo8 ( address ), value );	}
-	uint8_t peek ( uint_least16_t address ) override				{	return read ( endian_16lo8 ( address ) );	}
+	void poke ( uint16_t address, uint8_t value ) override	{	write ( endian_get16_lo8 ( address ), value );	}
+	uint8_t peek ( uint16_t address ) override				{	return read ( endian_get16_lo8 ( address ) );	}
 };
 
 }

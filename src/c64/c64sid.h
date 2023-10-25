@@ -38,8 +38,8 @@ private:
 protected:
 	virtual ~c64sid () {}
 
-	virtual uint8_t read ( uint_least8_t addr ) = 0;
-	virtual void write ( uint_least8_t addr, uint8_t data ) = 0;
+	virtual uint8_t read ( uint8_t addr ) = 0;
+	virtual void write ( uint8_t addr, uint8_t data ) = 0;
 
 public:
 	virtual void reset ( uint8_t volume ) = 0;
@@ -51,12 +51,12 @@ public:
     }
 
     // Bank functions
-	void poke ( uint_least16_t address, uint8_t value ) override
+	void poke ( uint16_t address, uint8_t value ) override
 	{
 		lastpoke[ address & 0x1f ] = value;
 		write ( address & 0x1f, value );
 	}
-	uint8_t peek ( uint_least16_t address ) override { return read ( address & 0x1f ); }
+	uint8_t peek ( uint16_t address ) override { return read ( address & 0x1f ); }
 
 	void getStatus ( uint8_t regs[ 0x20 ] ) const { std::copy_n ( lastpoke, std::size ( lastpoke ), regs ); }
 };

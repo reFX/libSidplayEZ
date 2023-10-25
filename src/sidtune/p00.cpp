@@ -29,14 +29,13 @@
 
 #include "sidplayfp/SidTuneInfo.h"
 
-#include "SmartPtr.h"
 #include "SidTuneTools.h"
 
 namespace libsidplayfp
 {
 
-#define X00_ID_LEN   8
-#define X00_NAME_LEN 17
+constexpr auto	X00_ID_LEN = 8;
+constexpr auto	X00_NAME_LEN = 17;
 
 // File format from PC64. PC64 automatically generates
 // the filename from the cbm name (16 to 8 conversion)
@@ -83,19 +82,19 @@ const char P00_ID[] = "C64File";
 
 SidTuneBase* p00::load ( const char* fileName, buffer_t& dataBuf )
 {
-	const char* ext = SidTuneTools::fileExtOfPath ( fileName );
+	auto	ext = SidTuneTools::fileExtOfPath ( fileName );
 
 	// Combined extension & magic field identification
 	if ( strlen ( ext ) != 4 )
 		return nullptr;
 
-	if ( !isdigit ( ext[ 2 ] ) || !isdigit ( ext[ 3 ] ) )
+	if ( ! std::isdigit ( ext[ 2 ] ) || ! std::isdigit ( ext[ 3 ] ) )
 		return nullptr;
 
 	const char*	format = nullptr;
 	X00Format	type;
 
-	switch ( toupper ( ext[ 1 ] ) )
+	switch ( std::toupper ( ext[ 1 ] ) )
 	{
 		case 'D':		type = X00_DEL;		format = TXT_FORMAT_DEL;		break;
 		case 'S':		type = X00_SEQ;		format = TXT_FORMAT_SEQ;		break;
@@ -139,7 +138,8 @@ void p00::load ( const char* format, const X00Header* pHeader )
 
 	{
 		// Decode file name
-		SmartPtr_sidtt<const uint8_t> spPet ( pHeader->name, X00_NAME_LEN );
+		auto	spPet = std::string_view ( (char*)pHeader->name, std::size ( pHeader->name ) );
+
 		info.m_infoString.push_back ( petsciiToAscii ( spPet ) );
 	}
 

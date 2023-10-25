@@ -71,10 +71,10 @@ public:
      * - Delays <= MAX produce constant results
      * - Delays >  MAX produce random results
      */
-    static const uint_least16_t MAX_POWER_ON_DELAY = 0x1FFF;
-    static const uint_least16_t DEFAULT_POWER_ON_DELAY = MAX_POWER_ON_DELAY + 1;
+    static const uint16_t MAX_POWER_ON_DELAY = 0x1FFF;
+    static const uint16_t DEFAULT_POWER_ON_DELAY = MAX_POWER_ON_DELAY + 1;
 
-    static const uint_least32_t DEFAULT_SAMPLING_FREQ  = 44100;
+    static const uint32_t DEFAULT_SAMPLING_FREQ  = 44100;
 
     /**
      * Intended c64 model when unknown or forced.
@@ -114,14 +114,14 @@ public:
     /**
      * Sampling frequency.
      */
-    uint_least32_t frequency = DEFAULT_SAMPLING_FREQ;
+    uint32_t frequency = DEFAULT_SAMPLING_FREQ;
 
     /**
      * Extra SID chips addresses.
      */
     //@{
-    uint_least16_t secondSidAddress = 0;
-    uint_least16_t thirdSidAddress = 0;
+    uint16_t secondSidAddress = 0;
+    uint16_t thirdSidAddress = 0;
     //@}
 
     /**
@@ -133,7 +133,7 @@ public:
     /**
      * Power on delay cycles.
      */
-    uint_least16_t powerOnDelay = DEFAULT_POWER_ON_DELAY;
+    uint16_t powerOnDelay = DEFAULT_POWER_ON_DELAY;
 
     /**
      * Compare two config objects.

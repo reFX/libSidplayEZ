@@ -82,14 +82,14 @@ void ReSIDfp::reset ( uint8_t volume )
 }
 //-----------------------------------------------------------------------------
 
-uint8_t ReSIDfp::read ( uint_least8_t addr )
+uint8_t ReSIDfp::read ( uint8_t addr )
 {
 	clock ();
 	return m_sid.read ( addr );
 }
 //-----------------------------------------------------------------------------
 
-void ReSIDfp::write ( uint_least8_t addr, uint8_t data )
+void ReSIDfp::write ( uint8_t addr, uint8_t data )
 {
 	clock ();
 	m_sid.write ( addr, data );

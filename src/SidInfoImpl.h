@@ -49,10 +49,10 @@ public:
 
     unsigned int m_channels;
 
-    uint_least16_t m_driverAddr;
-    uint_least16_t m_driverLength;
+    uint16_t m_driverAddr;
+    uint16_t m_driverLength;
 
-    uint_least16_t m_powerOnDelay;
+    uint16_t m_powerOnDelay;
 
 private:
     // prevent copying
@@ -86,10 +86,10 @@ public:
 
     unsigned int getChannels() const override { return m_channels; }
 
-    uint_least16_t getDriverAddr() const override { return m_driverAddr; }
-    uint_least16_t getDriverLength() const override { return m_driverLength; }
+    uint16_t getDriverAddr() const override { return m_driverAddr; }
+    uint16_t getDriverLength() const override { return m_driverLength; }
 
-    uint_least16_t getPowerOnDelay() const override { return m_powerOnDelay; }
+    uint16_t getPowerOnDelay() const override { return m_powerOnDelay; }
 
     const char *getSpeedString() const override { return m_speedString.c_str(); }
 
