@@ -38,22 +38,22 @@ class MOS652X;
 class Timer : private Event
 {
 protected:
-    static const int_least32_t CIAT_CR_START   = 0x01;
-    static const int_least32_t CIAT_STEP       = 0x04;
-    static const int_least32_t CIAT_CR_ONESHOT = 0x08;
-    static const int_least32_t CIAT_CR_FLOAD   = 0x10;
-    static const int_least32_t CIAT_PHI2IN     = 0x20;
-    static const int_least32_t CIAT_CR_MASK    = CIAT_CR_START | CIAT_CR_ONESHOT | CIAT_CR_FLOAD | CIAT_PHI2IN;
+    static const int32_t CIAT_CR_START   = 0x01;
+    static const int32_t CIAT_STEP       = 0x04;
+    static const int32_t CIAT_CR_ONESHOT = 0x08;
+    static const int32_t CIAT_CR_FLOAD   = 0x10;
+    static const int32_t CIAT_PHI2IN     = 0x20;
+    static const int32_t CIAT_CR_MASK    = CIAT_CR_START | CIAT_CR_ONESHOT | CIAT_CR_FLOAD | CIAT_PHI2IN;
 
-    static const int_least32_t CIAT_COUNT2     = 0x100;
-    static const int_least32_t CIAT_COUNT3     = 0x200;
+    static const int32_t CIAT_COUNT2     = 0x100;
+    static const int32_t CIAT_COUNT3     = 0x200;
 
-    static const int_least32_t CIAT_ONESHOT0   = 0x08 << 8;
-    static const int_least32_t CIAT_ONESHOT    = 0x08 << 16;
-    static const int_least32_t CIAT_LOAD1      = 0x10 << 8;
-    static const int_least32_t CIAT_LOAD       = 0x10 << 16;
+    static const int32_t CIAT_ONESHOT0   = 0x08 << 8;
+    static const int32_t CIAT_ONESHOT    = 0x08 << 16;
+    static const int32_t CIAT_LOAD1      = 0x10 << 8;
+    static const int32_t CIAT_LOAD       = 0x10 << 16;
 
-    static const int_least32_t CIAT_OUT        = 0x80000000;
+    static const int32_t CIAT_OUT        = 0x80000000;
 
 private:
     EventCallback<Timer> m_cycleSkippingEvent;
@@ -75,10 +75,10 @@ private:
     bool pbToggle;
 
     /// Current timer value.
-    uint_least16_t timer;
+    uint16_t timer;
 
     /// Timer start value (Latch).
-    uint_least16_t latch;
+    uint16_t latch;
 
     /// Copy of regs[CRA/B]
     uint8_t lastControlValue;
@@ -88,7 +88,7 @@ protected:
     MOS652X &parent;
 
     /// CRA/CRB control register / state.
-    int_least32_t state;
+    int32_t state;
 
 private:
     /**
@@ -198,14 +198,14 @@ public:
      *
      * @return current state value
      */
-    inline int_least32_t getState() const { return state; }
+    inline int32_t getState() const { return state; }
 
     /**
      * Get current timer value.
      *
      * @return current timer value
      */
-    inline uint_least16_t getTimer() const { return timer; }
+    inline uint16_t getTimer() const { return timer; }
 
     /**
      * Get PB6/PB7 Flipflop state.
@@ -226,7 +226,7 @@ void Timer::reschedule()
     //
     // Additionally, there are numerous flags that are present only in passing manner,
     // but which we need to let cycle through the CIA state machine.
-    const int_least32_t unwanted = CIAT_OUT | CIAT_CR_FLOAD | CIAT_LOAD1 | CIAT_LOAD;
+    const int32_t unwanted = CIAT_OUT | CIAT_CR_FLOAD | CIAT_LOAD1 | CIAT_LOAD;
     if ((state & unwanted) != 0)
     {
         eventScheduler.schedule(*this, 1);
@@ -238,7 +238,7 @@ void Timer::reschedule()
         // Test the conditions that keep COUNT2 and thus COUNT3 alive, and also
         // ensure that all of them are set indicating steady state operation.
 
-        const int_least32_t wanted = CIAT_CR_START | CIAT_PHI2IN | CIAT_COUNT2 | CIAT_COUNT3;
+        const int32_t wanted = CIAT_CR_START | CIAT_PHI2IN | CIAT_COUNT2 | CIAT_COUNT3;
         if (timer > 2 && (state & wanted) == wanted)
         {
             // we executed this cycle, therefore the pauseTime is +1. If we are called
@@ -257,8 +257,8 @@ void Timer::reschedule()
     {
         // Test conditions that result in CIA activity in next clocks.
         // If none, stop.
-        const int_least32_t unwanted1 = CIAT_CR_START | CIAT_PHI2IN;
-        const int_least32_t unwanted2 = CIAT_CR_START | CIAT_STEP;
+        const int32_t unwanted1 = CIAT_CR_START | CIAT_PHI2IN;
+        const int32_t unwanted2 = CIAT_CR_START | CIAT_STEP;
 
         if ((state & unwanted1) == unwanted1
             || (state & unwanted2) == unwanted2)

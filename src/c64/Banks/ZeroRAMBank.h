@@ -190,7 +190,7 @@ public:
         updateCpuPort();
     }
 
-    uint8_t peek(uint_least16_t address) override
+    uint8_t peek(uint16_t address) override
     {
         switch (address)
         {
@@ -223,7 +223,7 @@ public:
         }
     }
 
-    void poke(uint_least16_t address, uint8_t value) override
+    void poke(uint16_t address, uint8_t value) override
     {
         switch (address)
         {

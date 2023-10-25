@@ -72,12 +72,12 @@ public:
             mapper[i] = bank;
     }
 
-    uint8_t peek(uint_least16_t addr) override
+    uint8_t peek(uint16_t addr) override
     {
         return mapper[mapperIndex(addr)]->peek(addr);
     }
 
-    void poke(uint_least16_t addr, uint8_t data) override
+    void poke(uint16_t addr, uint8_t data) override
     {
         mapper[mapperIndex(addr)]->poke(addr, data);
     }

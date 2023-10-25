@@ -46,8 +46,8 @@ public:
 
 	void reset ()	{	sid->reset ( 0xf );	}
 
-	uint8_t peek ( uint_least16_t addr ) override				{	return sid->peek ( addr );	}
-	void poke ( uint_least16_t addr, uint8_t data ) override	{	sid->poke ( addr, data );	}
+	uint8_t peek ( uint16_t addr ) override				{	return sid->peek ( addr );	}
+	void poke ( uint16_t addr, uint8_t data ) override	{	sid->poke ( addr, data );	}
 
     /**
      * Set SID emulation.

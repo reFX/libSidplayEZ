@@ -81,9 +81,6 @@ public:
     } cia_model_t;
 
 private:
-    typedef std::map<int, ExtraSidBank*> sidBankMap_t;
-
-private:
     /// System clock frequency
     double cpuFrequency;
 
@@ -115,7 +112,7 @@ private:
     SidBank sidBank;
 
     /// Extra SIDs
-    sidBankMap_t extraSidBanks;
+    std::map<int, ExtraSidBank*>    extraSidBanks;
 
     /// I/O Area #1 and #2
     DisconnectedBusBank disconnectedBusBank;

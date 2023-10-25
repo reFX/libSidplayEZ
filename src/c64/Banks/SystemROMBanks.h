@@ -45,17 +45,17 @@ protected:
     /**
      * Set value at memory address.
      */
-    void setVal(uint_least16_t address, uint8_t val) { rom[address & (N-1)]=val; }
+    void setVal(uint16_t address, uint8_t val) { rom[address & (N-1)]=val; }
 
     /**
      * Return value from memory address.
      */
-    uint8_t getVal(uint_least16_t address) const { return rom[address & (N-1)]; }
+    uint8_t getVal(uint16_t address) const { return rom[address & (N-1)]; }
 
     /**
      * Return pointer to memory address.
      */
-    void* getPtr(uint_least16_t address) const { return (void*)&rom[address & (N-1)]; }
+    void* getPtr(uint16_t address) const { return (void*)&rom[address & (N-1)]; }
 
 public:
     /**
@@ -66,12 +66,12 @@ public:
     /**
      * Writing to ROM is a no-op.
      */
-    void poke(uint_least16_t, uint8_t) override {}
+    void poke(uint16_t, uint8_t) override {}
 
     /**
      * Read from ROM.
      */
-    uint8_t peek(uint_least16_t address) override { return rom[address & (N-1)]; }
+    uint8_t peek(uint16_t address) override { return rom[address & (N-1)]; }
 };
 
 /**
@@ -131,7 +131,7 @@ public:
      *
      * @param addr the new addres to point to
      */
-    void installResetHook(uint_least16_t addr)
+    void installResetHook(uint16_t addr)
     {
         setVal(0xfffc, endian_16lo8(addr));
         setVal(0xfffd, endian_16hi8(addr));
@@ -173,7 +173,7 @@ public:
      *
      * @param addr
      */
-    void installTrap(uint_least16_t addr)
+    void installTrap(uint16_t addr)
     {
         setVal(0xa7ae, JMPw);
         setVal(0xa7af, endian_16lo8(addr));

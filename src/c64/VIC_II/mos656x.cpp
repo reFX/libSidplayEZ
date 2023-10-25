@@ -1,25 +1,25 @@
 /*
- * This file is part of libsidplayfp, a SID player engine.
- *
- * Copyright 2011-2021 Leandro Nini <drfiemost@users.sourceforge.net>
- * Copyright 2009-2014 VICE Project
- * Copyright 2007-2010 Antti Lankila
- * Copyright 2001 Simon White
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+* This file is part of libsidplayfp, a SID player engine.
+*
+* Copyright 2011-2021 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2009-2014 VICE Project
+* Copyright 2007-2010 Antti Lankila
+* Copyright 2001 Simon White
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 // References below are from:
 //     The MOS 6567/6569 video controller (VIC-II)
@@ -38,72 +38,73 @@
 namespace libsidplayfp
 {
 
-/// Cycle # at which the VIC takes the bus in a bad line (BA goes low).
-const unsigned int VICII_FETCH_CYCLE = 11;
+// Cycle # at which the VIC takes the bus in a bad line (BA goes low).
+constexpr auto	VICII_FETCH_CYCLE = 11u;
+constexpr auto	VICII_SCREEN_TEXTCOLS = 40u;
 
-const unsigned int VICII_SCREEN_TEXTCOLS = 40;
-
-const char *MOS656X::credits()
+const char* MOS656X::credits ()
 {
-	return
-			"MOS6567/6569/6572/6573 (VIC II) Emulation:\n"
+	return	"MOS6567/6569/6572/6573 (VIC II) Emulation:\n"
 			"\tCopyright (C) 2001 Simon White\n"
 			"\tCopyright (C) 2007-2010 Antti Lankila\n"
 			"\tCopyright (C) 2009-2014 VICE Project\n"
 			"\tCopyright (C) 2011-2021 Leandro Nini\n";
 }
+//-----------------------------------------------------------------------------
 
-
-MOS656X::MOS656X(EventScheduler &scheduler)
+MOS656X::MOS656X ( EventScheduler& scheduler )
 	: Event ( "VIC Raster" )
-	, eventScheduler(scheduler)
-	, sprites(regs)
-	, badLineStateChangeEvent("Update AEC signal", *this, &MOS656X::badLineStateChange)
-	, rasterYIRQEdgeDetectorEvent("RasterY changed", *this, &MOS656X::rasterYIRQEdgeDetector)
-	, lightpenTriggerEvent("Trigger lightpen", *this, &MOS656X::lightpenTrigger)
+	, eventScheduler ( scheduler )
+	, sprites ( regs )
+	, badLineStateChangeEvent ( "Update AEC signal", *this, &MOS656X::badLineStateChange )
+	, rasterYIRQEdgeDetectorEvent ( "RasterY changed", *this, &MOS656X::rasterYIRQEdgeDetector )
+	, lightpenTriggerEvent ( "Trigger lightpen", *this, &MOS656X::lightpenTrigger )
 {
-	modelData[ MOS6567R56A ]	= { 262, 64, &MOS656X::clockOldNTSC	};	// Old NTSC (MOS6567R56A)
-	modelData[ MOS6567R8 ]		= { 263, 65, &MOS656X::clockNTSC	};	// NTSC-M   (MOS6567R8)
-	modelData[ MOS6569 ]		= { 312, 63, &MOS656X::clockPAL		};	// PAL-B    (MOS6569R1, MOS6569R3)
-	modelData[ MOS6572 ]		= { 312, 65, &MOS656X::clockNTSC	};	// PAL-N    (MOS6572)
-	modelData[ MOS6573 ]		= { 263, 65, &MOS656X::clockNTSC	};	// PAL-M    (MOS6573)
+	modelData[ MOS6567R56A ]	= { 262, 64, &MOS656X::clockOldNTSC };	// Old NTSC (MOS6567R56A)
+	modelData[ MOS6567R8 ]		= { 263, 65, &MOS656X::clockNTSC };		// NTSC-M   (MOS6567R8)
+	modelData[ MOS6569 ]		= { 312, 63, &MOS656X::clockPAL };		// PAL-B    (MOS6569R1, MOS6569R3)
+	modelData[ MOS6572 ]		= { 312, 65, &MOS656X::clockNTSC };		// PAL-N    (MOS6572)
+	modelData[ MOS6573 ]		= { 263, 65, &MOS656X::clockNTSC };		// PAL-M    (MOS6573)
 
 	chip ( MOS6569 );
 }
+//-----------------------------------------------------------------------------
 
-void MOS656X::reset()
+void MOS656X::reset ()
 {
-	irqFlags            = 0;
-	irqMask             = 0;
-	yscroll             = 0;
-	rasterY             = maxRasters - 1;
-	lineCycle           = 0;
-	areBadLinesEnabled  = false;
-	isBadLine           = false;
+	irqFlags = 0;
+	irqMask = 0;
+	yscroll = 0;
+	rasterY = maxRasters - 1;
+	lineCycle = 0;
+	areBadLinesEnabled = false;
+	isBadLine = false;
 	rasterYIRQCondition = false;
-	rasterClk           = 0;
-	vblanking           = false;
-	lpAsserted          = false;
+	rasterClk = 0;
+	vblanking = false;
+	lpAsserted = false;
 
 	std::fill_n ( regs, std::size ( regs ), 0 );
 
-	lp.reset();
-	sprites.reset();
+	lp.reset ();
+	sprites.reset ();
 
-	eventScheduler.cancel(*this);
-	eventScheduler.schedule(*this, 0, EVENT_CLOCK_PHI1);
+	eventScheduler.cancel ( *this );
+	eventScheduler.schedule ( *this, 0, EVENT_CLOCK_PHI1 );
 }
+//-----------------------------------------------------------------------------
 
-void MOS656X::chip(model_t model)
+void MOS656X::chip ( model_t model )
 {
-	maxRasters    = modelData[model].rasterLines;
-	cyclesPerLine = modelData[model].cyclesPerLine;
-	clock         = modelData[model].clock;
+	maxRasters = modelData[ model ].rasterLines;
+	cyclesPerLine = modelData[ model ].cyclesPerLine;
+	clock = modelData[ model ].clock;
 
-	lp.setScreenSize(maxRasters, cyclesPerLine);
+	lp.setScreenSize ( maxRasters, cyclesPerLine );
 
-	reset();
+	reset ();
 }
+//-----------------------------------------------------------------------------
 
 uint8_t MOS656X::read ( uint_least8_t addr )
 {
@@ -134,6 +135,7 @@ uint8_t MOS656X::read ( uint_least8_t addr )
 			return 0xff;
 	}
 }
+//-----------------------------------------------------------------------------
 
 void MOS656X::write ( uint_least8_t addr, uint8_t data )
 {
@@ -148,40 +150,34 @@ void MOS656X::write ( uint_least8_t addr, uint8_t data )
 	{
 		case 0x11: // Control register 1
 		{
-			const unsigned int oldYscroll = yscroll;
+			const auto	oldYscroll = yscroll;
 			yscroll = data & 0x7;
 
 			// This is the funniest part... handle bad line tricks.
-			const bool wasBadLinesEnabled = areBadLinesEnabled;
+			const auto	wasBadLinesEnabled = areBadLinesEnabled;
 
-			if ( ( rasterY == FIRST_DMA_LINE ) && ( lineCycle == 0 ) )
-			{
+			if ( rasterY == FIRST_DMA_LINE && lineCycle == 0 )
 				areBadLinesEnabled = readDEN ();
-			}
 
 			if ( ( oldRasterY () == FIRST_DMA_LINE ) && readDEN () )
-			{
 				areBadLinesEnabled = true;
-			}
 
-			if ( ( ( oldYscroll != yscroll ) || ( areBadLinesEnabled != wasBadLinesEnabled ) )
-				 && ( rasterY >= FIRST_DMA_LINE )
-				 && ( rasterY <= LAST_DMA_LINE ) )
+			if (		( ( oldYscroll != yscroll ) || ( areBadLinesEnabled != wasBadLinesEnabled ) )
+					&&	rasterY >= FIRST_DMA_LINE
+					&&	rasterY <= LAST_DMA_LINE )
 			{
 				// Check whether bad line state has changed.
-				const bool wasBadLine = ( wasBadLinesEnabled && ( oldYscroll == ( rasterY & 7 ) ) );
-				const bool nowBadLine = ( areBadLinesEnabled && ( yscroll == ( rasterY & 7 ) ) );
+				const auto	wasBadLine = ( wasBadLinesEnabled && ( oldYscroll == ( rasterY & 7 ) ) );
+				const auto	nowBadLine = ( areBadLinesEnabled && ( yscroll == ( rasterY & 7 ) ) );
 
 				if ( nowBadLine != wasBadLine )
 				{
-					const bool oldBadLine = isBadLine;
+					const auto	oldBadLine = isBadLine;
 
 					if ( wasBadLine )
 					{
 						if ( lineCycle < VICII_FETCH_CYCLE )
-						{
 							isBadLine = false;
-						}
 					}
 					else
 					{
@@ -190,9 +186,7 @@ void MOS656X::write ( uint_least8_t addr, uint8_t data )
 						// or outside the fetch interval but before raster ycounter is incremented
 						//   (lineCycle <= VICII_FETCH_CYCLE + VICII_SCREEN_TEXTCOLS + 6)
 						if ( lineCycle <= VICII_FETCH_CYCLE + VICII_SCREEN_TEXTCOLS + 6 )
-						{
 							isBadLine = true;
-						}
 					}
 
 					if ( isBadLine != oldBadLine )
@@ -224,8 +218,9 @@ void MOS656X::write ( uint_least8_t addr, uint8_t data )
 			break;
 	}
 }
+//-----------------------------------------------------------------------------
 
-void MOS656X::handleIrqState()
+void MOS656X::handleIrqState ()
 {
 	// signal an IRQ unless we already signaled it
 	if ( ( irqFlags & irqMask & 0x0f ) != 0 )
@@ -245,21 +240,22 @@ void MOS656X::handleIrqState()
 		}
 	}
 }
+//-----------------------------------------------------------------------------
 
-void MOS656X::event()
+void MOS656X::event ()
 {
-	const event_clock_t cycles = eventScheduler.getTime(eventScheduler.phase()) - rasterClk;
+	const auto	cycles = eventScheduler.getTime ( eventScheduler.phase () ) - rasterClk;
 
 	event_clock_t delay;
 
-	if (cycles)
+	if ( cycles )
 	{
 		// Update x raster
 		rasterClk += cycles;
 		lineCycle += cycles;
 		lineCycle %= cyclesPerLine;
 
-		delay = (this->*clock)();
+		delay = ( this->*clock ) ();
 	}
 	else
 	{
@@ -268,422 +264,428 @@ void MOS656X::event()
 
 	eventScheduler.schedule ( *this, uint32_t ( delay - eventScheduler.phase () ), EVENT_CLOCK_PHI1 );
 }
+//-----------------------------------------------------------------------------
 
-event_clock_t MOS656X::clockPAL()
+event_clock_t MOS656X::clockPAL ()
 {
 	event_clock_t delay = 1;
 
-	switch (lineCycle)
+	switch ( lineCycle )
 	{
-	case 0:
-		checkVblank();
-		endDma<2>();
-		break;
+		case 0:
+			checkVblank ();
+			endDma<2> ();
+			break;
 
-	case 1:
-		vblank();
-		startDma<5>();
+		case 1:
+			vblank ();
+			startDma<5> ();
 
-		// No sprites before next compulsory cycle
-		if (!sprites.isDma(0xf8))
-		   delay = 10;
-		break;
+			// No sprites before next compulsory cycle
+			if ( ! sprites.isDma ( 0xf8 ) )
+				delay = 10;
+			break;
 
-	case 2:
-		endDma<3>();
-		break;
+		case 2:
+			endDma<3> ();
+			break;
 
-	case 3:
-		startDma<6>();
-		break;
+		case 3:
+			startDma<6> ();
+			break;
 
-	case 4:
-		endDma<4>();
-		break;
+		case 4:
+			endDma<4> ();
+			break;
 
-	case 5:
-		startDma<7>();
-		break;
+		case 5:
+			startDma<7> ();
+			break;
 
-	case 6:
-		endDma<5>();
+		case 6:
+			endDma<5> ();
 
-		delay = sprites.isDma(0xc0) ? 2 : 5;
-		break;
+			delay = sprites.isDma ( 0xc0 ) ? 2 : 5;
+			break;
 
-	case 7:
-		break;
+		case 7:
+			break;
 
-	case 8:
-		endDma<6>();
+		case 8:
+			endDma<6> ();
 
-		delay = 2;
-		break;
+			delay = 2;
+			break;
 
-	case 9:
-		break;
+		case 9:
+			break;
 
-	case 10:
-		endDma<7>();
-		break;
+		case 10:
+			endDma<7> ();
+			break;
 
-	case 11:
-		startBadline();
+		case 11:
+			startBadline ();
 
-		delay = 3;
-		break;
+			delay = 3;
+			break;
 
-	case 12:
-		delay = 2;
-		break;
+		case 12:
+			delay = 2;
+			break;
 
-	case 13:
-		break;
+		case 13:
+			break;
 
-	case 14:
-		sprites.updateMc();
-		break;
+		case 14:
+			sprites.updateMc ();
+			break;
 
-	case 15:
-		sprites.updateMcBase();
+		case 15:
+			sprites.updateMcBase ();
 
-		delay = 39;
-		break;
+			delay = 39;
+			break;
 
-	case 54:
-		sprites.checkDma(rasterY, regs);
-		startDma<0>();
-		break;
+		case 54:
+			sprites.checkDma ( rasterY, regs );
+			startDma<0> ();
+			break;
 
-	case 55:
-		sprites.checkDma(rasterY, regs);    // Phi1
-		sprites.checkExp();                 // Phi2
-		startDma<0>();
-		break;
+		case 55:
+			sprites.checkDma ( rasterY, regs );    // Phi1
+			sprites.checkExp ();                 // Phi2
+			startDma<0> ();
+			break;
 
-	case 56:
-		startDma<1>();
-		break;
+		case 56:
+			startDma<1> ();
+			break;
 
-	case 57:
-		sprites.checkDisplay();
+		case 57:
+			sprites.checkDisplay ();
 
-		// No sprites before next compulsory cycle
-		if (!sprites.isDma(0x1f))
-			delay = 6;
-		break;
+			// No sprites before next compulsory cycle
+			if ( ! sprites.isDma ( 0x1f ) )
+				delay = 6;
+			break;
 
-	case 58:
-		startDma<2>();
-		break;
+		case 58:
+			startDma<2> ();
+			break;
 
-	case 59:
-		endDma<0>();
-		break;
+		case 59:
+			endDma<0> ();
+			break;
 
-	case 60:
-		startDma<3>();
-		break;
+		case 60:
+			startDma<3> ();
+			break;
 
-	case 61:
-		endDma<1>();
-		break;
+		case 61:
+			endDma<1> ();
+			break;
 
-	case 62:
-		startDma<4>();
-		break;
+		case 62:
+			startDma<4> ();
+			break;
 
-	default:
-		delay = 54 - lineCycle;
+		default:
+			delay = 54 - lineCycle;
 	}
 
 	return delay;
 }
+//-----------------------------------------------------------------------------
 
-event_clock_t MOS656X::clockNTSC()
+event_clock_t MOS656X::clockNTSC ()
 {
 	event_clock_t delay = 1;
 
-	switch (lineCycle)
+	switch ( lineCycle )
 	{
-	case 0:
-		checkVblank();
-		startDma<5>();
-		break;
+		case 0:
+			checkVblank ();
+			startDma<5> ();
+			break;
 
-	case 1:
-		vblank();
-		endDma<3>();
+		case 1:
+			vblank ();
+			endDma<3> ();
 
-		// No sprites before next compulsory cycle
-		if (!sprites.isDma(0xf0))
-			delay = 10;
-		break;
+			// No sprites before next compulsory cycle
+			if ( !sprites.isDma ( 0xf0 ) )
+				delay = 10;
+			break;
 
-	case 2:
-		startDma<6>();
-		break;
+		case 2:
+			startDma<6> ();
+			break;
 
-	case 3:
-		endDma<4>();
-		break;
+		case 3:
+			endDma<4> ();
+			break;
 
-	case 4:
-		startDma<7>();
-		break;
+		case 4:
+			startDma<7> ();
+			break;
 
-	case 5:
-		endDma<5>();
+		case 5:
+			endDma<5> ();
 
-		delay = sprites.isDma(0xc0) ? 2 : 6;
-		break;
+			delay = sprites.isDma ( 0xc0 ) ? 2 : 6;
+			break;
 
-	case 6:
-		break;
+		case 6:
+			break;
 
-	case 7:
-		endDma<6>();
+		case 7:
+			endDma<6> ();
 
-		delay = 2;
-		break;
+			delay = 2;
+			break;
 
-	case 8:
-		break;
+		case 8:
+			break;
 
-	case 9:
-		endDma<7>();
+		case 9:
+			endDma<7> ();
 
-		delay = 2;
-		break;
+			delay = 2;
+			break;
 
-	case 10:
-		break;
+		case 10:
+			break;
 
-	case 11:
-		startBadline();
+		case 11:
+			startBadline ();
 
-		delay = 3;
-		break;
+			delay = 3;
+			break;
 
-	case 12:
-		delay = 2;
-		break;
+		case 12:
+			delay = 2;
+			break;
 
-	case 13:
-		break;
+		case 13:
+			break;
 
-	case 14:
-		sprites.updateMc();
-		break;
+		case 14:
+			sprites.updateMc ();
+			break;
 
-	case 15:
-		sprites.updateMcBase();
+		case 15:
+			sprites.updateMcBase ();
 
-		delay = 39;
-		break;
+			delay = 39;
+			break;
 
-	case 54:
-		setBA(true);
-		break;
+		case 54:
+			setBA ( true );
+			break;
 
-	case 55:
-		sprites.checkDma(rasterY, regs);    // Phi1
-		sprites.checkExp();                 // Phi2
-		startDma<0>();
-		break;
+		case 55:
+			sprites.checkDma ( rasterY, regs );    // Phi1
+			sprites.checkExp ();                 // Phi2
+			startDma<0> ();
+			break;
 
-	case 56:
-		sprites.checkDma(rasterY, regs);
-		startDma<0>();
-		break;
+		case 56:
+			sprites.checkDma ( rasterY, regs );
+			startDma<0> ();
+			break;
 
-	case 57:
-		startDma<1>();
-		break;
+		case 57:
+			startDma<1> ();
+			break;
 
-	case 58:
-		sprites.checkDisplay();
+		case 58:
+			sprites.checkDisplay ();
 
-		// No sprites before next compulsory cycle
-		if (!sprites.isDma(0x1f))
-			delay = 7;
-		break;
+			// No sprites before next compulsory cycle
+			if ( ! sprites.isDma ( 0x1f ) )
+				delay = 7;
+			break;
 
-	case 59:
-		startDma<2>();
-		break;
+		case 59:
+			startDma<2> ();
+			break;
 
-	case 60:
-		endDma<0>();
-		break;
+		case 60:
+			endDma<0> ();
+			break;
 
-	case 61:
-		startDma<3>();
-		break;
+		case 61:
+			startDma<3> ();
+			break;
 
-	case 62:
-		endDma<1>();
-		break;
+		case 62:
+			endDma<1> ();
+			break;
 
-	case 63:
-		startDma<4>();
-		break;
+		case 63:
+			startDma<4> ();
+			break;
 
-	case 64:
-		endDma<2>();
-		break;
+		case 64:
+			endDma<2> ();
+			break;
 
-	default:
-		delay = 54 - lineCycle;
+		default:
+			delay = 54 - lineCycle;
 	}
 
 	return delay;
 }
+//-----------------------------------------------------------------------------
 
-event_clock_t MOS656X::clockOldNTSC()
+event_clock_t MOS656X::clockOldNTSC ()
 {
 	event_clock_t delay = 1;
 
-	switch (lineCycle)
+	switch ( lineCycle )
 	{
-	case 0:
-		checkVblank();
-		endDma<2>();
-		break;
+		case 0:
+			checkVblank ();
+			endDma<2> ();
+			break;
 
-	case 1:
-		vblank();
-		startDma<5>();
+		case 1:
+			vblank ();
+			startDma<5> ();
 
-		// No sprites before next compulsory cycle
-		if (!sprites.isDma(0xf8))
-		   delay = 10;
-		break;
+			// No sprites before next compulsory cycle
+			if ( ! sprites.isDma ( 0xf8 ) )
+				delay = 10;
+			break;
 
-	case 2:
-		endDma<3>();
-		break;
+		case 2:
+			endDma<3> ();
+			break;
 
-	case 3:
-		startDma<6>();
-		break;
+		case 3:
+			startDma<6> ();
+			break;
 
-	case 4:
-		endDma<4>();
-		break;
+		case 4:
+			endDma<4> ();
+			break;
 
-	case 5:
-		startDma<7>();
-		break;
+		case 5:
+			startDma<7> ();
+			break;
 
-	case 6:
-		endDma<5>();
+		case 6:
+			endDma<5> ();
 
-		delay = sprites.isDma(0xc0) ? 2 : 5;
-		break;
+			delay = sprites.isDma ( 0xc0 ) ? 2 : 5;
+			break;
 
-	case 7:
-		break;
+		case 7:
+			break;
 
-	case 8:
-		endDma<6>();
+		case 8:
+			endDma<6> ();
 
-		delay = 2;
-		break;
+			delay = 2;
+			break;
 
-	case 9:
-		break;
+		case 9:
+			break;
 
-	case 10:
-		endDma<7>();
-		break;
+		case 10:
+			endDma<7> ();
+			break;
 
-	case 11:
-		startBadline();
+		case 11:
+			startBadline ();
 
-		delay = 3;
-		break;
+			delay = 3;
+			break;
 
-	case 12:
-		delay = 2;
-		break;
+		case 12:
+			delay = 2;
+			break;
 
-	case 13:
-		break;
+		case 13:
+			break;
 
-	case 14:
-		sprites.updateMc();
-		break;
+		case 14:
+			sprites.updateMc ();
+			break;
 
-	case 15:
-		sprites.updateMcBase();
+		case 15:
+			sprites.updateMcBase ();
 
-		delay = 39;
-		break;
+			delay = 39;
+			break;
 
-	case 54:
-		setBA(true);
-		break;
+		case 54:
+			setBA ( true );
+			break;
 
-	case 55:
-		sprites.checkDma(rasterY, regs);    // Phi1
-		sprites.checkExp();                 // Phi2
-		startDma<0>();
-		break;
+		case 55:
+			sprites.checkDma ( rasterY, regs );    // Phi1
+			sprites.checkExp ();                 // Phi2
+			startDma<0> ();
+			break;
 
-	case 56:
-		sprites.checkDma(rasterY, regs);
-		startDma<0>();
-		break;
+		case 56:
+			sprites.checkDma ( rasterY, regs );
+			startDma<0> ();
+			break;
 
-	case 57:
-		sprites.checkDisplay();
-		startDma<1>();
+		case 57:
+			sprites.checkDisplay ();
+			startDma<1> ();
 
-		// No sprites before next compulsory cycle
-		delay = sprites.isDma(0x1f) ? 2 : 7;
-		break;
+			// No sprites before next compulsory cycle
+			delay = sprites.isDma ( 0x1f ) ? 2 : 7;
+			break;
 
-	case 58:
-		break;
+		case 58:
+			break;
 
-	case 59:
-		startDma<2>();
-		break;
+		case 59:
+			startDma<2> ();
+			break;
 
-	case 60:
-		endDma<0>();
-		break;
+		case 60:
+			endDma<0> ();
+			break;
 
-	case 61:
-		startDma<3>();
-		break;
+		case 61:
+			startDma<3> ();
+			break;
 
-	case 62:
-		endDma<1>();
-		break;
+		case 62:
+			endDma<1> ();
+			break;
 
-	case 63:
-		startDma<4>();
-		break;
+		case 63:
+			startDma<4> ();
+			break;
 
-	default:
-		delay = 54 - lineCycle;
+		default:
+			delay = 54 - lineCycle;
 	}
 
 	return delay;
 }
+//-----------------------------------------------------------------------------
 
-void MOS656X::triggerLightpen()
+void MOS656X::triggerLightpen ()
 {
 	lpAsserted = true;
 
-	eventScheduler.schedule(lightpenTriggerEvent, 1);
+	eventScheduler.schedule ( lightpenTriggerEvent, 1 );
 }
+//-----------------------------------------------------------------------------
 
-void MOS656X::clearLightpen()
+void MOS656X::clearLightpen ()
 {
 	lpAsserted = false;
 }
+//-----------------------------------------------------------------------------
 
 }

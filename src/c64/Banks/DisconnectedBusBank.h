@@ -48,12 +48,12 @@ public:
     /**
      * No device is connected so this is a no-op.
      */
-	void poke ( uint_least16_t, uint8_t ) override {}
+	void poke ( uint16_t, uint8_t ) override {}
 
     /**
      * No device is connected so this should return the value left on the bus.
      */
-	uint8_t peek ( uint_least16_t ) override { return pla.getLastReadByte (); }
+	uint8_t peek ( uint16_t ) override { return pla.getLastReadByte (); }
 };
 
 }

@@ -85,7 +85,7 @@ void Timer::clock()
     }
 
     /* ciatimer.c block start */
-    int_least32_t adj = state & (CIAT_CR_START | CIAT_CR_ONESHOT | CIAT_PHI2IN);
+    int32_t adj = state & (CIAT_CR_START | CIAT_CR_ONESHOT | CIAT_PHI2IN);
     if ((state & (CIAT_CR_START | CIAT_PHI2IN)) == (CIAT_CR_START | CIAT_PHI2IN))
     {
         adj |= CIAT_COUNT2;

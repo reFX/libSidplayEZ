@@ -46,7 +46,7 @@ public:
 
 	void reset ()
     {
-        std::fill_n ( lastpoke, std::size ( lastpoke ),  0 );
+        std::fill_n ( lastpoke, std::size ( lastpoke ), 0 );
         reset ( 0 );
     }
 

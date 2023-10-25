@@ -1,24 +1,24 @@
 /*
- * This file is part of libsidplayfp, a SID player engine.
- *
- * Copyright 2011-2023 Leandro Nini <drfiemost@users.sourceforge.net>
- * Copyright 2007-2010 Antti Lankila
- * Copyright 2000 Simon White
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+* This file is part of libsidplayfp, a SID player engine.
+*
+* Copyright 2011-2023 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2007-2010 Antti Lankila
+* Copyright 2000 Simon White
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 #include "c64.h"
 
@@ -32,177 +32,188 @@ namespace libsidplayfp
 
 typedef struct
 {
-    double colorBurst;         ///< Colorburst frequency in Herz
-    double divider;            ///< Clock frequency divider
-    double powerFreq;          ///< Power line frequency in Herz
-    MOS656X::model_t vicModel; ///< Video chip model
+	double colorBurst;         ///< Colorburst frequency in Herz
+	double divider;            ///< Clock frequency divider
+	double powerFreq;          ///< Power line frequency in Herz
+	MOS656X::model_t vicModel; ///< Video chip model
+
 } model_data_t;
 
 typedef struct
 {
-    MOS652X::model_t ciaModel; ///< CIA chip model
+	MOS652X::model_t ciaModel; ///< CIA chip model
 } cia_model_data_t;
 
 /*
- * Color burst frequencies:
- *
- * NTSC  - 3.579545455 MHz = 315/88 MHz
- * PAL-B - 4.43361875 MHz = 283.75 * 15625 Hz + 25 Hz.
- * PAL-M - 3.57561149 MHz
- * PAL-N - 3.58205625 MHz
- */
+	* Color burst frequencies:
+	*
+	* NTSC  - 3.579545455 MHz = 315/88 MHz
+	* PAL-B - 4.43361875 MHz = 283.75 * 15625 Hz + 25 Hz.
+	* PAL-M - 3.57561149 MHz
+	* PAL-N - 3.58205625 MHz
+	*/
 
 const model_data_t modelData[] =
 {
-    {4433618.75,  18., 50., MOS656X::MOS6569},      // PAL-B
-    {3579545.455, 14., 60., MOS656X::MOS6567R8},    // NTSC-M
-    {3579545.455, 14., 60., MOS656X::MOS6567R56A},  // Old NTSC-M
-    {3582056.25,  14., 50., MOS656X::MOS6572},      // PAL-N
-    {3575611.49,  14., 50., MOS656X::MOS6573},      // PAL-M
+	{	4433618.75,  18.0, 50.0, MOS656X::MOS6569		},	// PAL-B
+	{	3579545.455, 14.0, 60.0, MOS656X::MOS6567R8		},	// NTSC-M
+	{	3579545.455, 14.0, 60.0, MOS656X::MOS6567R56A	},	// Old NTSC-M
+	{	3582056.25,  14.0, 50.0, MOS656X::MOS6572		},	// PAL-N
+	{	3575611.49,  14.0, 50.0, MOS656X::MOS6573		},	// PAL-M
 };
+//-----------------------------------------------------------------------------
 
 const cia_model_data_t ciaModelData[] =
 {
-    {MOS652X::MOS6526},      // Old
-    {MOS652X::MOS8521},      // New
-    {MOS652X::MOS6526W4485}, // Old week 4485
+	{	MOS652X::MOS6526		},	// Old
+	{	MOS652X::MOS8521		},	// New
+	{	MOS652X::MOS6526W4485	},	// Old week 4485
 };
+//-----------------------------------------------------------------------------
 
-double c64::getCpuFreq(model_t model)
+double c64::getCpuFreq ( model_t model )
 {
-    // The crystal clock that drives the VIC II chip is four times
-    // the color burst frequency
-    const double crystalFreq = modelData[model].colorBurst * 4.;
+	// The crystal clock that drives the VIC II chip is four times
+	// the color burst frequency
+	const auto	crystalFreq = modelData[ model ].colorBurst * 4.0;
 
-    // The VIC II produces the two-phase system clock
-    // by running the input clock through a divider
-    return crystalFreq / modelData[model].divider;
+	// The VIC II produces the two-phase system clock
+	// by running the input clock through a divider
+	return crystalFreq / modelData[ model ].divider;
 }
+//-----------------------------------------------------------------------------
 
-c64::c64() :
-    c64env(eventScheduler),
-    cpuFrequency(getCpuFreq(PAL_B)),
-    cpu(*this),
-    cia1(*this),
-    cia2(*this),
-    vic(*this),
-    disconnectedBusBank(mmu),
-    mmu(eventScheduler, &ioBank)
+c64::c64 ()
+	: c64env ( eventScheduler )
+	, cpuFrequency ( getCpuFreq ( PAL_B ) )
+	, cpu ( *this )
+	, cia1 ( *this )
+	, cia2 ( *this )
+	, vic ( *this )
+	, disconnectedBusBank ( mmu )
+	, mmu ( eventScheduler, &ioBank )
 {
-    resetIoBank();
+	resetIoBank ();
 }
+//-----------------------------------------------------------------------------
 
-void c64::resetIoBank()
+void c64::resetIoBank ()
 {
-    ioBank.setBank(0x0, &vic);
-    ioBank.setBank(0x1, &vic);
-    ioBank.setBank(0x2, &vic);
-    ioBank.setBank(0x3, &vic);
-    ioBank.setBank(0x4, &sidBank);
-    ioBank.setBank(0x5, &sidBank);
-    ioBank.setBank(0x6, &sidBank);
-    ioBank.setBank(0x7, &sidBank);
-    ioBank.setBank(0x8, &colorRAMBank);
-    ioBank.setBank(0x9, &colorRAMBank);
-    ioBank.setBank(0xa, &colorRAMBank);
-    ioBank.setBank(0xb, &colorRAMBank);
-    ioBank.setBank(0xc, &cia1);
-    ioBank.setBank(0xd, &cia2);
-    ioBank.setBank(0xe, &disconnectedBusBank);
-    ioBank.setBank(0xf, &disconnectedBusBank);
+	ioBank.setBank ( 0x0, &vic );
+	ioBank.setBank ( 0x1, &vic );
+	ioBank.setBank ( 0x2, &vic );
+	ioBank.setBank ( 0x3, &vic );
+	ioBank.setBank ( 0x4, &sidBank );
+	ioBank.setBank ( 0x5, &sidBank );
+	ioBank.setBank ( 0x6, &sidBank );
+	ioBank.setBank ( 0x7, &sidBank );
+	ioBank.setBank ( 0x8, &colorRAMBank );
+	ioBank.setBank ( 0x9, &colorRAMBank );
+	ioBank.setBank ( 0xa, &colorRAMBank );
+	ioBank.setBank ( 0xb, &colorRAMBank );
+	ioBank.setBank ( 0xc, &cia1 );
+	ioBank.setBank ( 0xd, &cia2 );
+	ioBank.setBank ( 0xe, &disconnectedBusBank );
+	ioBank.setBank ( 0xf, &disconnectedBusBank );
 }
+//-----------------------------------------------------------------------------
 
-template<typename T>
-void resetSID(T &e) { e.second->reset(); }
-
-void c64::reset()
+void c64::reset ()
 {
-    eventScheduler.reset();
+	eventScheduler.reset ();
 
-    //cpu.reset();
-    cia1.reset();
-    cia2.reset();
-    vic.reset();
-    sidBank.reset();
-    colorRAMBank.reset();
-    mmu.reset();
+	//cpu.reset();
+	cia1.reset ();
+	cia2.reset ();
+	vic.reset ();
+	sidBank.reset ();
+	colorRAMBank.reset ();
+	mmu.reset ();
 
-    std::for_each(extraSidBanks.begin(), extraSidBanks.end(), resetSID<sidBankMap_t::value_type>);
+	for ( auto bck : extraSidBanks )
+		bck.second->reset ();
 
-    irqCount = 0;
-    oldBAState = true;
+	irqCount = 0;
+	oldBAState = true;
 }
+//-----------------------------------------------------------------------------
 
-void c64::setModel(model_t model)
+void c64::setModel ( model_t model )
 {
-    cpuFrequency = getCpuFreq(model);
-    vic.chip(modelData[model].vicModel);
+	cpuFrequency = getCpuFreq ( model );
+	vic.chip ( modelData[ model ].vicModel );
 
 	const auto  rate = (unsigned int)( cpuFrequency / modelData[ model ].powerFreq );
-    cia1.setDayOfTimeRate(rate);
-    cia2.setDayOfTimeRate(rate);
+	cia1.setDayOfTimeRate ( rate );
+	cia2.setDayOfTimeRate ( rate );
 }
+//-----------------------------------------------------------------------------
 
-void c64::setCiaModel(cia_model_t model)
+void c64::setCiaModel ( cia_model_t model )
 {
-    cia1.setModel(ciaModelData[model].ciaModel);
-    cia2.setModel(ciaModelData[model].ciaModel);
+	cia1.setModel ( ciaModelData[ model ].ciaModel );
+	cia2.setModel ( ciaModelData[ model ].ciaModel );
 }
+//-----------------------------------------------------------------------------
 
-void c64::setBaseSid(c64sid *s)
+void c64::setBaseSid ( c64sid* s )
 {
-    sidBank.setSID(s);
+	sidBank.setSID ( s );
 }
+//-----------------------------------------------------------------------------
 
-bool c64::addExtraSid(c64sid *s, int address)
+bool c64::addExtraSid ( c64sid* s, int address )
 {
-    // Check for valid address in the IO area range ($dxxx)
-    if ((address & 0xf000) != 0xd000)
-        return false;
+	// Check for valid address in the IO area range ($dxxx)
+	if ( ( address & 0xf000 ) != 0xd000 )
+		return false;
 
-    const int idx = (address >> 8) & 0xf;
+	const auto	idx = ( address >> 8 ) & 0xf;
 
-    // Only allow second SID chip in SID area ($d400-$d7ff)
-    // or IO Area ($de00-$dfff)
-    if ((idx < 0x4) || ((idx > 0x7) && (idx < 0xe)))
-        return false;
+	// Only allow second SID chip in SID area ($d400-$d7ff)
+	// or IO Area ($de00-$dfff)
+	if ( ( idx < 0x4 ) || ( ( idx > 0x7 ) && ( idx < 0xe ) ) )
+		return false;
 
-    // Add new SID bank
-    sidBankMap_t::iterator it = extraSidBanks.find(idx);
-    if (it != extraSidBanks.end())
-    {
-         ExtraSidBank *extraSidBank = it->second;
-         extraSidBank->addSID(s, address);
-    }
-    else
-    {
-        ExtraSidBank *extraSidBank = extraSidBanks.insert(it, sidBankMap_t::value_type(idx, new ExtraSidBank()))->second;
-        extraSidBank->resetSIDMapper(ioBank.getBank(idx));
-        ioBank.setBank(idx, extraSidBank);
-        extraSidBank->addSID(s, address);
-    }
+	// Add new SID bank
+	auto	it = extraSidBanks.find ( idx );
+	if ( it != extraSidBanks.end () )
+	{
+		auto	extraSidBank = it->second;
+		extraSidBank->addSID ( s, address );
+	}
+	else
+	{
+		auto	extraSidBank = extraSidBanks.insert ( it, { idx, new ExtraSidBank () } )->second;
+		extraSidBank->resetSIDMapper ( ioBank.getBank ( idx ) );
+		ioBank.setBank ( idx, extraSidBank );
+		extraSidBank->addSID ( s, address );
+	}
 
-    return true;
+	return true;
 }
+//-----------------------------------------------------------------------------
 
-template<class T>
-void Delete(T &s) { delete s.second; }
-
-c64::~c64()
+c64::~c64 ()
 {
-    std::for_each(extraSidBanks.begin(), extraSidBanks.end(), Delete<sidBankMap_t::value_type>);
-    extraSidBanks.clear();
-}
+	for ( auto bck : extraSidBanks )
+		delete bck.second;
 
-void c64::clearSids()
+	extraSidBanks.clear ();
+}
+//-----------------------------------------------------------------------------
+
+void c64::clearSids ()
 {
-    sidBank.setSID(nullptr);
+	sidBank.setSID ( nullptr );
 
-    resetIoBank();
+	resetIoBank ();
 
-    std::for_each(extraSidBanks.begin(), extraSidBanks.end(), Delete<sidBankMap_t::value_type>);
+	for ( auto bck : extraSidBanks )
+		delete bck.second;
 
-    extraSidBanks.clear();
+	extraSidBanks.clear ();
 }
+//-----------------------------------------------------------------------------
 
 }

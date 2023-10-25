@@ -46,7 +46,7 @@ void Tod::reset()
     eventScheduler.schedule(*this, 0, EVENT_CLOCK_PHI1);
 }
 
-uint8_t Tod::read(uint_least8_t reg)
+uint8_t Tod::read(uint8_t reg)
 {
     // TOD clock is latched by reading Hours, and released
     // upon reading Tenths of Seconds. The counter itself
@@ -63,7 +63,7 @@ uint8_t Tod::read(uint_least8_t reg)
     return latch[reg];
 }
 
-void Tod::write(uint_least8_t reg, uint8_t data)
+void Tod::write(uint8_t reg, uint8_t data)
 {
     switch (reg)
     {

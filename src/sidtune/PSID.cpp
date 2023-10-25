@@ -222,7 +222,7 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 			default:
 				throw loadError ( TXT_UNKNOWN_PSID );
 		}
-		info->m_formatString = TXT_FORMAT_PSID;
+		info.m_formatString = TXT_FORMAT_PSID;
 	}
 	else if ( pHeader.id == RSID_ID )
 	{
@@ -236,19 +236,19 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 			default:
 				throw loadError ( TXT_UNKNOWN_RSID );
 		}
-		info->m_formatString = TXT_FORMAT_RSID;
+		info.m_formatString = TXT_FORMAT_RSID;
 		compatibility = SidTuneInfo::COMPATIBILITY_R64;
 	}
 
 	fileOffset = pHeader.data;
-	info->m_loadAddr = pHeader.load;
-	info->m_initAddr = pHeader.init;
-	info->m_playAddr = pHeader.play;
-	info->m_songs = pHeader.songs;
-	info->m_startSong = pHeader.start;
-	info->m_compatibility = compatibility;
-	info->m_relocPages = 0;
-	info->m_relocStartPage = 0;
+	info.m_loadAddr = pHeader.load;
+	info.m_initAddr = pHeader.init;
+	info.m_playAddr = pHeader.play;
+	info.m_songs = pHeader.songs;
+	info.m_startSong = pHeader.start;
+	info.m_compatibility = compatibility;
+	info.m_relocPages = 0;
+	info.m_relocStartPage = 0;
 
 	auto	speed = pHeader.speed;
 	auto	clock = SidTuneInfo::CLOCK_UNKNOWN;
@@ -283,39 +283,39 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 		{
 			case SidTuneInfo::COMPATIBILITY_C64:
 				if ( flags & PSID_SPECIFIC )
-					info->m_compatibility = SidTuneInfo::COMPATIBILITY_PSID;
+					info.m_compatibility = SidTuneInfo::COMPATIBILITY_PSID;
 				break;
 
 			case SidTuneInfo::COMPATIBILITY_R64:
 				if ( flags & PSID_BASIC )
-					info->m_compatibility = SidTuneInfo::COMPATIBILITY_BASIC;
+					info.m_compatibility = SidTuneInfo::COMPATIBILITY_BASIC;
 				break;
 
 			default:
 				break;
 		}
 
-		info->m_clockSpeed = clock;
+		info.m_clockSpeed = clock;
 
-		info->m_sidModels[ 0 ] = getSidModel ( flags >> 4 );
+		info.m_sidModels[ 0 ] = getSidModel ( flags >> 4 );
 
-		info->m_relocStartPage = pHeader.relocStartPage;
-		info->m_relocPages = pHeader.relocPages;
+		info.m_relocStartPage = pHeader.relocStartPage;
+		info.m_relocPages = pHeader.relocPages;
 
 		if ( pHeader.version >= 3 )
 		{
 			if ( validateAddress ( pHeader.sidChipBase2 ) )
 			{
-				info->m_sidChipAddresses.push_back ( 0xd000 | uint16_t ( pHeader.sidChipBase2 << 4 ) );
-				info->m_sidModels.push_back ( getSidModel ( flags >> 6 ) );
+				info.m_sidChipAddresses.push_back ( 0xd000 | uint16_t ( pHeader.sidChipBase2 << 4 ) );
+				info.m_sidModels.push_back ( getSidModel ( flags >> 6 ) );
 			}
 
 			if ( pHeader.version >= 4 )
 			{
 				if ( pHeader.sidChipBase3 != pHeader.sidChipBase2 && validateAddress ( pHeader.sidChipBase3 ) )
 				{
-					info->m_sidChipAddresses.push_back ( 0xd000 | uint16_t ( pHeader.sidChipBase3 << 4 ) );
-					info->m_sidModels.push_back ( getSidModel ( flags >> 8 ) );
+					info.m_sidChipAddresses.push_back ( 0xd000 | uint16_t ( pHeader.sidChipBase3 << 4 ) );
+					info.m_sidModels.push_back ( getSidModel ( flags >> 8 ) );
 				}
 			}
 		}
@@ -325,7 +325,7 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 	// as required by the RSID specification
 	if ( compatibility == SidTuneInfo::COMPATIBILITY_R64 )
 	{
-		if ( info->m_loadAddr || info->m_playAddr || speed )
+		if ( info.m_loadAddr || info.m_playAddr || speed )
 			throw loadError ( ERR_INVALID );
 
 		// Real C64 tunes appear as CIA
@@ -336,9 +336,9 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 	convertOldStyleSpeedToTables ( speed, clock );
 
 	// Copy info strings.
-	info->m_infoString.push_back ( std::string ( pHeader.name, PSID_MAXSTRLEN ) );
-	info->m_infoString.push_back ( std::string ( pHeader.author, PSID_MAXSTRLEN ) );
-	info->m_infoString.push_back ( std::string ( pHeader.released, PSID_MAXSTRLEN ) );
+	info.m_infoString.push_back ( std::string ( pHeader.name, PSID_MAXSTRLEN ) );
+	info.m_infoString.push_back ( std::string ( pHeader.author, PSID_MAXSTRLEN ) );
+	info.m_infoString.push_back ( std::string ( pHeader.released, PSID_MAXSTRLEN ) );
 
 	if ( musPlayer )
 		throw loadError ( "Compute!'s Sidplayer MUS data is not supported yet" ); // TODO
@@ -354,26 +354,26 @@ const char* PSID::createMD5 ( char* md5 )
 
 	// Include C64 data.
 	MD5	myMD5;
-	myMD5.append ( &cache[ fileOffset ], info->m_c64dataLen );
+	myMD5.append ( &cache[ fileOffset ], info.m_c64dataLen );
 
 	uint8_t tmp[ 2 ];
 	// Include INIT and PLAY address.
-	endian_little16 ( tmp, info->m_initAddr );
+	endian_little16 ( tmp, info.m_initAddr );
 	myMD5.append ( tmp, sizeof ( tmp ) );
-	endian_little16 ( tmp, info->m_playAddr );
+	endian_little16 ( tmp, info.m_playAddr );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	// Include number of songs.
-	endian_little16 ( tmp, uint16_t ( info->m_songs ) );
+	endian_little16 ( tmp, uint16_t ( info.m_songs ) );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	{
 		// Include song speed for each song.
-		const unsigned int currentSong = info->m_currentSong;
-		for ( unsigned int s = 1; s <= info->m_songs; s++ )
+		const unsigned int currentSong = info.m_currentSong;
+		for ( unsigned int s = 1; s <= info.m_songs; s++ )
 		{
 			selectSong ( s );
-			const uint8_t songSpeed = static_cast<uint8_t>( info->m_songSpeed );
+			const uint8_t songSpeed = static_cast<uint8_t>( info.m_songSpeed );
 			myMD5.append ( &songSpeed, sizeof ( songSpeed ) );
 		}
 		// Restore old song
@@ -384,7 +384,7 @@ const char* PSID::createMD5 ( char* md5 )
 	// clock speed change the MD5 fingerprint. That way the
 	// fingerprint of a PAL-speed sidtune in PSID v1, v2, and
 	// PSID v2NG format is the same
-	if ( info->m_clockSpeed == SidTuneInfo::CLOCK_NTSC )
+	if ( info.m_clockSpeed == SidTuneInfo::CLOCK_NTSC )
 	{
 		const uint8_t ntsc_val = 2;
 		myMD5.append ( &ntsc_val, sizeof ( ntsc_val ) );

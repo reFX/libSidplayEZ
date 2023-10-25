@@ -1,154 +1,162 @@
 /*
- * This file is part of libsidplayfp, a SID player engine.
- *
- * Copyright 2011-2020 Leandro Nini <drfiemost@users.sourceforge.net>
- * Copyright 2009-2014 VICE Project
- * Copyright 2007-2010 Antti Lankila
- * Copyright 2000 Simon White
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+* This file is part of libsidplayfp, a SID player engine.
+*
+* Copyright 2011-2020 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2009-2014 VICE Project
+* Copyright 2007-2010 Antti Lankila
+* Copyright 2000 Simon White
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 #include "interrupt.h"
-
 #include "mos652x.h"
 
 namespace libsidplayfp
 {
 
-void SerialPort::reset()
+SerialPort::SerialPort ( EventScheduler& scheduler, MOS652X& _parent ) : Event ( "Serial Port interrupt" )
+	, parent ( _parent )
+	, eventScheduler ( scheduler )
+	, flipCntEvent ( "flip CNT", *this, &SerialPort::flipCnt )
+	, flipFakeEvent ( "flip fake", *this, &SerialPort::flipFake )
+	, startSdrEvent ( "start SDR", *this, &SerialPort::doStartSdr )
 {
-    count = 0;
-    cntHistory = 0;
-    cnt = 1;
-    loaded = false;
-    pending = false;
-    forceFinish = false;
-
-    lastSync = eventScheduler.getTime(EVENT_CLOCK_PHI1);
 }
+//-----------------------------------------------------------------------------
 
-void SerialPort::event()
+void SerialPort::reset ()
 {
-    parent.spInterrupt();
+	count = 0;
+	cntHistory = 0;
+	cnt = 1;
+	loaded = false;
+	pending = false;
+	forceFinish = false;
+
+	lastSync = eventScheduler.getTime ( EVENT_CLOCK_PHI1 );
 }
+//-----------------------------------------------------------------------------
 
-void SerialPort::syncCntHistory()
+void SerialPort::event ()
 {
-    const event_clock_t time = eventScheduler.getTime(EVENT_CLOCK_PHI1);
-    const event_clock_t clocks = time - lastSync;
+	parent.spInterrupt ();
+}
+//-----------------------------------------------------------------------------
 
-    lastSync = time;
+void SerialPort::syncCntHistory ()
+{
+	const auto	time = eventScheduler.getTime ( EVENT_CLOCK_PHI1 );
+	const auto	clocks = time - lastSync;
 
-    for ( int i = 0; i < clocks; i++ )
+	lastSync = time;
+
+	for ( auto i = 0; i < clocks; i++ )
 		cntHistory = uint8_t ( ( cntHistory << 1 ) | cnt );
 }
+//-----------------------------------------------------------------------------
 
-void SerialPort::startSdr()
+void SerialPort::startSdr ()
 {
-    eventScheduler.schedule(startSdrEvent, 1);
+	eventScheduler.schedule ( startSdrEvent, 1 );
 }
+//-----------------------------------------------------------------------------
 
-void SerialPort::doStartSdr()
+void SerialPort::doStartSdr ()
 {
-    if (!loaded)
-        loaded = true;
-    else
-        pending = true;
+	if ( ! loaded )
+		loaded = true;
+	else
+		pending = true;
 }
+//-----------------------------------------------------------------------------
 
-void SerialPort::switchSerialDirection(bool input)
+void SerialPort::switchSerialDirection ( bool input )
 {
-    syncCntHistory();
+	syncCntHistory ();
 
-    if (input)
-    {
-        const uint8_t cntVal = model4485 ? 0x7 : 0x6;
-        forceFinish = (cntHistory & cntVal) != cntVal;
+	if ( input )
+	{
+		const uint8_t cntVal = model4485 ? 0x7 : 0x6;
+		forceFinish = ( cntHistory & cntVal ) != cntVal;
 
-        if (!forceFinish)
-        {
-            if ((count != 2) && (eventScheduler.remaining(flipCntEvent) == 1))
-            {
-                forceFinish = true;
-            }
-        }
-    }
-    else
-    {
-        if (forceFinish)
-        {
-            eventScheduler.cancel(*this);
-            eventScheduler.schedule(*this, 2);
-            forceFinish = false;
-        }
-    }
+		if ( ! forceFinish )
+			if ( count != 2 && eventScheduler.remaining ( flipCntEvent ) == 1 )
+				forceFinish = true;
+	}
+	else
+	{
+		if ( forceFinish )
+		{
+			eventScheduler.cancel ( *this );
+			eventScheduler.schedule ( *this, 2 );
+			forceFinish = false;
+		}
+	}
 
-    cnt = 1;
-    cntHistory |= 1;
+	cnt = 1;
+	cntHistory |= 1;
 
-    eventScheduler.cancel(flipCntEvent);
-    eventScheduler.cancel(flipFakeEvent);
+	eventScheduler.cancel ( flipCntEvent );
+	eventScheduler.cancel ( flipFakeEvent );
 
-    count = 0;
-    loaded = false;
-    pending = false;
+	count = 0;
+	loaded = false;
+	pending = false;
 }
+//-----------------------------------------------------------------------------
 
-void SerialPort::handle()
+void SerialPort::handle ()
 {
-    if (loaded && (count == 0))
-    {
-        // Output rate 8 bits at ta / 2
-        count = 16;
-    }
+	// Output rate 8 bits at ta / 2
+	if ( loaded && count == 0 )
+		count = 16;
 
-    if (count == 0)
-        return;
+	if ( count == 0 )
+		return;
 
-    if (eventScheduler.isPending(flipFakeEvent) || eventScheduler.isPending(flipCntEvent))
-    {
-        eventScheduler.cancel(flipFakeEvent);
-        eventScheduler.schedule(flipFakeEvent, 2);
-    }
-    else
-    {
-        eventScheduler.schedule(flipCntEvent, 2);
-    }
-
+	if ( eventScheduler.isPending ( flipFakeEvent ) || eventScheduler.isPending ( flipCntEvent ) )
+	{
+		eventScheduler.cancel ( flipFakeEvent );
+		eventScheduler.schedule ( flipFakeEvent, 2 );
+	}
+	else
+	{
+		eventScheduler.schedule ( flipCntEvent, 2 );
+	}
 }
+//-----------------------------------------------------------------------------
 
-void SerialPort::flipFake() {}
-
-void SerialPort::flipCnt()
+void SerialPort::flipCnt ()
 {
-    if (count == 0)
-        return;
+	if ( count == 0 )
+		return;
 
-    syncCntHistory();
+	syncCntHistory ();
 
-    cnt ^= 1;
+	cnt ^= 1;
 
-    if (--count == 1)
-    {
-        eventScheduler.cancel(*this);
-        eventScheduler.schedule(*this, 2);
+	if ( --count == 1 )
+	{
+		eventScheduler.cancel ( *this );
+		eventScheduler.schedule ( *this, 2 );
 
-        loaded = pending;
-        pending = false;
-    }
+		loaded = pending;
+		pending = false;
+	}
 }
+//-----------------------------------------------------------------------------
 
 }
