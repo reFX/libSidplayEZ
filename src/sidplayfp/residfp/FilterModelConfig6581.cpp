@@ -31,7 +31,7 @@
 namespace reSIDfp
 {
 
-const unsigned int OPAMP_SIZE = 33;
+const unsigned int OPAMP_SIZE_6581 = 33;
 
 /**
  * This is the SID 6581 op-amp voltage transfer function, measured on
@@ -39,7 +39,7 @@ const unsigned int OPAMP_SIZE = 33;
  * All measured chips have op-amps with output voltages (and thus input
  * voltages) within the range of 0.81V - 10.31V.
  */
-const Spline::Point opamp_voltage[OPAMP_SIZE] =
+const Spline::Point opamp_voltage_6581[ OPAMP_SIZE_6581 ] =
 {
   {  0.81, 10.31 },  // Approximate start of actual range
   {  2.40, 10.31 },
@@ -97,8 +97,8 @@ FilterModelConfig6581::FilterModelConfig6581() :
         12.18,   // Vdd
         1.31,    // Vth
         20e-6,   // uCox
-        opamp_voltage,
-        OPAMP_SIZE
+        opamp_voltage_6581,
+        OPAMP_SIZE_6581
     ),
 	WL_vcr ( 9.0 / 1.0 ),
 	WL_snake ( 1.0 / 115.0 ),
@@ -115,7 +115,7 @@ FilterModelConfig6581::FilterModelConfig6581() :
     //
     auto filterSummer = [ this ]
     {
-		OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+		OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
         // The filter summer operates at n ~ 1, and has 5 fundamentally different
         // input configurations (2 - 6 input "resistors").
@@ -143,7 +143,7 @@ FilterModelConfig6581::FilterModelConfig6581() :
     };
     auto filterMixer = [ this ]
     {
-        OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
         // The audio mixer operates at n ~ 8/6, and has 8 fundamentally different
         // input configurations (0 - 7 input "resistors").
@@ -167,7 +167,7 @@ FilterModelConfig6581::FilterModelConfig6581() :
     };
     auto filterGain = [ this ]
     {
-        OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
         // 4 bit "resistor" ladders in the audio output gain
         // necessitate 16 gain tables.
@@ -190,7 +190,7 @@ FilterModelConfig6581::FilterModelConfig6581() :
     };
     auto filterGainRes = [ this ]
     {
-        OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
         // 4 bit "resistor" ladders in the bandpass resonance gain
         // necessitate 16 gain tables.

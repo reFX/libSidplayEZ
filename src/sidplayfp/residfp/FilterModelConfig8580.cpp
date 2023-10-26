@@ -78,13 +78,13 @@ const double resGain[16] =
       ((1.4*4.7)/(1.4+4.7))/2.8, // (Rf|R3)/RC   0.385246
 };
 
-const unsigned int OPAMP_SIZE = 21;
+const unsigned int OPAMP_SIZE_8580 = 21;
 
 /**
  * This is the SID 8580 op-amp voltage transfer function, measured on
  * CAP1B/CAP1A on a chip marked CSG 8580R5 1690 25.
  */
-const Spline::Point opamp_voltage[OPAMP_SIZE] =
+const Spline::Point opamp_voltage_8580[ OPAMP_SIZE_8580 ] =
 {
     {  1.30,  8.91 },  // Approximate start of actual range
     {  4.76,  8.91 },
@@ -130,8 +130,8 @@ FilterModelConfig8580::FilterModelConfig8580 () :
 		9.09,   // Vdd
 		0.80,   // Vth
 		100e-6, // uCox
-		opamp_voltage,
-		OPAMP_SIZE
+        opamp_voltage_8580,
+        OPAMP_SIZE_8580
 	)
 {
     // Create lookup tables for gains / summers.
@@ -142,7 +142,7 @@ FilterModelConfig8580::FilterModelConfig8580 () :
 
     auto filterSummer = [ this ]
     {
-        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
         // The filter summer operates at n ~ 1, and has 5 fundamentally different
         // input configurations (2 - 6 input "resistors").
         //
@@ -167,7 +167,7 @@ FilterModelConfig8580::FilterModelConfig8580 () :
     };
     auto filterMixer = [ this ]
     {
-        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
         // The audio mixer operates at n ~ 8/5, and has 8 fundamentally different
         // input configurations (0 - 7 input "resistors").
         //
@@ -190,7 +190,7 @@ FilterModelConfig8580::FilterModelConfig8580 () :
     };
     auto filterGain = [ this ]
     {
-        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
         // 4 bit "resistor" ladders in the audio output gain
         // necessitate 16 gain tables.
         // From die photographs of the volume "resistor" ladders
@@ -212,7 +212,7 @@ FilterModelConfig8580::FilterModelConfig8580 () :
     };
     auto filterGainRes = [ this ]
     {
-        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage ), std::end ( opamp_voltage ) ), Vddt, vmin, vmax );
+        OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
         // 4 bit "resistor" ladders in the bandpass resonance gain
         // necessitate 16 gain tables.
         // From die photographs of the bandpass "resistor" ladders

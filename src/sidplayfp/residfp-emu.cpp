@@ -33,12 +33,13 @@ namespace libsidplayfp
 const char* ReSIDfp::getCredits ()
 {
 	static const char* credits = {
-		"ReSIDfp V" VERSION " Engine:\n"
-		"\t(C) 1999-2002 Simon White\n"
-		"MOS6581 (SID) Emulation (ReSIDfp V" VERSION "):\n"
-		"\t(C) 1999-2002 Dag Lem\n"
-		"\t(C) 2005-2011 Antti S. Lankila\n"
-		"\t(C) 2010-2015 Leandro Nini\n"
+		"reSIDfp 2.5.0 Engine:\n"
+		"(C) 1999-2002 Simon White\n"
+		"MOS6581 (SID) Emulation (ReSIDfp 2.5.0):\n"
+		"(C) 1999-2002 Dag Lem\n"
+		"(C) 2005-2011 Antti S. Lankila\n"
+		"(C) 2010-2023 Leandro Nini\n"
+		"(C) 2023 Michael Hartmann\n"
 	};
 
 	return credits;

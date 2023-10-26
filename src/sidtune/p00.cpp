@@ -68,16 +68,6 @@ typedef enum
 	X00_REL
 } X00Format;
 
-// Format strings
-const char TXT_FORMAT_DEL[] = "Unsupported tape image file (DEL)";
-const char TXT_FORMAT_SEQ[] = "Unsupported tape image file (SEQ)";
-const char TXT_FORMAT_PRG[] = "Tape image file (PRG)";
-const char TXT_FORMAT_USR[] = "Unsupported USR file (USR)";
-const char TXT_FORMAT_REL[] = "Unsupported tape image file (REL)";
-
-// Magic field
-const char P00_ID[] = "C64File";
-
 //-----------------------------------------------------------------------------
 
 SidTuneBase* p00::load ( const char* fileName, buffer_t& dataBuf )
@@ -96,11 +86,11 @@ SidTuneBase* p00::load ( const char* fileName, buffer_t& dataBuf )
 
 	switch ( std::toupper ( ext[ 1 ] ) )
 	{
-		case 'D':		type = X00_DEL;		format = TXT_FORMAT_DEL;		break;
-		case 'S':		type = X00_SEQ;		format = TXT_FORMAT_SEQ;		break;
-		case 'P':		type = X00_PRG;		format = TXT_FORMAT_PRG;		break;
-		case 'U':		type = X00_USR;		format = TXT_FORMAT_USR;		break;
-		case 'R':		type = X00_REL;		format = TXT_FORMAT_REL;		break;
+		case 'D':		type = X00_DEL;		format = "Unsupported tape image file (DEL)";		break;
+		case 'S':		type = X00_SEQ;		format = "Unsupported tape image file (SEQ)";		break;
+		case 'P':		type = X00_PRG;		format = "Tape image file (PRG)";					break;
+		case 'U':		type = X00_USR;		format = "Unsupported USR file (USR)";				break;
+		case 'R':		type = X00_REL;		format = "Unsupported tape image file (REL)";		break;
 
 		default:		return nullptr;
 	}
@@ -115,7 +105,8 @@ SidTuneBase* p00::load ( const char* fileName, buffer_t& dataBuf )
 	memcpy ( pHeader.name, &dataBuf[ X00_ID_LEN ], X00_NAME_LEN );
 	pHeader.length = dataBuf[ X00_ID_LEN + X00_NAME_LEN ];
 
-	if ( strcmp ( pHeader.id, P00_ID ) )
+	// Magic field
+	if ( strcmp ( pHeader.id, "C64File" ) )
 		return nullptr;
 
 	// File types current supported

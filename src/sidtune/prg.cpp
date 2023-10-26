@@ -31,10 +31,6 @@
 
 namespace libsidplayfp
 {
-
-// Format strings
-const char TXT_FORMAT_PRG[] = "Tape image file (PRG)";
-
 //-----------------------------------------------------------------------------
 
 SidTuneBase* prg::load ( const char* fileName, buffer_t& dataBuf )
@@ -58,7 +54,7 @@ SidTuneBase* prg::load ( const char* fileName, buffer_t& dataBuf )
 
 void prg::load ()
 {
-	info.m_formatString = TXT_FORMAT_PRG;
+	info.m_formatString = "Tape image file (PRG)";
 
 	// Automatic settings
 	info.m_songs = 1;
