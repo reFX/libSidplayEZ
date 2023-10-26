@@ -25,32 +25,38 @@
 namespace reSIDfp
 {
 
+//-----------------------------------------------------------------------------
+
 Filter6581::~Filter6581 ()
 {
 	delete[] f0_dac;
 }
+//-----------------------------------------------------------------------------
 
 void Filter6581::updatedCenterFrequency ()
 {
-	const unsigned short Vw = f0_dac[ fc ];
+	const auto	Vw = f0_dac[ fc ];
+
 	hpIntegrator->setVw ( Vw );
 	bpIntegrator->setVw ( Vw );
 }
+//-----------------------------------------------------------------------------
 
 void Filter6581::updatedMixing ()
 {
 	currentGain = gain_vol[ vol ];
 
-	unsigned int ni = 0;
-	unsigned int no = 0;
+	auto	ni = 0u;
+	auto	no = 0u;
 
 	( filt1 ? ni : no )++;
 	( filt2 ? ni : no )++;
 
 	if ( filt3 ) ni++;
-	else if ( !voice3off ) no++;
+	else if ( ! voice3off ) no++;
 
-	( filtE ? ni : no )++;
+	no++;
+//	( filtE ? ni : no )++;
 
 	currentSummer = summer[ ni ];
 
@@ -60,6 +66,7 @@ void Filter6581::updatedMixing ()
 
 	currentMixer = mixer[ no ];
 }
+//-----------------------------------------------------------------------------
 
 void Filter6581::setFilterCurve ( double curvePosition )
 {
@@ -67,5 +74,6 @@ void Filter6581::setFilterCurve ( double curvePosition )
 	f0_dac = FilterModelConfig6581::getInstance ()->getDAC ( curvePosition );
 	updatedCenterFrequency ();
 }
+//-----------------------------------------------------------------------------
 
 } // namespace reSIDfp

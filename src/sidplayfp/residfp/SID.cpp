@@ -39,134 +39,132 @@ const unsigned int ENV_DAC_BITS = 8;
 const unsigned int OSC_DAC_BITS = 12;
 
 /**
-	* The waveform D/A converter introduces a DC offset in the signal
-	* to the envelope multiplying D/A converter. The "zero" level of
-	* the waveform D/A converter can be found as follows:
-	*
-	* Measure the "zero" voltage of voice 3 on the SID audio output
-	* pin, routing only voice 3 to the mixer ($d417 = $0b, $d418 =
-	* $0f, all other registers zeroed).
-	*
-	* Then set the sustain level for voice 3 to maximum and search for
-	* the waveform output value yielding the same voltage as found
-	* above. This is done by trying out different waveform output
-	* values until the correct value is found, e.g. with the following
-	* program:
-	*
-	*        lda #$08
-	*        sta $d412
-	*        lda #$0b
-	*        sta $d417
-	*        lda #$0f
-	*        sta $d418
-	*        lda #$f0
-	*        sta $d414
-	*        lda #$21
-	*        sta $d412
-	*        lda #$01
-	*        sta $d40e
-	*
-	*        ldx #$00
-	*        lda #$38        ; Tweak this to find the "zero" level
-	*l       cmp $d41b
-	*        bne l
-	*        stx $d40e        ; Stop frequency counter - freeze waveform output
-	*        brk
-	*
-	* The waveform output range is 0x000 to 0xfff, so the "zero"
-	* level should ideally have been 0x800. In the measured chip, the
-	* waveform output "zero" level was found to be 0x380 (i.e. $d41b
-	* = 0x38) at an audio output voltage of 5.94V.
-	*
-	* With knowledge of the mixer op-amp characteristics, further estimates
-	* of waveform voltages can be obtained by sampling the EXT IN pin.
-	* From EXT IN samples, the corresponding waveform output can be found by
-	* using the model for the mixer.
-	*
-	* Such measurements have been done on a chip marked MOS 6581R4AR
-	* 0687 14, and the following results have been obtained:
-	* * The full range of one voice is approximately 1.5V.
-	* * The "zero" level rides at approximately 5.0V.
-	*
-	*
-	* zero-x did the measuring on the 8580 (https://sourceforge.net/p/vice-emu/bugs/1036/#c5b3):
-	* When it sits on basic from powerup it's at 4.72
-	* Run 1.prg and check the output pin level.
-	* Then run 2.prg and adjust it until the output level is the same...
-	* 0x94-0xA8 gives me the same 4.72 1.prg shows.
-	* On another 8580 it's 0x90-0x9C
-	* Third chip 0x94-0xA8
-	* Fourth chip 0x90-0xA4
-	* On the 8580 that plays digis the output is 4.66 and 0x93 is the only value to reach that.
-	* To me that seems as regular 8580s have somewhat wide 0-level range,
-	* whereas that digi-compatible 8580 has it very narrow.
-	* On my 6581R4AR has 0x3A as the only value giving the same output level as 1.prg
-	*/
-	//@{
+* The waveform D/A converter introduces a DC offset in the signal
+* to the envelope multiplying D/A converter. The "zero" level of
+* the waveform D/A converter can be found as follows:
+*
+* Measure the "zero" voltage of voice 3 on the SID audio output
+* pin, routing only voice 3 to the mixer ($d417 = $0b, $d418 =
+* $0f, all other registers zeroed).
+*
+* Then set the sustain level for voice 3 to maximum and search for
+* the waveform output value yielding the same voltage as found
+* above. This is done by trying out different waveform output
+* values until the correct value is found, e.g. with the following
+* program:
+*
+*        lda #$08
+*        sta $d412
+*        lda #$0b
+*        sta $d417
+*        lda #$0f
+*        sta $d418
+*        lda #$f0
+*        sta $d414
+*        lda #$21
+*        sta $d412
+*        lda #$01
+*        sta $d40e
+*
+*        ldx #$00
+*        lda #$38        ; Tweak this to find the "zero" level
+*l       cmp $d41b
+*        bne l
+*        stx $d40e        ; Stop frequency counter - freeze waveform output
+*        brk
+*
+* The waveform output range is 0x000 to 0xfff, so the "zero"
+* level should ideally have been 0x800. In the measured chip, the
+* waveform output "zero" level was found to be 0x380 (i.e. $d41b
+* = 0x38) at an audio output voltage of 5.94V.
+*
+* With knowledge of the mixer op-amp characteristics, further estimates
+* of waveform voltages can be obtained by sampling the EXT IN pin.
+* From EXT IN samples, the corresponding waveform output can be found by
+* using the model for the mixer.
+*
+* Such measurements have been done on a chip marked MOS 6581R4AR
+* 0687 14, and the following results have been obtained:
+* * The full range of one voice is approximately 1.5V.
+* * The "zero" level rides at approximately 5.0V.
+*
+*
+* zero-x did the measuring on the 8580 (https://sourceforge.net/p/vice-emu/bugs/1036/#c5b3):
+* When it sits on basic from powerup it's at 4.72
+* Run 1.prg and check the output pin level.
+* Then run 2.prg and adjust it until the output level is the same...
+* 0x94-0xA8 gives me the same 4.72 1.prg shows.
+* On another 8580 it's 0x90-0x9C
+* Third chip 0x94-0xA8
+* Fourth chip 0x90-0xA4
+* On the 8580 that plays digis the output is 4.66 and 0x93 is the only value to reach that.
+* To me that seems as regular 8580s have somewhat wide 0-level range,
+* whereas that digi-compatible 8580 has it very narrow.
+* On my 6581R4AR has 0x3A as the only value giving the same output level as 1.prg
+*/
+//@{
 unsigned int constexpr OFFSET_6581 = 0x380;
 unsigned int constexpr OFFSET_8580 = 0x9c0;
 //@}
 
 /**
-	* Bus value stays alive for some time after each operation.
-	* Values differs between chip models, the timings used here
-	* are taken from VICE [1].
-	* See also the discussion "How do I reliably detect 6581/8580 sid?" on CSDb [2].
-	*
-	*   Results from real C64 (testprogs/SID/bitfade/delayfrq0.prg):
-	*
-	*   (new SID) (250469/8580R5) (250469/8580R5)
-	*   delayfrq0    ~7a000        ~108000
-	*
-	*   (old SID) (250407/6581)
-	*   delayfrq0    ~01d00
-	*
-	* [1]: http://sourceforge.net/p/vice-emu/patches/99/
-	* [2]: http://noname.c64.org/csdb/forums/?roomid=11&topicid=29025&showallposts=1
-	*/
-	//@{
+* Bus value stays alive for some time after each operation.
+* Values differs between chip models, the timings used here
+* are taken from VICE [1].
+* See also the discussion "How do I reliably detect 6581/8580 sid?" on CSDb [2].
+*
+*   Results from real C64 (testprogs/SID/bitfade/delayfrq0.prg):
+*
+*   (new SID) (250469/8580R5) (250469/8580R5)
+*   delayfrq0    ~7a000        ~108000
+*
+*   (old SID) (250407/6581)
+*   delayfrq0    ~01d00
+*
+* [1]: http://sourceforge.net/p/vice-emu/patches/99/
+* [2]: http://noname.c64.org/csdb/forums/?roomid=11&topicid=29025&showallposts=1
+*/
+//@{
 int constexpr BUS_TTL_6581 = 0x01d00;
 int constexpr BUS_TTL_8580 = 0xa2000;
 //@}
 
-SID::SID () :
-	filter6581 ( new Filter6581 () ),
-	filter8580 ( new Filter8580 () ),
-	externalFilter ( new ExternalFilter () ),
-	resampler ( nullptr ),
-	potX ( new Potentiometer () ),
-	potY ( new Potentiometer () )
+//-----------------------------------------------------------------------------
+
+SID::SID ()
+	: filter6581 ( new Filter6581 () )
+	, filter8580 ( new Filter8580 () )
+	, externalFilter ( new ExternalFilter () )
+	, resampler ( nullptr )
+	, potX ( new Potentiometer () )
+	, potY ( new Potentiometer () )
 {
 	voice[ 0 ].reset ( new Voice () );
 	voice[ 1 ].reset ( new Voice () );
 	voice[ 2 ].reset ( new Voice () );
 
-	muted[ 0 ] = muted[ 1 ] = muted[ 2 ] = false;
-
 	reset ();
 	setChipModel ( MOS8580 );
 }
+//-----------------------------------------------------------------------------
 
 SID::~SID ()
 {
 	// Needed to delete auto_ptr with complete type
 }
+//-----------------------------------------------------------------------------
 
 void SID::setFilter6581Curve ( double filterCurve )
 {
 	filter6581->setFilterCurve ( filterCurve );
 }
+//-----------------------------------------------------------------------------
 
 void SID::setFilter8580Curve ( double filterCurve )
 {
 	filter8580->setFilterCurve ( filterCurve );
 }
-
-void SID::enableFilter ( bool enable )
-{
-	filter6581->enable ( enable );
-	filter8580->enable ( enable );
-}
+//-----------------------------------------------------------------------------
 
 void SID::voiceSync ( bool sync )
 {
@@ -193,6 +191,7 @@ void SID::voiceSync ( bool sync )
 			nextVoiceSync = thisVoiceSync;
 	}
 }
+//-----------------------------------------------------------------------------
 
 void SID::setChipModel ( ChipModel _model )
 {
@@ -249,6 +248,7 @@ void SID::setChipModel ( ChipModel _model )
 		voice[ i ]->wave ()->setPulldownModels ( pulldowntables );
 	}
 }
+//-----------------------------------------------------------------------------
 
 void SID::reset ()
 {
@@ -266,12 +266,14 @@ void SID::reset ()
 	busValueTtl = 0;
 	voiceSync ( false );
 }
+//-----------------------------------------------------------------------------
 
-void SID::input ( int value )
+void SID::input ( int /*value*/ )
 {
-	filter6581->input ( value );
-	filter8580->input ( value );
+//	filter6581->input ( value );
+//	filter8580->input ( value );
 }
+//-----------------------------------------------------------------------------
 
 unsigned char SID::read ( int offset )
 {
@@ -307,6 +309,7 @@ unsigned char SID::read ( int offset )
 
 	return busValue;
 }
+//-----------------------------------------------------------------------------
 
 void SID::write ( int offset, unsigned char value )
 {
@@ -332,7 +335,7 @@ void SID::write ( int offset, unsigned char value )
 			break;
 
 		case 0x04: // Voice #1 control register
-			voice[ 0 ]->writeCONTROL_REG ( muted[ 0 ] ? 0 : value );
+			voice[ 0 ]->writeCONTROL_REG ( value );
 			break;
 
 		case 0x05: // Voice #1 Attack and Decay length
@@ -360,7 +363,7 @@ void SID::write ( int offset, unsigned char value )
 			break;
 
 		case 0x0b: // Voice #2 control register
-			voice[ 1 ]->writeCONTROL_REG ( muted[ 1 ] ? 0 : value );
+			voice[ 1 ]->writeCONTROL_REG ( value );
 			break;
 
 		case 0x0c: // Voice #2 Attack and Decay length
@@ -388,7 +391,7 @@ void SID::write ( int offset, unsigned char value )
 			break;
 
 		case 0x12: // Voice #3 control register
-			voice[ 2 ]->writeCONTROL_REG ( muted[ 2 ] ? 0 : value );
+			voice[ 2 ]->writeCONTROL_REG ( value );
 			break;
 
 		case 0x13: // Voice #3 Attack and Decay length
@@ -426,6 +429,7 @@ void SID::write ( int offset, unsigned char value )
 	// Update voicesync just in case.
 	voiceSync ( false );
 }
+//-----------------------------------------------------------------------------
 
 void SID::setSamplingParameters ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
 {
@@ -433,6 +437,7 @@ void SID::setSamplingParameters ( double clockFrequency, double samplingFrequenc
 
 	resampler.reset ( TwoPassSincResampler::create ( clockFrequency, samplingFrequency, highestAccurateFrequency ) );
 }
+//-----------------------------------------------------------------------------
 
 void SID::clockSilent ( unsigned int cycles )
 {
@@ -465,5 +470,6 @@ void SID::clockSilent ( unsigned int cycles )
 			voiceSync ( true );
 	}
 }
+//-----------------------------------------------------------------------------
 
 } // namespace reSIDfp

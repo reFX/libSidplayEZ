@@ -31,7 +31,7 @@ namespace reSIDfp
  * equipment impedance. Here we suppose an impedance of 10kOhm resulting
  * in a 3 dB attenuation at 1.6Hz.
  * To operate properly the 6581 audio output needs a pull-down resistor
- *(1KOhm recommended, not needed on 8580)
+ * (1KOhm recommended, not needed on 8580)
  *
  * ~~~
  *                                 9/12V
