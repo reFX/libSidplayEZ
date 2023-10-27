@@ -37,41 +37,42 @@ constexpr auto	PSID_MAXSTRLEN = 32;
 
 // Header has been extended for 'RSID' format
 // The following changes are present:
-//     id = 'RSID'
-//     version = 2, 3 or 4
-//     play, load and speed reserved 0
-//     psidspecific flag is called C64BASIC flag
-//     init cannot be under ROMS/IO memory area
-//     load address cannot be less than $07E8
-//     info strings may be 32 characters long without trailing zero
-
-struct psidHeader           // all values are big-endian
+//		id = 'RSID'
+//		version = 2, 3 or 4
+//		play, load and speed reserved 0
+//		psidspecific flag is called C64BASIC flag
+//		init cannot be under ROMS/IO memory area
+//		load address cannot be less than $07E8
+//		info strings may be 32 characters long without trailing zero
+//		all values are big-endian
+struct psidHeader
 {
-	uint32_t id;                   // 'PSID' or 'RSID' (ASCII)
-	uint16_t version;              // 1, 2, 3 or 4
-	uint16_t data;                 // 16-bit offset to binary data in file
-	uint16_t load;                 // 16-bit C64 address to load file to
-	uint16_t init;                 // 16-bit C64 address of init subroutine
-	uint16_t play;                 // 16-bit C64 address of play subroutine
-	uint16_t songs;                // number of songs
-	uint16_t start;                // start song out of [1..256]
-	uint32_t speed;                // 32-bit speed info
-	// bit: 0=50 Hz, 1=CIA 1 Timer A (default: 60 Hz)
-	char name[ PSID_MAXSTRLEN ];     // ASCII strings, 31 characters long and
-	char author[ PSID_MAXSTRLEN ];   // terminated by a trailing zero
-	char released[ PSID_MAXSTRLEN ]; //
+	uint32_t	id;						// 'PSID' or 'RSID' (ASCII)
+	uint16_t	version;				// 1, 2, 3, or 4
+	uint16_t	data;					// 16-bit offset to binary data in file
+	uint16_t	load;					// 16-bit C64 address to load file to
+	uint16_t	init;					// 16-bit C64 address of init subroutine
+	uint16_t	play;					// 16-bit C64 address of play subroutine
+	uint16_t	songs;					// number of songs
+	uint16_t	start;					// start song out of [1..256]
+	uint32_t	speed;					// bit: 0=50 Hz, 1=CIA 1 Timer A (default: 60 Hz)
 
-	uint16_t flags;                // only version >= 2
-	uint8_t relocStartPage;        // only version >= 2ng
-	uint8_t relocPages;            // only version >= 2ng
-	uint8_t sidChipBase2;          // only version >= 3
-	uint8_t sidChipBase3;          // only version >= 4
+	char	name[ PSID_MAXSTRLEN ];		// ASCII strings, 31 characters long and terminated by a trailing zero
+	char	author[ PSID_MAXSTRLEN ];
+	char	released[ PSID_MAXSTRLEN ];
+
+	uint16_t	flags;					// only version >= 2
+	uint8_t		relocStartPage;			// only version >= 2ng
+	uint8_t		relocPages;				// only version >= 2ng
+	uint8_t		sidChipBase2;			// only version >= 3
+	uint8_t		sidChipBase3;			// only version >= 4
 };
+//-----------------------------------------------------------------------------
 
 enum
 {
 	PSID_MUS = 1 << 0,
-	PSID_SPECIFIC = 1 << 1, // These two are mutally exclusive
+	PSID_SPECIFIC = 1 << 1, // These two are mutually exclusive
 	PSID_BASIC = 1 << 1,
 	PSID_CLOCK = 3 << 2,
 	PSID_SIDMODEL = 3 << 4
@@ -93,14 +94,8 @@ enum
 	PSID_SIDMODEL_ANY = PSID_SIDMODEL_6581 | PSID_SIDMODEL_8580
 };
 
-// Format strings
-const char TXT_FORMAT_PSID[] = "PlaySID one-file format (PSID)";
-const char TXT_FORMAT_RSID[] = "Real C64 one-file format (RSID)";
-const char TXT_UNKNOWN_PSID[] = "Unsupported PSID version";
-const char TXT_UNKNOWN_RSID[] = "Unsupported RSID version";
-
-constexpr	auto	psid_headerSize = 118;
-constexpr	auto	psidv2_headerSize = psid_headerSize + 6;
+constexpr auto	psid_headerSize = 118;
+constexpr auto	psidv2_headerSize = psid_headerSize + 6;
 
 // Magic fields
 constexpr	uint32_t PSID_ID = 0x50534944;
@@ -109,8 +104,8 @@ constexpr	uint32_t RSID_ID = 0x52534944;
 //-----------------------------------------------------------------------------
 
 /**
-	* Decode SID model flags.
-	*/
+* Decode SID model flags
+*/
 SidTuneInfo::model_t getSidModel ( uint16_t modelFlag )
 {
 	if ( ( modelFlag & PSID_SIDMODEL_ANY ) == PSID_SIDMODEL_ANY )
@@ -123,24 +118,6 @@ SidTuneInfo::model_t getSidModel ( uint16_t modelFlag )
 		return SidTuneInfo::SIDMODEL_8580;
 
 	return SidTuneInfo::SIDMODEL_UNKNOWN;
-}
-//-----------------------------------------------------------------------------
-
-//
-// Check if extra SID address is valid for PSID specs
-//
-static bool validateAddress ( uint8_t address )
-{
-	// Only even values are valid.
-	if ( address & 1 )
-		return false;
-
-	// Ranges $00-$41 ($D000-$D410) and $80-$DF ($D800-$DDF0) are invalid
-	// Any invalid value means that no second SID is used, like $00
-	if ( address <= 0x41 || ( address >= 0x80 && address <= 0xdf ) )
-		return false;
-
-	return true;
 }
 //-----------------------------------------------------------------------------
 
@@ -220,9 +197,9 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 				break;
 
 			default:
-				throw loadError ( TXT_UNKNOWN_PSID );
+				throw loadError ( "Unsupported PSID version" );
 		}
-		info.m_formatString = TXT_FORMAT_PSID;
+		info.m_formatString = "PlaySID one-file format (PSID)";
 	}
 	else if ( pHeader.id == RSID_ID )
 	{
@@ -234,9 +211,9 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 				break;
 
 			default:
-				throw loadError ( TXT_UNKNOWN_RSID );
+				throw loadError ( "Unsupported RSID version" );
 		}
-		info.m_formatString = TXT_FORMAT_RSID;
+		info.m_formatString = "Real C64 one-file format (RSID)";
 		compatibility = SidTuneInfo::COMPATIBILITY_R64;
 	}
 
@@ -304,6 +281,20 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 
 		if ( pHeader.version >= 3 )
 		{
+			auto validateAddress = [] ( uint8_t address )
+			{
+				// Only even values are valid
+				if ( address & 1 )
+					return false;
+
+				// Ranges $00-$41 ($D000-$D410) and $80-$DF ($D800-$DDF0) are invalid
+				// Any invalid value means that no second SID is used, like $00
+				if ( address <= 0x41 || ( address >= 0x80 && address <= 0xdf ) )
+					return false;
+
+				return true;
+			};
+
 			if ( validateAddress ( pHeader.sidChipBase2 ) )
 			{
 				info.m_sidChipAddresses.push_back ( 0xd000 | uint16_t ( pHeader.sidChipBase2 << 4 ) );
@@ -420,14 +411,13 @@ const char* PSID::createMD5New ( char* md5 )
 
 	*md5 = '\0';
 
-	// The calculation is now simplified
-	// All the header + all the data
+	// The calculation is now simplified. All the header + all the data
 	MD5	myMD5;
 	myMD5.append ( &cache[ 0 ], int ( cache.size () ) );
 
 	myMD5.finish ();
 
-	// Get fingerprint.
+	// Get fingerprint
 	myMD5.getAscIIDigest ().copy ( md5, SidTune::MD5_LENGTH );
 	md5[ SidTune::MD5_LENGTH ] = '\0';
 

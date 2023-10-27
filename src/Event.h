@@ -25,51 +25,43 @@
 
 namespace libsidplayfp {
 
-typedef int_fast64_t event_clock_t;
+typedef int64_t event_clock_t;
 
+//-----------------------------------------------------------------------------
 
 /**
-	* An Event object that can be inserted in the Event Scheduler.
-	*/
+* An Event object that can be inserted in the Event Scheduler
+*/
 class Event
 {
 	friend class EventScheduler;
 
-	/// The next event in sequence.
+	// The next event in sequence.
 	Event* next;
 
-	/// The clock this event fires.
+	// The clock this event fires.
 	event_clock_t triggerTime;
-
-	/// Describe event for humans.
-	const char* const m_name;
 
 public:
 	/**
-		* Events are used for delayed execution.
-		*
-		* @param name Descriptive string of the event.
-		*/
-	Event ( const char* const name ) :
-		m_name ( name )
+	* Events are used for delayed execution.
+	*
+	* @param name Descriptive string of the event.
+	*/
+	Event ( const char* const /*name*/ )
 	{
 	}
 
 	/**
-		* Event code to be executed. Events are allowed to safely
-		* reschedule themselves with the EventScheduler during
-		* invocations.
-		*/
+	* Event code to be executed. Events are allowed to safely
+	* reschedule themselves with the EventScheduler during
+	* invocations.
+	*/
 	virtual void event () = 0;
-
-	/**
-		* Get the event name.
-		* Only for debugging purposes.
-		*/
-	const char* name () const { return m_name; }
 
 protected:
 	~Event () {}
 };
+//-----------------------------------------------------------------------------
 
 }

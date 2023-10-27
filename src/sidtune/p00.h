@@ -26,14 +26,10 @@ namespace libsidplayfp
 
 struct X00Header;
 
+//-----------------------------------------------------------------------------
+
 class p00 final : public SidTuneBase
 {
-protected:
-	p00 () {}
-
-private:
-	void load ( const char* format, const X00Header* pHeader );
-
 public:
 	/**
 	 * @return pointer to a SidTune or 0 if not a PC64 file
@@ -43,10 +39,16 @@ public:
 
 	virtual ~p00 () {}
 
+protected:
+	p00 () {}
+
 private:
+	void load ( const char* format, const X00Header* pHeader );
+
 	// prevent copying
-	p00 ( const p00& );
-	p00& operator=( p00& );
+	p00 ( const p00& ) = delete;
+	p00& operator=( p00& ) = delete;
 };
+//-----------------------------------------------------------------------------
 
 }

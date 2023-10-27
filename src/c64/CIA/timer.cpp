@@ -106,7 +106,7 @@ void Timer::clock ()
 	state = adj;
 	// ciatimer.c block end
 
-	if ( ( timer == 0 ) && ( ( state & CIAT_COUNT3 ) != 0 ) )
+	if ( timer == 0 && state & CIAT_COUNT3 )
 	{
 		state |= CIAT_LOAD | CIAT_OUT;
 
@@ -118,8 +118,8 @@ void Timer::clock ()
 		const auto	toggle = ( lastControlValue & 0x06 ) == 6;
 		pbToggle = toggle && ! pbToggle;
 
-		// Implementation of the serial port
-		serialPort ();
+//		// Implementation of the serial port
+//		serialPort ();
 
 		// Timer A signals underflow handling: IRQ/B-count
 		underFlow ();

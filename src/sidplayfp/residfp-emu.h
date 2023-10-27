@@ -35,14 +35,13 @@ namespace libsidplayfp
 class ReSIDfp final : public sidemu
 {
 private:
-	reSIDfp::SID& m_sid;
+	reSIDfp::SID	m_sid;
 
 public:
 	static const char* getCredits ();
 
 public:
 	ReSIDfp ( sidbuilder* builder );
-	~ReSIDfp () override;
 
 	bool getStatus () const { return m_status; }
 

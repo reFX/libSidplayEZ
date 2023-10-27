@@ -23,6 +23,7 @@
 */
 
 #include <stdint.h>
+#include <array>
 
 #include "EventScheduler.h"
 
@@ -56,21 +57,22 @@ private:
 	const uint8_t&	crb;
 
 	event_clock_t	cycles;
-	event_clock_t	period;
+	event_clock_t	period = ~0;	// Dummy
 
-	unsigned int	todtickcounter;
+	unsigned int	todtickcounter = 0;
 
 	bool	isLatched;
 	bool	isStopped;
 
-	uint8_t	clock[ 4 ];
-	uint8_t	latch[ 4 ];
-	uint8_t	alarm[ 4 ];
+	std::array<uint8_t, 4>	clock;
+	std::array<uint8_t, 4>	latch;
+	std::array<uint8_t, 4>	alarm;
 
 private:
 	inline void checkAlarm ();
 	inline void updateCounters ();
-	void event ();
+
+	void event () override;
 
 public:
 	Tod ( EventScheduler& scheduler, MOS652X& _parent, uint8_t regs[ 0x10 ] )
@@ -79,8 +81,6 @@ public:
 		, parent ( _parent )
 		, cra ( regs[ 0x0e ] )
 		, crb ( regs[ 0x0f ] )
-		, period ( ~0 )		// Dummy
-		, todtickcounter ( 0 )
 	{
 	}
 

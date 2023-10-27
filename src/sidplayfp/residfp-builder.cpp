@@ -47,13 +47,7 @@ unsigned int ReSIDfpBuilder::create ( unsigned int sids )
 {
 	m_status = true;
 
-	// Check available devices
-	auto	count = availDevices ();
-
-	if ( count && ( count < sids ) )
-		sids = count;
-
-	for ( count = 0; count < sids; count++ )
+	for ( auto count = 0u; count < sids; count++ )
 	{
 		try
 		{
@@ -68,7 +62,7 @@ unsigned int ReSIDfpBuilder::create ( unsigned int sids )
 		}
 	}
 
-	return count;
+	return sids;
 }
 //-----------------------------------------------------------------------------
 

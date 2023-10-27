@@ -1,3 +1,4 @@
+#pragma once
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
@@ -19,11 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-#ifndef OPCODES_H
-#define OPCODES_H
-
-#define OPCODE_MAX 0x100
 
 /* HLT
     case 0x02: case 0x12: case 0x22: case 0x32: case 0x42: case 0x52:
@@ -331,5 +327,3 @@
 #define INSax ISBax
 #define SKBn  NOPb
 #define SKWn  NOPa
-
-#endif // OPCODES_H

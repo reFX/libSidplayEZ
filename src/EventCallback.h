@@ -39,10 +39,10 @@ private:
 	void event () override { ( m_this.*m_callback )( ); }
 
 public:
-	EventCallback ( const char* const name, This& object, Callback callback ) :
-		Event ( name ),
-		m_this ( object ),
-		m_callback ( callback )
+	EventCallback ( const char* const name, This& object, Callback callback )
+		: Event ( name )
+		, m_this ( object )
+		, m_callback ( callback )
 	{
 	}
 };

@@ -130,9 +130,7 @@ private:
 	uint8_t regs[ 0x40 ];
 
 	EventCallback<MOS656X> badLineStateChangeEvent;
-
 	EventCallback<MOS656X> rasterYIRQEdgeDetectorEvent;
-
 	EventCallback<MOS656X> lightpenTriggerEvent;
 
 private:
@@ -199,10 +197,10 @@ private:
 
 	bool evaluateIsBadLine () const
 	{
-		return areBadLinesEnabled
-			&& rasterY >= FIRST_DMA_LINE
-			&& rasterY <= LAST_DMA_LINE
-			&& ( rasterY & 7 ) == yscroll;
+		return		areBadLinesEnabled
+				&&	rasterY >= FIRST_DMA_LINE
+				&&	rasterY <= LAST_DMA_LINE
+				&&	( rasterY & 7 ) == yscroll;
 	}
 
 	/**
@@ -246,7 +244,7 @@ private:
 		{
 			rasterY++;
 			rasterYIRQEdgeDetector ();
-			if ( ( rasterY == FIRST_DMA_LINE ) && !areBadLinesEnabled )
+			if ( rasterY == FIRST_DMA_LINE && ! areBadLinesEnabled )
 				areBadLinesEnabled = readDEN ();
 		}
 

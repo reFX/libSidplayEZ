@@ -57,13 +57,7 @@ void TimerA::underFlow ()
 	parent.underflowA ();
 }
 
-void TimerA::serialPort ()
-{
-	parent.handleSerialPort ();
-}
-
 // Timer B
-
 void TimerB::underFlow ()
 {
 	parent.underflowB ();
@@ -88,7 +82,7 @@ void InterruptSource6526::trigger ( uint8_t interruptMask )
 	// if timer B underflows during the acknowledge cycle
 	// it triggers an interrupt as expected
 	// but the second bit in icr is not set
-	if ( ( interruptMask == INTERRUPT_UNDERFLOW_B ) && ack0 () )
+	if ( interruptMask == INTERRUPT_UNDERFLOW_B && ack0 () )
 	{
 		idr &= ~INTERRUPT_UNDERFLOW_B;
 		idrTemp &= ~INTERRUPT_UNDERFLOW_B;
@@ -98,7 +92,7 @@ void InterruptSource6526::trigger ( uint8_t interruptMask )
 
 uint8_t InterruptSource6526::clear ()
 {
-	uint8_t oldIdr = InterruptSource::clear ();
+	auto	oldIdr = InterruptSource::clear ();
 	idr &= INTERRUPT_REQUEST;
 
 	return oldIdr;
@@ -115,35 +109,27 @@ const char* MOS652X::credits ()
 }
 //-----------------------------------------------------------------------------
 
-MOS652X::MOS652X ( EventScheduler& scheduler ) :
-	eventScheduler ( scheduler ),
-	pra ( regs[ PRA ] ),
-	prb ( regs[ PRB ] ),
-	ddra ( regs[ DDRA ] ),
-	ddrb ( regs[ DDRB ] ),
-	timerA ( scheduler, *this ),
-	timerB ( scheduler, *this ),
-	interruptSource ( new InterruptSource6526 ( scheduler, *this ) ),
-	tod ( scheduler, *this, regs ),
-	serialPort ( scheduler, *this ),
-	bTickEvent ( "CIA B counts A", *this, &MOS652X::bTick )
+MOS652X::MOS652X ( EventScheduler& scheduler )
+	: interruptSource6526 ( scheduler, *this )
+	, interruptSource8521 ( scheduler, *this )
+	, eventScheduler ( scheduler )
+	, pra ( regs[ PRA ] )
+	, prb ( regs[ PRB ] )
+	, ddra ( regs[ DDRA ] )
+	, ddrb ( regs[ DDRB ] )
+	, timerA ( scheduler, *this )
+	, timerB ( scheduler, *this )
+	, interruptSource ( &interruptSource6526 )
+	, tod ( scheduler, *this, regs )
+	, bTickEvent ( "CIA B counts A", *this, &MOS652X::bTick )
 {
-	reset ();
-}
-//-----------------------------------------------------------------------------
-
-void MOS652X::handleSerialPort ()
-{
-	if ( regs[ CRA ] & 0x40 )
-		serialPort.handle ();
+	MOS652X::reset ();
 }
 //-----------------------------------------------------------------------------
 
 void MOS652X::reset ()
 {
-	memset ( regs, 0, sizeof ( regs ) );
-
-	serialPort.reset ();
+	std::fill_n ( regs, std::size ( regs ), 0 );
 
 	// Reset timers
 	timerA.reset ();
@@ -218,7 +204,7 @@ void MOS652X::write ( uint8_t addr, uint8_t data )
 	timerA.syncWithCpu ();
 	timerB.syncWithCpu ();
 
-	const uint8_t oldData = regs[ addr ];
+	const auto	oldData = regs[ addr ];
 	regs[ addr ] = data;
 
 	switch ( addr )
@@ -245,13 +231,14 @@ void MOS652X::write ( uint8_t addr, uint8_t data )
 			tod.write ( addr - TOD_TEN, data );
 			break;
 
-		case SDR:		serialPort.startSdr ();				break;
-		case ICR:		interruptSource->set ( data );		break;
+		case SDR:
+			break;
+
+		case ICR:
+			interruptSource->set ( data );
+			break;
 
 		case CRA:
-			if ( ( data ^ oldData ) & 0x40 )
-				serialPort.switchSerialDirection ( ( data & 0x40 ) == 0 );
-
 			// Reset the underflow flipflop for the data port
 			if ( ( data & 1 ) && ! ( oldData & 1 ) )
 				timerA.setPbToggle ( true );
@@ -309,19 +296,10 @@ void MOS652X::spInterrupt ()
 
 void MOS652X::setModel ( model_t model )
 {
-	switch ( model )
-	{
-		case MOS6526W4485:
-		case MOS6526:
-			serialPort.setModel4485 ( model == MOS6526W4485 );
-			interruptSource.reset ( new InterruptSource6526 ( eventScheduler, *this ) );
-			break;
-
-		case MOS8521:
-			serialPort.setModel4485 ( false );
-			interruptSource.reset ( new InterruptSource8521 ( eventScheduler, *this ) );
-			break;
-	}
+	if ( model == model_t::MOS6526 )
+		interruptSource = &interruptSource6526;
+	else
+		interruptSource = &interruptSource8521;
 }
 //-----------------------------------------------------------------------------
 

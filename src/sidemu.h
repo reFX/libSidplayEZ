@@ -62,7 +62,7 @@ protected:
 	event_clock_t m_accessClk;
 
 	/// The sample buffer
-	short* m_buffer = nullptr;
+	int16_t		m_buffer[ OUTPUTBUFFERSIZE ];
 
 	/// Current position in buffer
 	int m_bufferpos = 0;
@@ -132,7 +132,7 @@ public:
 	/**
 	* Get the buffer.
 	*/
-	short* buffer () const { return m_buffer; }
+	int16_t* buffer () { return &m_buffer[ 0 ]; }
 };
 
 }

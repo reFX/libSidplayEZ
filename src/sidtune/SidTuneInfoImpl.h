@@ -135,7 +135,7 @@ public:
 
 	const char* getDataFileName () const override { return m_dataFileName.c_str (); }
 
-	const char* getInfoFileName () const override { return !m_infoFileName.empty () ? m_infoFileName.c_str () : nullptr; }
+	const char* getInfoFileName () const override { return ! m_infoFileName.empty () ? m_infoFileName.c_str () : nullptr; }
 };
 
 }

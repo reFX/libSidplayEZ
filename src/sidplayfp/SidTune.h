@@ -40,10 +40,6 @@ class SidTune
 public:
 	static const int MD5_LENGTH = 32;
 
-private:
-	/// Filename extensions to append for various file types.
-	static const char** fileNameExtensions;
-
 private:  // -------------------------------------------------------------
 	libsidplayfp::SidTuneBase* tune;
 
@@ -52,27 +48,17 @@ private:  // -------------------------------------------------------------
 	bool m_status;
 
 public:  // ----------------------------------------------------------------
-
 	typedef void ( *LoaderFunc )( const char* fileName, std::vector<uint8_t>& bufferRef );
 
 	/**
 	 * Load a sidtune from a file.
 	 *
-	 * To retrieve data from standard input pass in filename "-".
-	 * If you want to override the default filename extensions use this
-	 * contructor. Please note, that if the specified "fileName"
-	 * does exist and the loader is able to determine its file format,
-	 * this function does not try to append any file name extension.
-	 * See "SidTune.cpp" for the default list of file name extensions.
-	 * You can specify "fileName = 0", if you do not want to
-	 * load a sidtune. You can later load one with open().
+	 * You can specify "fileName = 0", if you do not want to load a sidtune. You can later load one with open().
 	 *
 	 * @param fileName
-	 * @param fileNameExt
 	 * @param separatorIsSlash
 	 */
-	SidTune ( const char* fileName, const char** fileNameExt = 0,
-			  bool separatorIsSlash = false );
+	SidTune ( const char* fileName, bool separatorIsSlash = false );
 
 	/**
 	 * Load a sidtune from a file, using a file access callback.
@@ -83,11 +69,9 @@ public:  // ----------------------------------------------------------------
 	 *
 	 * @param loader
 	 * @param fileName
-	 * @param fileNameExt
 	 * @param separatorIsSlash
 	 */
-	SidTune ( LoaderFunc loader, const char* fileName, const char** fileNameExt = 0,
-			  bool separatorIsSlash = false );
+	SidTune ( LoaderFunc loader, const char* fileName, bool separatorIsSlash = false );
 
 	/**
 	 * Load a single-file sidtune from a memory buffer.
@@ -97,18 +81,7 @@ public:  // ----------------------------------------------------------------
 	 * @param sidtuneLength length of the buffer
 	 */
 	SidTune ( const uint8_t* oneFileFormatSidtune, uint32_t sidtuneLength );
-
 	~SidTune ();
-
-	/**
-	 * The SidTune class does not copy the list of file name extensions,
-	 * so make sure you keep it. If the provided pointer is 0, the
-	 * default list will be activated. This is a static list which
-	 * is used by all SidTune objects.
-	 *
-	 * @param fileNameExt
-	 */
-	void setFileNameExtensions ( const char** fileNameExt );
 
 	/**
 	 * Load a sidtune into an existing object from a file.

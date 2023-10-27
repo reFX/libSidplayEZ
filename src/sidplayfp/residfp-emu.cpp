@@ -35,7 +35,7 @@ const char* ReSIDfp::getCredits ()
 	static const char* credits = {
 		"reSIDfp 2.5.0 Engine:\n"
 		"(C) 1999-2002 Simon White\n"
-		"MOS6581 (SID) Emulation (ReSIDfp 2.5.0):\n"
+		"MOS6581 (SID) Emulation (reSIDfp 2.5.0):\n"
 		"(C) 1999-2002 Dag Lem\n"
 		"(C) 2005-2011 Antti S. Lankila\n"
 		"(C) 2010-2023 Leandro Nini\n"
@@ -48,17 +48,8 @@ const char* ReSIDfp::getCredits ()
 
 ReSIDfp::ReSIDfp ( sidbuilder* builder )
 	: sidemu ( builder )
-	, m_sid ( *( new reSIDfp::SID ) )
 {
-	m_buffer = new short[ OUTPUTBUFFERSIZE ];
 	reset ( 0 );
-}
-//-----------------------------------------------------------------------------
-
-ReSIDfp::~ReSIDfp ()
-{
-	delete& m_sid;
-	delete[] m_buffer;
 }
 //-----------------------------------------------------------------------------
 
@@ -99,7 +90,7 @@ void ReSIDfp::write ( uint8_t addr, uint8_t data )
 
 void ReSIDfp::clock ()
 {
-	const event_clock_t cycles = eventScheduler->getTime ( EVENT_CLOCK_PHI1 ) - m_accessClk;
+	const event_clock_t	cycles = eventScheduler->getTime ( EVENT_CLOCK_PHI1 ) - m_accessClk;
 	m_accessClk += cycles;
 	m_bufferpos += m_sid.clock ( (unsigned int)cycles, m_buffer + m_bufferpos );
 }
@@ -128,27 +119,7 @@ void ReSIDfp::model ( SidConfig::sid_model_t model )
 	//
 	// Set the emulated SID model
 	//
-	reSIDfp::ChipModel chipModel;
-
-	switch ( model )
-	{
-		case SidConfig::MOS6581:
-			chipModel = reSIDfp::MOS6581;
-//			m_sid.input ( 0 );
-			break;
-
-		case SidConfig::MOS8580:
-			chipModel = reSIDfp::MOS8580;
-//			m_sid.input ( digiboost ? -32768 : 0 );
-			break;
-
-		default:
-			m_status = false;
-			m_error = ERR_INVALID_CHIP;
-			return;
-	}
-
-	m_sid.setChipModel ( chipModel );
+	m_sid.setChipModel ( model == SidConfig::MOS6581 ? reSIDfp::MOS6581 : reSIDfp::MOS8580 );
 	m_status = true;
 }
 //-----------------------------------------------------------------------------

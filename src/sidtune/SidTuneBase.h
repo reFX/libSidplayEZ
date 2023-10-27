@@ -245,15 +245,6 @@ private:
 	*/
 	static SidTuneBase* getFromBuffer ( const uint8_t* const buffer, uint32_t bufferLen );
 
-	/**
-	* Get new file name with specified extension.
-	*
-	* @param destString destination string
-	* @param sourceName original file name
-	* @param sourceExt new extension
-	*/
-	static void createNewFileName ( std::string& destString, const char* sourceName, const char* sourceExt );
-
 private:
 	// prevent copying
 	SidTuneBase ( const SidTuneBase& );

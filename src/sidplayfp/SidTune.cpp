@@ -25,34 +25,17 @@ using namespace libsidplayfp;
 
 const char MSG_NO_ERRORS[] = "No errors";
 
-// Default sidtune file name extensions. This selection can be overriden
-// by specifying a custom list in the constructor.
-const char* defaultFileNameExt[] =
-{
-	// Preferred default file extension for single-file sidtunes
-	// or sidtune description files in SIDPLAY INFOFILE format.
-	".sid", ".SID",
-	// File extensions used (and created) by various C64 emulators and
-	// related utilities. These extensions are recommended to be used as
-	// a replacement for ".dat" in conjunction with two-file sidtunes.
-	".c64", ".prg", ".p00", ".C64", ".PRG", ".P00",
-	// End.
-	0
-};
 //-----------------------------------------------------------------------------
 
-const char** SidTune::fileNameExtensions = defaultFileNameExt;
-
-SidTune::SidTune ( const char* fileName, const char** fileNameExt, bool separatorIsSlash )
-	: SidTune ( nullptr, fileName, fileNameExt, separatorIsSlash )
+SidTune::SidTune ( const char* fileName, bool separatorIsSlash )
+	: SidTune ( nullptr, fileName, separatorIsSlash )
 {
 }
 //-----------------------------------------------------------------------------
 
-SidTune::SidTune ( LoaderFunc loader, const char* fileName, const char** fileNameExt, bool separatorIsSlash )
+SidTune::SidTune ( LoaderFunc loader, const char* fileName, bool separatorIsSlash )
 	: tune ( nullptr )
 {
-	setFileNameExtensions ( fileNameExt );
 	load ( loader, fileName, separatorIsSlash );
 }
 //-----------------------------------------------------------------------------
@@ -67,12 +50,6 @@ SidTune::SidTune ( const uint8_t* oneFileFormatSidtune, uint32_t sidtuneLength )
 SidTune::~SidTune ()
 {
 	delete tune;
-}
-//-----------------------------------------------------------------------------
-
-void SidTune::setFileNameExtensions ( const char** fileNameExt )
-{
-	fileNameExtensions = ( ( fileNameExt != nullptr ) ? fileNameExt : defaultFileNameExt );
 }
 //-----------------------------------------------------------------------------
 
@@ -120,19 +97,19 @@ void SidTune::read ( const uint8_t* sourceBuffer, uint32_t bufferLen )
 
 unsigned int SidTune::selectSong ( unsigned int songNum )
 {
-	return tune != nullptr ? tune->selectSong ( songNum ) : 0;
+	return tune ? tune->selectSong ( songNum ) : 0;
 }
 //-----------------------------------------------------------------------------
 
 const SidTuneInfo* SidTune::getInfo () const
 {
-	return tune != nullptr ? tune->getInfo () : nullptr;
+	return tune ? tune->getInfo () : nullptr;
 }
 //-----------------------------------------------------------------------------
 
 const SidTuneInfo* SidTune::getInfo ( unsigned int songNum )
 {
-	return tune != nullptr ? tune->getInfo ( songNum ) : nullptr;
+	return tune ? tune->getInfo ( songNum ) : nullptr;
 }
 //-----------------------------------------------------------------------------
 
@@ -144,7 +121,7 @@ const char* SidTune::statusString () const { return m_statusString; }
 
 bool SidTune::placeSidTuneInC64mem ( sidmemory& mem )
 {
-	if ( tune == nullptr )
+	if ( ! tune )
 		return false;
 
 	tune->placeSidTuneInC64mem ( mem );
@@ -154,18 +131,18 @@ bool SidTune::placeSidTuneInC64mem ( sidmemory& mem )
 
 const char* SidTune::createMD5 ( char* md5 )
 {
-	return tune != nullptr ? tune->createMD5 ( md5 ) : nullptr;
+	return tune ? tune->createMD5 ( md5 ) : nullptr;
 }
 //-----------------------------------------------------------------------------
 
 const char* SidTune::createMD5New ( char* md5 )
 {
-	return tune != nullptr ? tune->createMD5New ( md5 ) : nullptr;
+	return tune ? tune->createMD5New ( md5 ) : nullptr;
 }
 //-----------------------------------------------------------------------------
 
 const uint8_t* SidTune::c64Data () const
 {
-	return tune != nullptr ? tune->c64Data () : nullptr;
+	return tune ? tune->c64Data () : nullptr;
 }
 //-----------------------------------------------------------------------------

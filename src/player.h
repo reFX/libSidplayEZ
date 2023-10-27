@@ -26,8 +26,8 @@
 
 #include "sidplayfp/SidConfig.h"
 #include "sidplayfp/SidTuneInfo.h"
-
 #include "SidInfoImpl.h"
+
 #include "mixer.h"
 #include "c64/c64.h"
 

@@ -84,13 +84,13 @@ const char CHR_tab[ 256 ] =
 };
 
 /// The Commodore 64 memory size
-const uint32_t MAX_MEMORY = 65536;
+constexpr uint32_t MAX_MEMORY = 65536;
 
 /// C64KB + LOAD + PSID
-const uint32_t MAX_FILELEN = MAX_MEMORY + 2 + 0x7C;
+constexpr uint32_t MAX_FILELEN = MAX_MEMORY + 2 + 0x7C;
 
 /// Minimum load address for real c64 only tunes
-const uint16_t SIDTUNE_R64_MIN_LOAD_ADDR = 0x07e8;
+constexpr uint16_t SIDTUNE_R64_MIN_LOAD_ADDR = 0x07e8;
 
 //-----------------------------------------------------------------------------
 
@@ -294,7 +294,7 @@ void SidTuneBase::acceptSidTune ( const char* dataFileName, const char* infoFile
 		// We only detect an offset of two. Some position independent
 		// sidtunes contain a load address of 0xE000, but are loaded
 		// to 0x0FFE and call player at 0x1000.
-		info.m_fixLoad = ( endian_getLittle16 ( &buf[ fileOffset ] ) == ( info.m_loadAddr + 2 ) );
+		info.m_fixLoad = endian_getLittle16 ( &buf[ fileOffset ] ) == ( info.m_loadAddr + 2 );
 	}
 
 	// Check the size of the data.
@@ -304,14 +304,6 @@ void SidTuneBase::acceptSidTune ( const char* dataFileName, const char* infoFile
 		throw loadError ( ERR_EMPTY );
 
 	cache.swap ( buf );
-}
-//-----------------------------------------------------------------------------
-
-void SidTuneBase::createNewFileName ( std::string& destString, const char* sourceName, const char* sourceExt )
-{
-	destString.assign ( sourceName );
-	destString.erase ( destString.find_last_of ( '.' ) );
-	destString.append ( sourceExt );
 }
 //-----------------------------------------------------------------------------
 
