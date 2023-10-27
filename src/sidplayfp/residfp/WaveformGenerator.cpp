@@ -301,15 +301,15 @@ void WaveformGenerator::set_noise_output ()
 }
 //-----------------------------------------------------------------------------
 
-void WaveformGenerator::setWaveformModels ( matrix_t* models )
+void WaveformGenerator::setWaveformModels ( std::vector<int16_t>& models )
 {
-	model_wave = models;
+	model_wave = &models;
 }
 //-----------------------------------------------------------------------------
 
-void WaveformGenerator::setPulldownModels ( matrix_t* models )
+void WaveformGenerator::setPulldownModels ( std::vector<int16_t>& models )
 {
-	model_pulldown = models;
+	model_pulldown = &models;
 }
 //-----------------------------------------------------------------------------
 
@@ -331,8 +331,8 @@ void WaveformGenerator::set_no_noise_or_noise_output ()
 
 void WaveformGenerator::writeCONTROL_REG ( unsigned char control )
 {
-	const unsigned int waveform_prev = waveform;
-	const bool test_prev = test;
+	const auto	waveform_prev = waveform;
+	const auto	test_prev = test;
 
 	waveform = ( control >> 4 ) & 0x0f;
 	test = ( control & 0x08 ) != 0;
@@ -343,18 +343,21 @@ void WaveformGenerator::writeCONTROL_REG ( unsigned char control )
 
 	if ( waveform != waveform_prev )
 	{
+		auto	modWave = model_wave->data ();
+		auto	modPulldown = model_pulldown->data ();
+
 		// Set up waveform tables
-		wave = ( *model_wave )[ waveform & 0x3 ];
+		wave = &modWave[ ( waveform & 0x3 ) << 12 ];
 
 		// We assume the combinations including noise behave the same as without
 		switch ( waveform & 0x7 )
 		{
-			case 3:     pulldown = ( *model_pulldown )[ 0 ];                                    break;
-			case 4:     pulldown = ( waveform & 0x8 ) ? ( *model_pulldown )[ 4 ] : nullptr;     break;
-			case 5:     pulldown = ( *model_pulldown )[ 1 ];                                    break;
-			case 6:     pulldown = ( *model_pulldown )[ 2 ];                                    break;
-			case 7:     pulldown = ( *model_pulldown )[ 3 ];                                    break;
-			default:    pulldown = nullptr;                                                     break;
+			case 3:     pulldown = &modPulldown[ 0 << 12 ];									break;
+			case 4:     pulldown = ( waveform & 0x8 ) ? &modPulldown[ 4 << 12 ] : nullptr;	break;
+			case 5:     pulldown = &modPulldown[ 1 << 12 ];									break;
+			case 6:     pulldown = &modPulldown[ 2 << 12 ];									break;
+			case 7:     pulldown = &modPulldown[ 3 << 12 ];									break;
+			default:    pulldown = nullptr;													break;
 		}
 
 		// no_noise and no_pulse are used in set_waveform_output() as bitmasks to
@@ -418,7 +421,7 @@ void WaveformGenerator::reset ()
 	test = false;
 	sync = false;
 
-	wave = model_wave ? ( *model_wave )[ 0 ] : nullptr;
+	wave = nullptr;
 	pulldown = nullptr;
 
 	ring_msb_mask = 0;

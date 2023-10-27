@@ -24,7 +24,6 @@
 
 #include <limits>
 
-#include "array.h"
 #include "Dac.h"
 #include "Filter6581.h"
 #include "Filter8580.h"
@@ -132,6 +131,8 @@ constexpr auto	BUS_TTL_8580 = 0xa2000;
 
 SID::SID ()
 {
+	waveTable = WaveformCalculator::buildWaveTable ();
+
 	reset ();
 	setChipModel ( MOS8580 );
 }
@@ -178,24 +179,20 @@ void SID::voiceSync ( bool sync )
 
 void SID::setChipModel ( ChipModel _model )
 {
-	switch ( _model )
-	{
-		case MOS6581:
-			filter = &filter6581;
-			modelTTL = BUS_TTL_6581;
-			break;
-
-		case MOS8580:
-			filter = &filter8580;
-			modelTTL = BUS_TTL_8580;
-			break;
-	}
-
 	model = _model;
 
-	// calculate waveform-related tables
-	auto    wavetables = WaveformCalculator::getInstance ()->getWaveTable ();
-	auto    pulldowntables = WaveformCalculator::getInstance ()->buildPulldownTable ( model );
+	pulldownTable = WaveformCalculator::buildPulldownTable ( model );
+
+	if ( model == MOS6581 )
+	{
+		filter = &filter6581;
+		modelTTL = BUS_TTL_6581;
+	}
+	else
+	{
+		filter = &filter8580;
+		modelTTL = BUS_TTL_8580;
+	}
 
 	// calculate envelope DAC table
 	{
@@ -223,8 +220,8 @@ void SID::setChipModel ( ChipModel _model )
 		vce.setEnvDAC ( envDAC );
 		vce.setWavDAC ( oscDAC );
 		vce.waveformGenerator.setModel ( model == MOS6581 );
-		vce.waveformGenerator.setWaveformModels ( wavetables );
-		vce.waveformGenerator.setPulldownModels ( pulldowntables );
+		vce.waveformGenerator.setWaveformModels ( waveTable );
+		vce.waveformGenerator.setPulldownModels ( pulldownTable );
 	}
 }
 //-----------------------------------------------------------------------------

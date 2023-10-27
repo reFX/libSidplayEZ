@@ -21,8 +21,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "../array.h"
-
 namespace reSIDfp
 {
 
@@ -44,11 +42,11 @@ namespace reSIDfp
 class SincResampler final
 {
 private:
-	/// Size of the ring buffer, must be a power of 2
+	// Size of the ring buffer, must be a power of 2
 	static const int RINGSIZE = 2048;
 
-	/// Table of the fir filter coefficients
-	matrix_t* firTable;
+	// Table of the fir filter coefficients
+	std::vector<int16_t>	firTable;
 
 	int sampleIndex = 0;
 
@@ -64,7 +62,7 @@ private:
 
 	int outputValue = 0;
 
-	short sample[ RINGSIZE * 2 ];
+	int16_t	sample[ RINGSIZE * 2 ];
 
 	int fir ( int subcycle );
 

@@ -20,8 +20,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "array.h"
-
 namespace reSIDfp
 {
 
@@ -89,34 +87,22 @@ typedef struct
 * driving the top bit low.
 *
 */
-class WaveformCalculator final
+namespace WaveformCalculator
 {
-private:
-	matrix_t wftable;
-
-private:
-	WaveformCalculator ();
-
-public:
 	/**
-	* Get the singleton instance.
-	*/
-	static WaveformCalculator* getInstance ();
-
-	/**
-	* Get the waveform table for use by WaveformGenerator.
+	* Get the waveform table for use by WaveformGenerator
 	*
 	* @return Waveform table
 	*/
-	matrix_t* getWaveTable () { return &wftable; }
+	static std::vector<int16_t> buildWaveTable ();
 
 	/**
-	* Build pulldown table for use by WaveformGenerator.
+	* Build pulldown table for use by WaveformGenerator
 	*
 	* @param model Chip model to use
 	* @return Pulldown table
 	*/
-	matrix_t* buildPulldownTable ( ChipModel model );
-};
+	static std::vector<int16_t> buildPulldownTable ( ChipModel model );
+}
 
 } // namespace reSIDfp

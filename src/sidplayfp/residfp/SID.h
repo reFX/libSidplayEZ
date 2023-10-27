@@ -73,11 +73,12 @@ private:
 	// Filter used, if model is set to 8580
 	Filter8580	filter8580;
 
-	/**
-	* External filter that provides high-pass and low-pass filtering
-	* to adjust sound tone slightly.
-	*/
+	// External filter that provides high-pass and low-pass filtering to adjust sound tone slightly
 	ExternalFilter	externalFilter;
+
+	// Table of waveforms
+	std::vector<int16_t>	waveTable;
+	std::vector<int16_t>	pulldownTable;
 
 	/// Resampler used by audio generation code.
 	std::unique_ptr<TwoPassSincResampler> resampler;

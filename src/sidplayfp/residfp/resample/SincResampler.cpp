@@ -25,9 +25,6 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
-#include <map>
-#include <iostream>
-#include <sstream>
 
 constexpr auto	M_PI = 3.14159265358979323846;
 
@@ -42,16 +39,8 @@ constexpr auto	M_PI = 3.14159265358979323846;
 	#include <arm_neon.h>
 #endif
 
-#include <mutex>
-
 namespace reSIDfp
 {
-
-typedef std::map<std::string, matrix_t> fir_cache_t;
-
-// Cache for the expensive FIR table computation results
-fir_cache_t FIR_CACHE;
-std::mutex FIR_CACHE_Lock;
 
 // Maximum error acceptable in I0 is 1e-6, or ~96 dB
 constexpr auto	I0E = 1e-6;
@@ -96,7 +85,7 @@ double I0 ( double x )
 * @param bLength length of the sinc buffer
 * @return convolved result
 */
-static int convolve ( const short* a, const short* b, int bLength )
+static int convolve ( const int16_t* a, const int16_t* b, int bLength )
 {
 	#ifdef HAVE_SSE2
 	//
@@ -210,41 +199,38 @@ static int convolve ( const short* a, const short* b, int bLength )
 int SincResampler::fir ( int subcycle )
 {
 	// Find the first of the nearest fir tables close to the phase
-	auto		firTableFirst = ( subcycle * firRES >> 10 );
-	const auto	firTableOffset = ( subcycle * firRES ) & 0x3ff;
+	auto		firTableFirst = subcycle * firRES >> 10;
+	const auto	firTableOffset = ( subcycle * firRES ) & 0x3FF;
 
-	// Find firN most recent samples, plus one extra in case the FIR wraps.
+	// Find firN most recent samples, plus one extra in case the FIR wraps
 	auto	sampleStart = sampleIndex - firN + RINGSIZE - 1;
 
-	const auto	v1 = convolve ( sample + sampleStart, ( *firTable )[ firTableFirst ], firN );
+	const auto	v1 = convolve ( sample + sampleStart, firTable.data () + firTableFirst * firN, firN );
 
-	// Use next FIR table, wrap around to first FIR table using
-	// previous sample.
+	// Use next FIR table, wrap around to first FIR table using previous sample
 	if ( ++firTableFirst == firRES )
 	{
 		firTableFirst = 0;
 		++sampleStart;
 	}
 
-	const auto	v2 = convolve ( sample + sampleStart, ( *firTable )[ firTableFirst ], firN );
+	const auto	v2 = convolve ( sample + sampleStart, firTable.data () + firTableFirst * firN, firN );
 
-	// Linear interpolation between the sinc tables yields good
-	// approximation for the exact value.
+	// Linear interpolation between the sinc tables yields good approximation for the exact value
 	return v1 + ( firTableOffset * ( v2 - v1 ) >> 10 );
 }
 //-----------------------------------------------------------------------------
 
 SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
-	: cyclesPerSample ( static_cast<int>( clockFrequency / samplingFrequency * 1024. ) )
+	: cyclesPerSample ( int ( clockFrequency / samplingFrequency * 1024.0 ) )
 {
 	// 16 bits -> -96dB stopband attenuation.
 	const auto	A = -20.0 * std::log10 ( 1.0 / ( 1 << BITS ) );
-	// A fraction of the bandwidth is allocated to the transition band, which we double
-	// because we design the filter to transition halfway at nyquist.
+
+	// A fraction of the bandwidth is allocated to the transition band, which we double because we design the filter to transition halfway at Nyquist
 	const auto	dw = ( 1.0 - 2.0 * highestAccurateFrequency / samplingFrequency ) * M_PI * 2.0;
 
-	// For calculation of beta and N see the reference for the kaiserord
-	// function in the MATLAB Signal Processing Toolbox:
+	// For calculation of beta and N see the reference for the Kaiser window function in the MATLAB Signal Processing Toolbox:
 	// http://www.mathworks.com/help/signal/ref/kaiserord.html
 	const auto	beta = 0.1102 * ( A - 8.7 );
 	const auto	I0beta = I0 ( beta );
@@ -274,55 +260,35 @@ SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, 
 		// The filter test program indicates that the filter performs well, though.
 	}
 
-	// Create the map key
-	std::ostringstream o;
-	o << firN << "," << firRES << "," << cyclesPerSampleD;
-	const std::string firKey = o.str ();
+	// Allocate memory for FIR table
+	firTable.resize ( firRES * firN );
 
-	std::lock_guard<std::mutex> lock ( FIR_CACHE_Lock );
+	// The cutoff frequency is midway through the transition band, in effect the same as Nyquist
+	const auto	wc = M_PI;
 
-	fir_cache_t::iterator lb = FIR_CACHE.lower_bound ( firKey );
+	// Calculate the sinc tables
+	const auto	scale = 32768.0 * wc / cyclesPerSampleD / M_PI;
 
-	// The FIR computation is expensive and we set sampling parameters often, but
-	// from a very small set of choices. Thus, caching is used to speed initialization.
-	if ( lb != FIR_CACHE.end () && !( FIR_CACHE.key_comp ()( firKey, lb->first ) ) )
+	// We're not interested in the fractional part so use int division before converting to double
+	const auto	tmp = firN / 2;
+	const auto	firN_2 = double ( tmp );
+
+	auto*	dst = firTable.data ();
+	for ( auto i = 0; i < firRES; i++ )
 	{
-		firTable = &( lb->second );
-	}
-	else
-	{
-		// Allocate memory for FIR tables.
-		matrix_t tempTable ( firRES, firN );
+		const auto	jPhase = double ( i ) / firRES + firN_2;
 
-		firTable = &( FIR_CACHE.emplace_hint ( lb, fir_cache_t::value_type ( firKey, tempTable ) )->second );
-
-		// The cutoff frequency is midway through the transition band, in effect the same as nyquist.
-		const auto	wc = M_PI;
-
-		// Calculate the sinc tables.
-		const auto	scale = 32768.0 * wc / cyclesPerSampleD / M_PI;
-
-		// we're not interested in the fractional part
-		// so use int division before converting to double
-		const auto	tmp = firN / 2;
-		const auto	firN_2 = double ( tmp );
-
-		for ( auto i = 0; i < firRES; i++ )
+		for ( auto j = 0; j < firN; j++ )
 		{
-			const auto	jPhase = double ( i ) / firRES + firN_2;
+			const auto	x = j - jPhase;
 
-			for ( auto j = 0; j < firN; j++ )
-			{
-				const auto	x = j - jPhase;
+			const auto	xt = x / firN_2;
+			const auto	kaiserXt = std::fabs ( xt ) < 1.0 ? I0 ( beta * std::sqrt ( 1. - xt * xt ) ) / I0beta : 0.0;
 
-				const auto	xt = x / firN_2;
-				const auto	kaiserXt = std::fabs ( xt ) < 1. ? I0 ( beta * std::sqrt ( 1. - xt * xt ) ) / I0beta : 0.;
+			const auto	wt = wc * x / cyclesPerSampleD;
+			const auto	sincWt = std::fabs ( wt ) >= 1e-8 ? std::sin ( wt ) / wt : 1.0;
 
-				const auto	wt = wc * x / cyclesPerSampleD;
-				const auto	sincWt = std::fabs ( wt ) >= 1e-8 ? std::sin ( wt ) / wt : 1.;
-
-				( *firTable )[ i ][ j ] = short ( scale * sincWt * kaiserXt );
-			}
+			*dst++ = int16_t ( scale * sincWt * kaiserXt );
 		}
 	}
 }
@@ -352,7 +318,7 @@ bool SincResampler::input ( int input )
 		auto	value = double ( x - threshold ) / 32768.0;
 		value = t + a * std::tanh ( b * value );
 
-		return short ( value * 32768.0 );
+		return int16_t ( value * 32768.0 );
 	};
 
 	sample[ sampleIndex ] = sample[ sampleIndex + RINGSIZE ] = softClip ( input );

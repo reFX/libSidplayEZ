@@ -21,8 +21,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "array.h"
-
 namespace reSIDfp
 {
 
@@ -81,11 +79,11 @@ namespace reSIDfp
 class WaveformGenerator final
 {
 private:
-	matrix_t*	model_wave = nullptr;
-	matrix_t*	model_pulldown = nullptr;
+	std::vector<int16_t>*	model_wave = nullptr;
+	std::vector<int16_t>*	model_pulldown = nullptr;
 
-	short*	wave = nullptr;
-	short*	pulldown = nullptr;
+	int16_t*	wave = nullptr;
+	int16_t*	pulldown = nullptr;
 
 	// PWout = (PWn/40.95)%
 	unsigned int pw = 0;
@@ -154,8 +152,8 @@ private:
 	void shiftregBitfade ();
 
 public:
-	void setWaveformModels ( matrix_t* models );
-	void setPulldownModels ( matrix_t* models );
+	void setWaveformModels ( std::vector<int16_t>& models );
+	void setPulldownModels ( std::vector<int16_t>& models );
 
 	/**
 	* Set the chip model.
