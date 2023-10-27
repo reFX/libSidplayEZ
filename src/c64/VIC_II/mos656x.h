@@ -24,7 +24,6 @@
 
 #include <stdint.h>
 
-#include "lightpen.h"
 #include "sprites.h"
 #include "Event.h"
 #include "EventCallback.h"
@@ -111,17 +110,11 @@ private:
 	/// Set when new frame starts.
 	bool vblanking;
 
-	/// Is CIA asserting lightpen?
-	bool lpAsserted;
-
 	/// internal IRQ flags
 	uint8_t irqFlags;
 
 	/// masks for the IRQ flags
 	uint8_t irqMask;
-
-	/// Light pen
-	Lightpen lp;
 
 	/// the 8 sprites data
 	Sprites sprites;
@@ -131,7 +124,6 @@ private:
 
 	EventCallback<MOS656X> badLineStateChangeEvent;
 	EventCallback<MOS656X> rasterYIRQEdgeDetectorEvent;
-	EventCallback<MOS656X> lightpenTriggerEvent;
 
 private:
 	event_clock_t clockPAL ();
@@ -146,27 +138,28 @@ private:
 	/**
 	* AEC state was updated.
 	*/
-	void badLineStateChange () { setBA ( !isBadLine ); }
+	void badLineStateChange () { setBA ( ! isBadLine ); }
 
 	/**
 	* RasterY IRQ edge detector.
 	*/
 	void rasterYIRQEdgeDetector ()
 	{
-		const bool oldRasterYIRQCondition = rasterYIRQCondition;
+		const auto	oldRasterYIRQCondition = rasterYIRQCondition;
 		rasterYIRQCondition = rasterY == readRasterLineIRQ ();
-		if ( !oldRasterYIRQCondition && rasterYIRQCondition )
+		if ( ! oldRasterYIRQCondition && rasterYIRQCondition )
 			activateIRQFlag ( IRQ_RASTER );
 	}
 
-	void lightpenTrigger ()
+/*	void lightpenTrigger ()
 	{
-		// Synchronize simulation
-		sync ();
-
-		if ( lp.trigger ( lineCycle, rasterY ) )
-			activateIRQFlag ( IRQ_LIGHTPEN );
+ 		// Synchronize simulation
+ 		sync ();
+ 
+ 		if ( lp.trigger ( lineCycle, rasterY ) )
+ 			activateIRQFlag ( IRQ_LIGHTPEN );
 	}
+*/
 
 	/**
 	* Set an IRQ flag and trigger an IRQ if the corresponding IRQ mask is set.
@@ -262,10 +255,10 @@ private:
 			vblanking = false;
 			rasterY = 0;
 			rasterYIRQEdgeDetector ();
-			lp.untrigger ();
 
-			if ( lpAsserted && lp.retrigger () )
-				activateIRQFlag ( IRQ_LIGHTPEN );
+//			lp.untrigger ();
+// 			if ( lpAsserted && lp.retrigger () )
+// 				activateIRQFlag ( IRQ_LIGHTPEN );
 		}
 	}
 
@@ -331,16 +324,6 @@ public:
 	* Set chip model.
 	*/
 	void chip ( model_t model );
-
-	/**
-	* Trigger the lightpen. Sets the lightpen usage flag.
-	*/
-	void triggerLightpen ();
-
-	/**
-	* Clears the lightpen usage flag.
-	*/
-	void clearLightpen ();
 
 	/**
 	* Reset VIC II.

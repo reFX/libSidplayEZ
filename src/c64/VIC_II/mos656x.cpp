@@ -58,7 +58,6 @@ MOS656X::MOS656X ( EventScheduler& scheduler )
 	, sprites ( regs )
 	, badLineStateChangeEvent ( "Update AEC signal", *this, &MOS656X::badLineStateChange )
 	, rasterYIRQEdgeDetectorEvent ( "RasterY changed", *this, &MOS656X::rasterYIRQEdgeDetector )
-	, lightpenTriggerEvent ( "Trigger lightpen", *this, &MOS656X::lightpenTrigger )
 {
 	modelData[ MOS6567R56A ]	= { 262, 64, &MOS656X::clockOldNTSC };	// Old NTSC (MOS6567R56A)
 	modelData[ MOS6567R8 ]		= { 263, 65, &MOS656X::clockNTSC };		// NTSC-M   (MOS6567R8)
@@ -82,11 +81,11 @@ void MOS656X::reset ()
 	rasterYIRQCondition = false;
 	rasterClk = 0;
 	vblanking = false;
-	lpAsserted = false;
+//	lpAsserted = false;
 
 	std::fill_n ( regs, std::size ( regs ), 0 );
 
-	lp.reset ();
+//	lp.reset ();
 	sprites.reset ();
 
 	eventScheduler.cancel ( *this );
@@ -100,7 +99,7 @@ void MOS656X::chip ( model_t model )
 	cyclesPerLine = modelData[ model ].cyclesPerLine;
 	clock = modelData[ model ].clock;
 
-	lp.setScreenSize ( maxRasters, cyclesPerLine );
+//	lp.setScreenSize ( maxRasters, cyclesPerLine );
 
 	reset ();
 }
@@ -117,8 +116,8 @@ uint8_t MOS656X::read ( uint8_t addr )
 	{
 		case 0x11:		return ( regs[ addr ] & 0x7f ) | ( ( rasterY & 0x100 ) >> 1 );  // Control register 1
 		case 0x12:      return rasterY & 0xff;                                          // Raster counter
-		case 0x13:      return lp.getX ();
-		case 0x14:      return lp.getY ();
+		case 0x13:      return 0;
+		case 0x14:      return 0;
 		case 0x19:  	return irqFlags | 0x70;                                         // Interrupt Pending Register
 		case 0x1a:      return irqMask | 0xf0;                                          // Interrupt Mask Register
 
@@ -674,18 +673,18 @@ event_clock_t MOS656X::clockOldNTSC ()
 }
 //-----------------------------------------------------------------------------
 
-void MOS656X::triggerLightpen ()
-{
-	lpAsserted = true;
-
-	eventScheduler.schedule ( lightpenTriggerEvent, 1 );
-}
-//-----------------------------------------------------------------------------
-
-void MOS656X::clearLightpen ()
-{
-	lpAsserted = false;
-}
-//-----------------------------------------------------------------------------
+// void MOS656X::triggerLightpen ()
+// {
+// 	lpAsserted = true;
+// 
+// 	eventScheduler.schedule ( lightpenTriggerEvent, 1 );
+// }
+// //-----------------------------------------------------------------------------
+// 
+// void MOS656X::clearLightpen ()
+// {
+// 	lpAsserted = false;
+// }
+// //-----------------------------------------------------------------------------
 
 }

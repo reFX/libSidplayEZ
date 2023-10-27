@@ -174,12 +174,6 @@ protected:
 	// Event context.
 	EventScheduler&	eventScheduler;
 
-	// Ports
-	uint8_t&	pra;
-	uint8_t&	prb;
-	uint8_t&	ddra;
-	uint8_t&	ddrb;
-
 	/// These are all CIA registers.
 	uint8_t	regs[ 0x10 ];
 
@@ -231,11 +225,6 @@ private:
 	/** Timer B underflow. */
 	void underflowB ();
 
-	/**
-	* Handle the serial port.
-	*/
-	void handleSerialPort ();
-
 protected:
 	/**
 	* Create a new CIA.
@@ -252,8 +241,6 @@ protected:
 	*/
 	virtual void interrupt ( bool state ) = 0;
 
-	virtual void portA () {}
-	virtual void portB () {}
 
 	/**
 	* Timers can appear on the port.

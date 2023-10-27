@@ -31,8 +31,6 @@ namespace libsidplayfp
 
 enum
 {
-	PRA = 0,
-	PRB = 1,
 	DDRA = 2,
 	DDRB = 3,
 	TAL = 4,
@@ -49,30 +47,31 @@ enum
 	CRA = 14,
 	CRB = 15
 };
+//-----------------------------------------------------------------------------
 
 // Timer A
-
 void TimerA::underFlow ()
 {
 	parent.underflowA ();
 }
+//-----------------------------------------------------------------------------
 
 // Timer B
 void TimerB::underFlow ()
 {
 	parent.underflowB ();
 }
+//-----------------------------------------------------------------------------
 
 // Interrupt Source 8521
-
 void InterruptSource8521::trigger ( uint8_t interruptMask )
 {
 	if ( InterruptSource::isTriggered ( interruptMask ) )
 		schedule ( 0 );
 }
+//-----------------------------------------------------------------------------
 
 // Interrupt Source 6526
-
 void InterruptSource6526::trigger ( uint8_t interruptMask )
 {
 	// interrupts are delayed by 1 clk on old CIAs
@@ -113,10 +112,6 @@ MOS652X::MOS652X ( EventScheduler& scheduler )
 	: interruptSource6526 ( scheduler, *this )
 	, interruptSource8521 ( scheduler, *this )
 	, eventScheduler ( scheduler )
-	, pra ( regs[ PRA ] )
-	, prb ( regs[ PRB ] )
-	, ddra ( regs[ DDRA ] )
-	, ddrb ( regs[ DDRB ] )
 	, timerA ( scheduler, *this )
 	, timerB ( scheduler, *this )
 	, interruptSource ( &interruptSource6526 )
@@ -175,8 +170,6 @@ uint8_t MOS652X::read ( uint8_t addr )
 
 	switch ( addr )
 	{
-		case PRA:		return ( regs[ PRA ] | ~regs[ DDRA ] ); // Simulate a serial port
-		case PRB:		return adjustDataPort ( regs[ PRB ] | ~regs[ DDRB ] );
 		case TAL:		return endian_get16_lo8 ( timerA.getTimer () );
 		case TAH:		return endian_get16_hi8 ( timerA.getTimer () );
 		case TBL:		return endian_get16_lo8 ( timerB.getTimer () );
@@ -209,16 +202,6 @@ void MOS652X::write ( uint8_t addr, uint8_t data )
 
 	switch ( addr )
 	{
-		case PRA:
-		case DDRA:
-			portA ();
-			break;
-
-		case PRB:
-		case DDRB:
-			portB ();
-			break;
-
 		case TAL:		timerA.latchLo ( data );			break;
 		case TAH:		timerA.latchHi ( data );			break;
 		case TBL:		timerB.latchLo ( data );			break;
@@ -302,5 +285,4 @@ void MOS652X::setModel ( model_t model )
 		interruptSource = &interruptSource8521;
 }
 //-----------------------------------------------------------------------------
-
 }

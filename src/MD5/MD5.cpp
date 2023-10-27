@@ -116,8 +116,9 @@ void MD5::reset ()
 	abcd[ 1 ] = 0xefcdab89;
 	abcd[ 2 ] = 0x98badcfe;
 	abcd[ 3 ] = 0x10325476;
-	memset ( digest, 0, 16 );
-	memset ( buf, 0, 64 );
+
+	std::fill_n ( digest, std::size ( digest ), 0 );
+	std::fill_n ( buf, std::size ( buf ), 0 );
 }
 //-----------------------------------------------------------------------------
 

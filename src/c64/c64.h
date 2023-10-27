@@ -173,11 +173,6 @@ private:
 	*/
 	inline void setBA ( bool state ) override;
 
-	/**
-	* @param state fire pressed, active low
-	*/
-	inline void lightpen ( bool state ) override;
-
 	void resetIoBank ();
 
 public:
@@ -288,15 +283,6 @@ void c64::setBA ( bool state )
 
 	// Signal changes in BA to interested parties
 	cpu.setRDY ( state );
-}
-//-----------------------------------------------------------------------------
-
-void c64::lightpen ( bool state )
-{
-	if ( !state )
-		vic.triggerLightpen ();
-	else
-		vic.clearLightpen ();
 }
 //-----------------------------------------------------------------------------
 

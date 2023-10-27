@@ -118,9 +118,6 @@ void Timer::clock ()
 		const auto	toggle = ( lastControlValue & 0x06 ) == 6;
 		pbToggle = toggle && ! pbToggle;
 
-//		// Implementation of the serial port
-//		serialPort ();
-
 		// Timer A signals underflow handling: IRQ/B-count
 		underFlow ();
 	}

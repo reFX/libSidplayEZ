@@ -51,12 +51,6 @@ protected:
 		m_env.interruptIRQ ( state );
 	}
 
-	void portB () override
-	{
-		// We should call adjustDataPort here, but we're only interested in bit 4
-		m_env.lightpen ( ( prb | ~ddrb ) & 0x10 );
-	}
-
 public:
 	c64cia1 ( c64env& env )
 		: MOS652X ( env.scheduler () )
