@@ -123,7 +123,7 @@ void ReSIDfp::sampling ( float systemclock, float freq )
 }
 //-----------------------------------------------------------------------------
 
-void ReSIDfp::model ( SidConfig::sid_model_t model, bool digiboost )
+void ReSIDfp::model ( SidConfig::sid_model_t model )
 {
 	//
 	// Set the emulated SID model
@@ -134,12 +134,12 @@ void ReSIDfp::model ( SidConfig::sid_model_t model, bool digiboost )
 	{
 		case SidConfig::MOS6581:
 			chipModel = reSIDfp::MOS6581;
-			m_sid.input ( 0 );
+//			m_sid.input ( 0 );
 			break;
 
 		case SidConfig::MOS8580:
 			chipModel = reSIDfp::MOS8580;
-			m_sid.input ( digiboost ? -32768 : 0 );
+//			m_sid.input ( digiboost ? -32768 : 0 );
 			break;
 
 		default:

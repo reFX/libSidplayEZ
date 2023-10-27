@@ -30,6 +30,11 @@ namespace reSIDfp
 class Filter
 {
 protected:
+	unsigned short** mixer = nullptr;
+	unsigned short** summer = nullptr;
+	unsigned short** gain_res = nullptr;
+	unsigned short** gain_vol = nullptr;
+
 	/// Current volume amplifier setting.
 	unsigned short* currentGain = nullptr;
 
@@ -92,10 +97,9 @@ protected:
 	/**
 	* Mixing configuration modified (offsets change)
 	*/
-	virtual void updatedMixing () = 0;
+	void updatedMixing ();
 
 public:
-	Filter () {}
 	virtual ~Filter () {}
 
 	/**

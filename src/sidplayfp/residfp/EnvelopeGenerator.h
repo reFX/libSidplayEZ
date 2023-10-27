@@ -1,109 +1,109 @@
 #pragma once
 /*
- * This file is part of libsidplayfp, a SID player engine.
- *
- * Copyright 2011-2022 Leandro Nini <drfiemost@users.sourceforge.net>
- * Copyright 2018 VICE Project
- * Copyright 2007-2010 Antti Lankila
- * Copyright 2004,2010 Dag Lem <resid@nimrod.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+* This file is part of libsidplayfp, a SID player engine.
+*
+* Copyright 2011-2022 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2018 VICE Project
+* Copyright 2007-2010 Antti Lankila
+* Copyright 2004,2010 Dag Lem <resid@nimrod.no>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 namespace reSIDfp
 {
 /**
-	* A 15 bit [LFSR] is used to implement the envelope rates, in effect dividing
-	* the clock to the envelope counter by the currently selected rate period.
-	*
-	* In addition, another 5 bit counter is used to implement the exponential envelope decay,
-	* in effect further dividing the clock to the envelope counter.
-	* The period of this counter is set to 1, 2, 4, 8, 16, 30 at the envelope counter
-	* values 255, 93, 54, 26, 14, 6, respectively.
-	*
-	* [LFSR]: https://en.wikipedia.org/wiki/Linear_feedback_shift_register
-	*/
-class EnvelopeGenerator
+* A 15 bit [LFSR] is used to implement the envelope rates, in effect dividing
+* the clock to the envelope counter by the currently selected rate period.
+*
+* In addition, another 5 bit counter is used to implement the exponential envelope decay,
+* in effect further dividing the clock to the envelope counter.
+* The period of this counter is set to 1, 2, 4, 8, 16, 30 at the envelope counter
+* values 255, 93, 54, 26, 14, 6, respectively.
+*
+* [LFSR]: https://en.wikipedia.org/wiki/Linear_feedback_shift_register
+*/
+class EnvelopeGenerator final
 {
 private:
 	/**
-		* The envelope state machine's distinct states. In addition to this,
-		* envelope has a hold mode, which freezes envelope counter to zero.
-		*/
+	* The envelope state machine's distinct states. In addition to this,
+	* envelope has a hold mode, which freezes envelope counter to zero.
+	*/
 	enum State
 	{
 		ATTACK, DECAY_SUSTAIN, RELEASE
 	};
 
 private:
-	/// XOR shift register for ADSR prescaling.
-	unsigned int lfsr;
+	// XOR shift register for ADSR prescaling
+	unsigned int lfsr = 0x7fff;
 
-	/// Comparison value (period) of the rate counter before next event.
-	unsigned int rate;
-
-	/**
-		* During release mode, the SID approximates envelope decay via piecewise
-		* linear decay rate.
-		*/
-	unsigned int exponential_counter;
+	// Comparison value (period) of the rate counter before next event
+	unsigned int rate = 0;
 
 	/**
-		* Comparison value (period) of the exponential decay counter before next
-		* decrement.
-		*/
-	unsigned int exponential_counter_period;
-	unsigned int new_exponential_counter_period;
+	* During release mode, the SID approximates envelope decay via piecewise
+	* linear decay rate.
+	*/
+	unsigned int exponential_counter = 0;
 
-	unsigned int state_pipeline;
+	/**
+	* Comparison value (period) of the exponential decay counter before next
+	* decrement.
+	*/
+	unsigned int exponential_counter_period = 1;
+	unsigned int new_exponential_counter_period = 0;
+
+	unsigned int state_pipeline = 0;
 
 	///
-	unsigned int envelope_pipeline;
+	unsigned int envelope_pipeline = 0;
 
-	unsigned int exponential_pipeline;
+	unsigned int exponential_pipeline = 0;
 
-	/// Current envelope state
-	State state;
-	State next_state;
+	// Current envelope state
+	State state = RELEASE;
+	State next_state = RELEASE;
 
-	/// Whether counter is enabled. Only switching to ATTACK can release envelope.
-	bool counter_enabled;
+	// Whether counter is enabled. Only switching to ATTACK can release envelope
+	bool counter_enabled = true;
 
 	/// Gate bit
-	bool gate;
+	bool gate = false;
 
 	///
-	bool resetLfsr;
+	bool resetLfsr = false;
 
-	/// The current digital value of envelope output.
-	unsigned char envelope_counter;
+	/// The current digital value of envelope output
+	unsigned char envelope_counter = 0xaa;
 
 	/// Attack register
-	unsigned char attack;
+	unsigned char attack = 0;
 
 	/// Decay register
-	unsigned char decay;
+	unsigned char decay = 0;
 
 	/// Sustain register
-	unsigned char sustain;
+	unsigned char sustain = 0;
 
 	/// Release register
-	unsigned char release;
+	unsigned char release = 0;
 
 	/// The ENV3 value, sampled at the first phase of the clock
-	unsigned char env3;
+	unsigned char env3 = 0;
 
 private:
 	/**
@@ -144,76 +144,52 @@ private:
 
 public:
 	/**
-		* SID clocking.
-		*/
+	* SID clocking.
+	*/
 	void clock ();
 
 	/**
-		* Get the Envelope Generator digital output.
-		*/
+	* Get the Envelope Generator digital output.
+	*/
 	unsigned int output () const { return envelope_counter; }
 
 	/**
-		* Constructor.
-		*/
-	EnvelopeGenerator () :
-		lfsr ( 0x7fff ),
-		rate ( 0 ),
-		exponential_counter ( 0 ),
-		exponential_counter_period ( 1 ),
-		new_exponential_counter_period ( 0 ),
-		state_pipeline ( 0 ),
-		envelope_pipeline ( 0 ),
-		exponential_pipeline ( 0 ),
-		state ( RELEASE ),
-		next_state ( RELEASE ),
-		counter_enabled ( true ),
-		gate ( false ),
-		resetLfsr ( false ),
-		envelope_counter ( 0xaa ),
-		attack ( 0 ),
-		decay ( 0 ),
-		sustain ( 0 ),
-		release ( 0 ),
-		env3 ( 0 )
-	{}
-
-	/**
-		* SID reset.
-		*/
+	* SID reset.
+	*/
 	void reset ();
 
 	/**
-		* Write control register.
-		*
-		* @param control
-		*            control register value
-		*/
+	* Write control register.
+	*
+	* @param control
+	*            control register value
+	*/
 	void writeCONTROL_REG ( unsigned char control );
 
 	/**
-		* Write Attack/Decay register.
-		*
-		* @param attack_decay
-		*            attack/decay value
-		*/
+	* Write Attack/Decay register.
+	*
+	* @param attack_decay
+	*            attack/decay value
+	*/
 	void writeATTACK_DECAY ( unsigned char attack_decay );
 
 	/**
-		* Write Sustain/Release register.
-		*
-		* @param sustain_release
-		*            sustain/release value
-		*/
+	* Write Sustain/Release register.
+	*
+	* @param sustain_release
+	*            sustain/release value
+	*/
 	void writeSUSTAIN_RELEASE ( unsigned char sustain_release );
 
 	/**
-		* Return the envelope current value.
-		*
-		* @return envelope counter value
-		*/
+	* Return the envelope current value.
+	*
+	* @return envelope counter value
+	*/
 	unsigned char readENV () const { return env3; }
 };
+//-----------------------------------------------------------------------------
 
 inline void EnvelopeGenerator::clock ()
 {
@@ -228,7 +204,7 @@ inline void EnvelopeGenerator::clock ()
 	if ( state_pipeline )
 		state_change ();
 
-	if ( ( envelope_pipeline != 0 ) && ( --envelope_pipeline == 0 ) )
+	if ( envelope_pipeline != 0 && --envelope_pipeline == 0 )
 	{
 		if ( counter_enabled )
 		{
@@ -240,7 +216,7 @@ inline void EnvelopeGenerator::clock ()
 					state_pipeline = 3;
 				}
 			}
-			else if ( ( state == DECAY_SUSTAIN ) || ( state == RELEASE ) )
+			else if ( state == DECAY_SUSTAIN || state == RELEASE )
 			{
 				if ( --envelope_counter == 0x00 )
 					counter_enabled = false;
@@ -249,18 +225,17 @@ inline void EnvelopeGenerator::clock ()
 			set_exponential_counter ();
 		}
 	}
-	else if ( ( exponential_pipeline != 0 ) && ( --exponential_pipeline == 0 ) )
+	else if ( exponential_pipeline != 0 && --exponential_pipeline == 0 )
 	{
 		exponential_counter = 0;
 
-		if ( ( ( state == DECAY_SUSTAIN ) && ( envelope_counter != sustain ) )
-				|| ( state == RELEASE ) )
+		if (	( state == DECAY_SUSTAIN && envelope_counter != sustain )
+			||	state == RELEASE )
 		{
 			// The envelope counter can flip from 0x00 to 0xff by changing state to
 			// attack, then to release. The envelope counter will then continue
 			// counting down in the release state.
 			// This has been verified by sampling ENV3.
-
 			envelope_pipeline = 1;
 		}
 	}
@@ -279,7 +254,6 @@ inline void EnvelopeGenerator::clock ()
 			// release, then to attack. The envelope counter is then frozen at
 			// zero; to unlock this situation the state must be changed to release,
 			// then to attack. This has been verified by sampling ENV3.
-
 			envelope_pipeline = 2;
 		}
 		else
@@ -309,46 +283,47 @@ inline void EnvelopeGenerator::clock ()
 		resetLfsr = true;
 	}
 }
+//-----------------------------------------------------------------------------
 
 /**
-	* This is what happens on chip during state switching,
-	* based on die reverse engineering and transistor level
-	* emulation.
-	*
-	* Attack
-	*
-	*  0 - Gate on
-	*  1 - Counting direction changes
-	*      During this cycle the decay rate is "accidentally" activated
-	*  2 - Counter is being inverted
-	*      Now the attack rate is correctly activated
-	*      Counter is enabled
-	*  3 - Counter will be counting upward from now on
-	*
-	* Decay
-	*
-	*  0 - Counter == $ff
-	*  1 - Counting direction changes
-	*      The attack state is still active
-	*  2 - Counter is being inverted
-	*      During this cycle the decay state is activated
-	*  3 - Counter will be counting downward from now on
-	*
-	* Release
-	*
-	*  0 - Gate off
-	*  1 - During this cycle the release state is activated if coming from sustain/decay
-	* *2 - Counter is being inverted, the release state is activated
-	* *3 - Counter will be counting downward from now on
-	*
-	*  (* only if coming directly from Attack state)
-	*
-	* Freeze
-	*
-	*  0 - Counter == $00
-	*  1 - Nothing
-	*  2 - Counter is disabled
-	*/
+* This is what happens on chip during state switching,
+* based on die reverse engineering and transistor level
+* emulation.
+*
+* Attack
+*
+*  0 - Gate on
+*  1 - Counting direction changes
+*      During this cycle the decay rate is "accidentally" activated
+*  2 - Counter is being inverted
+*      Now the attack rate is correctly activated
+*      Counter is enabled
+*  3 - Counter will be counting upward from now on
+*
+* Decay
+*
+*  0 - Counter == $ff
+*  1 - Counting direction changes
+*      The attack state is still active
+*  2 - Counter is being inverted
+*      During this cycle the decay state is activated
+*  3 - Counter will be counting downward from now on
+*
+* Release
+*
+*  0 - Gate off
+*  1 - During this cycle the release state is activated if coming from sustain/decay
+* *2 - Counter is being inverted, the release state is activated
+* *3 - Counter will be counting downward from now on
+*
+*  (* only if coming directly from Attack state)
+*
+* Freeze
+*
+*  0 - Counter == $00
+*  1 - Nothing
+*  2 - Counter is disabled
+*/
 inline void EnvelopeGenerator::state_change ()
 {
 	state_pipeline--;
@@ -379,8 +354,8 @@ inline void EnvelopeGenerator::state_change ()
 			break;
 
 		case RELEASE:
-			if ( ( ( state == ATTACK ) && ( state_pipeline == 0 ) )
-					|| ( ( state == DECAY_SUSTAIN ) && ( state_pipeline == 1 ) ) )
+			if (	( state == ATTACK			&&	state_pipeline == 0 )
+				||	( state == DECAY_SUSTAIN	&&	state_pipeline == 1 ) )
 			{
 				state = RELEASE;
 				rate = adsrtable[ release ];
@@ -388,6 +363,7 @@ inline void EnvelopeGenerator::state_change ()
 			break;
 	}
 }
+//-----------------------------------------------------------------------------
 
 inline void EnvelopeGenerator::set_exponential_counter ()
 {
@@ -423,4 +399,6 @@ inline void EnvelopeGenerator::set_exponential_counter ()
 			break;
 	}
 }
+//-----------------------------------------------------------------------------
+
 } // namespace reSIDfp

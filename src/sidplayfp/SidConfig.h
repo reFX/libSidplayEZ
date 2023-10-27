@@ -97,11 +97,6 @@ public:
     bool forceSidModel = false;
 
     /**
-     * Enable digiboost when 8580 SID model is used.
-     */
-    bool digiBoost = false;
-
-    /**
      * Intended cia model.
      */
     cia_model_t ciaModel = MOS6526;
@@ -147,7 +142,6 @@ public:
 			    ||  forceC64Model != config.forceC64Model
 			    ||  defaultSidModel != config.defaultSidModel
 			    ||  forceSidModel != config.forceSidModel
-			    ||  digiBoost != config.digiBoost
 			    ||  ciaModel != config.ciaModel
 			    ||  playback != config.playback
 			    ||  frequency != config.frequency

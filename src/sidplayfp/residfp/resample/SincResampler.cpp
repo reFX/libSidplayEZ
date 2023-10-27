@@ -29,11 +29,11 @@
 #include <iostream>
 #include <sstream>
 
-#define M_PI    3.14159265358979323846
+constexpr auto	M_PI = 3.14159265358979323846;
 
- //
- // SSE2 detection
- //
+//
+// SSE2 detection
+//
 #if (defined(_M_AMD64) || defined(_M_X64)) || __SSE2__
 	#define HAVE_SSE2
 	#include <emmintrin.h>
@@ -49,49 +49,53 @@ namespace reSIDfp
 
 typedef std::map<std::string, matrix_t> fir_cache_t;
 
-/// Cache for the expensive FIR table computation results.
+// Cache for the expensive FIR table computation results
 fir_cache_t FIR_CACHE;
 std::mutex FIR_CACHE_Lock;
 
-/// Maximum error acceptable in I0 is 1e-6, or ~96 dB.
-const double I0E = 1e-6;
+// Maximum error acceptable in I0 is 1e-6, or ~96 dB
+constexpr auto	I0E = 1e-6;
+constexpr auto	BITS = 16;
 
-const int BITS = 16;
+//-----------------------------------------------------------------------------
 
 /**
-	* Compute the 0th order modified Bessel function of the first kind.
-	* This function is originally from resample-1.5/filterkit.c by J. O. Smith.
-	* It is used to build the Kaiser window for resampling.
-	*
-	* @param x evaluate I0 at x
-	* @return value of I0 at x.
-	*/
+* Compute the 0th order modified Bessel function of the first kind.
+* This function is originally from resample-1.5/filterkit.c by J. O. Smith.
+* It is used to build the Kaiser window for resampling.
+*
+* @param x evaluate I0 at x
+* @return value of I0 at x.
+*/
 double I0 ( double x )
 {
-	double sum = 1.;
-	double u = 1.;
-	double n = 1.;
-	const double halfx = x / 2.;
+	auto	sum = 1.0;
+	auto	u = 1.0;
+	auto	n = 1.0;
+	const auto	halfx = x / 2.0;
 
 	do
 	{
-		const double temp = halfx / n;
+		const auto	temp = halfx / n;
+
 		u *= temp * temp;
 		sum += u;
-		n += 1.;
+		n += 1.0;
+
 	} while ( u >= I0E * sum );
 
 	return sum;
 }
+//-----------------------------------------------------------------------------
 
 /**
-	* Calculate convolution with sample and sinc.
-	*
-	* @param a sample buffer input
-	* @param b sinc buffer
-	* @param bLength length of the sinc buffer
-	* @return convolved result
-	*/
+* Calculate convolution with sample and sinc.
+*
+* @param a sample buffer input
+* @param b sinc buffer
+* @param bLength length of the sinc buffer
+* @return convolved result
+*/
 static int convolve ( const short* a, const short* b, int bLength )
 {
 	#ifdef HAVE_SSE2
@@ -201,15 +205,16 @@ static int convolve ( const short* a, const short* b, int bLength )
 
 	return ( out + ( 1 << 14 ) ) >> 15;
 }
+//-----------------------------------------------------------------------------
 
 int SincResampler::fir ( int subcycle )
 {
 	// Find the first of the nearest fir tables close to the phase
-	int firTableFirst = ( subcycle * firRES >> 10 );
-	const int firTableOffset = ( subcycle * firRES ) & 0x3ff;
+	auto		firTableFirst = ( subcycle * firRES >> 10 );
+	const auto	firTableOffset = ( subcycle * firRES ) & 0x3ff;
 
 	// Find firN most recent samples, plus one extra in case the FIR wraps.
-	int sampleStart = sampleIndex - firN + RINGSIZE - 1;
+	auto	sampleStart = sampleIndex - firN + RINGSIZE - 1;
 
 	const auto	v1 = convolve ( sample + sampleStart, ( *firTable )[ firTableFirst ], firN );
 
@@ -227,42 +232,42 @@ int SincResampler::fir ( int subcycle )
 	// approximation for the exact value.
 	return v1 + ( firTableOffset * ( v2 - v1 ) >> 10 );
 }
+//-----------------------------------------------------------------------------
 
 SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
 	: cyclesPerSample ( static_cast<int>( clockFrequency / samplingFrequency * 1024. ) )
 {
 	// 16 bits -> -96dB stopband attenuation.
-	const double A = -20.0 * std::log10 ( 1.0 / ( 1 << BITS ) );
+	const auto	A = -20.0 * std::log10 ( 1.0 / ( 1 << BITS ) );
 	// A fraction of the bandwidth is allocated to the transition band, which we double
 	// because we design the filter to transition halfway at nyquist.
-	const double dw = ( 1.0 - 2.0 * highestAccurateFrequency / samplingFrequency ) * M_PI * 2.0;
+	const auto	dw = ( 1.0 - 2.0 * highestAccurateFrequency / samplingFrequency ) * M_PI * 2.0;
 
 	// For calculation of beta and N see the reference for the kaiserord
 	// function in the MATLAB Signal Processing Toolbox:
 	// http://www.mathworks.com/help/signal/ref/kaiserord.html
-	const double beta = 0.1102 * ( A - 8.7 );
-	const double I0beta = I0 ( beta );
-	const double cyclesPerSampleD = clockFrequency / samplingFrequency;
+	const auto	beta = 0.1102 * ( A - 8.7 );
+	const auto	I0beta = I0 ( beta );
+	const auto	cyclesPerSampleD = clockFrequency / samplingFrequency;
 
 	{
 		// The filter order will maximally be 124 with the current constraints.
 		// N >= (96.33 - 7.95)/(2 * pi * 2.285 * (maxfreq - passbandfreq) >= 123
 		// The filter order is equal to the number of zero crossings, i.e.
 		// it should be an even number (sinc is symmetric with respect to x = 0).
-		int N = static_cast<int>( ( A - 7.95 ) / ( 2.285 * dw ) + 0.5 );
+		auto	N = int ( ( A - 7.95 ) / ( 2.285 * dw ) + 0.5 );
 		N += N & 1;
 
 		// The filter length is equal to the filter order + 1.
 		// The filter length must be an odd number (sinc is symmetric with respect to
 		// x = 0).
-		firN = static_cast<int>( N * cyclesPerSampleD ) + 1;
-		firN |= 1;
+		firN = int ( ( N * cyclesPerSampleD ) + 1 ) | 1;
 
 		// Check whether the sample ring buffer would overflow.
 		assert ( firN < RINGSIZE );
 
 		// Error is bounded by err < 1.234 / L^2, so L = sqrt(1.234 / (2^-16)) = sqrt(1.234 * 2^16).
-		firRES = static_cast<int>( std::ceil ( std::sqrt ( 1.234 * ( 1 << BITS ) ) / cyclesPerSampleD ) );
+		firRES = int ( std::ceil ( std::sqrt ( 1.234 * ( 1 << BITS ) ) / cyclesPerSampleD ) );
 
 		// firN*firRES represent the total resolution of the sinc sampling. JOS
 		// recommends a length of 2^BITS, but we don't quite use that good a filter.
@@ -292,47 +297,64 @@ SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, 
 		firTable = &( FIR_CACHE.emplace_hint ( lb, fir_cache_t::value_type ( firKey, tempTable ) )->second );
 
 		// The cutoff frequency is midway through the transition band, in effect the same as nyquist.
-		const double wc = M_PI;
+		const auto	wc = M_PI;
 
 		// Calculate the sinc tables.
-		const double scale = 32768.0 * wc / cyclesPerSampleD / M_PI;
+		const auto	scale = 32768.0 * wc / cyclesPerSampleD / M_PI;
 
 		// we're not interested in the fractional part
 		// so use int division before converting to double
-		const int tmp = firN / 2;
-		const double firN_2 = static_cast<double>( tmp );
+		const auto	tmp = firN / 2;
+		const auto	firN_2 = double ( tmp );
 
-		for ( int i = 0; i < firRES; i++ )
+		for ( auto i = 0; i < firRES; i++ )
 		{
-			const double jPhase = (double)i / firRES + firN_2;
+			const auto	jPhase = double ( i ) / firRES + firN_2;
 
-			for ( int j = 0; j < firN; j++ )
+			for ( auto j = 0; j < firN; j++ )
 			{
-				const double x = j - jPhase;
+				const auto	x = j - jPhase;
 
-				const double xt = x / firN_2;
-				const double kaiserXt = std::fabs ( xt ) < 1. ? I0 ( beta * std::sqrt ( 1. - xt * xt ) ) / I0beta : 0.;
+				const auto	xt = x / firN_2;
+				const auto	kaiserXt = std::fabs ( xt ) < 1. ? I0 ( beta * std::sqrt ( 1. - xt * xt ) ) / I0beta : 0.;
 
-				const double wt = wc * x / cyclesPerSampleD;
-				const double sincWt = std::fabs ( wt ) >= 1e-8 ? std::sin ( wt ) / wt : 1.;
+				const auto	wt = wc * x / cyclesPerSampleD;
+				const auto	sincWt = std::fabs ( wt ) >= 1e-8 ? std::sin ( wt ) / wt : 1.;
 
-				( *firTable )[ i ][ j ] = static_cast<short>( scale * sincWt * kaiserXt );
+				( *firTable )[ i ][ j ] = short ( scale * sincWt * kaiserXt );
 			}
 		}
 	}
 }
+//-----------------------------------------------------------------------------
 
 bool SincResampler::input ( int input )
 {
 	auto	ready = false;
 
 	/*
-		* Clip the input as it may overflow the 16 bit range.
-		*
-		* Approximate measured input ranges:
-		* 6581: [-24262,+25080]  (Kawasaki_Synthesizer_Demo)
-		* 8580: [-21514,+35232]  (64_Forever, Drum_Fool)
-		*/
+	* Clip the input as it may overflow the 16 bit range.
+	*
+	* Approximate measured input ranges:
+	* 6581: [-24262,+25080]  (Kawasaki_Synthesizer_Demo)
+	* 8580: [-21514,+35232]  (64_Forever, Drum_Fool)
+	*/
+	auto softClip = [] ( int x )
+	{
+		constexpr auto	threshold = 28000;
+		if ( x < threshold )
+			return short ( x );
+
+		constexpr auto	t = threshold / 32768.0;
+		constexpr auto	a = 1.0 - t;
+		constexpr auto	b = 1.0 / a;
+
+		auto	value = double ( x - threshold ) / 32768.0;
+		value = t + a * std::tanh ( b * value );
+
+		return short ( value * 32768.0 );
+	};
+
 	sample[ sampleIndex ] = sample[ sampleIndex + RINGSIZE ] = softClip ( input );
 	sampleIndex = ( sampleIndex + 1 ) & ( RINGSIZE - 1 );
 
@@ -347,11 +369,13 @@ bool SincResampler::input ( int input )
 
 	return ready;
 }
+//-----------------------------------------------------------------------------
 
 void SincResampler::reset ()
 {
 	std::fill_n ( sample, std::size ( sample ), 0 );
 	sampleOffset = 0;
 }
+//-----------------------------------------------------------------------------
 
 } // namespace reSIDfp

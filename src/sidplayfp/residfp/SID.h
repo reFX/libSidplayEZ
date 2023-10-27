@@ -24,7 +24,13 @@
 #include <memory>
 #include <algorithm>
 
-#include "Filter.h"
+namespace reSIDfp
+{
+	typedef enum { MOS6581 = 1, MOS8580 } ChipModel;
+}
+
+#include "Filter6581.h"
+#include "Filter8580.h"
 #include "ExternalFilter.h"
 #include "Voice.h"
 #include "resample/TwoPassSincResampler.h"
@@ -32,12 +38,7 @@
 namespace reSIDfp
 {
 
-class Filter6581;
-class Filter8580;
-class Potentiometer;
 //-----------------------------------------------------------------------------
-
-typedef enum { MOS6581 = 1, MOS8580 } ChipModel;
 
 /**
 * SID error exception.
@@ -60,35 +61,29 @@ public:
 /**
 * MOS6581/MOS8580 emulation.
 */
-class SID
+class SID final
 {
 private:
-	/// Currently active filter
-	Filter* filter;
+	// Currently active filter
+	Filter*	filter;
 
-	/// Filter used, if model is set to 6581
-	std::unique_ptr<Filter6581> const filter6581;
+	// Filter used, if model is set to 6581
+	Filter6581	filter6581;
 
-	/// Filter used, if model is set to 8580
-	std::unique_ptr<Filter8580> const filter8580;
+	// Filter used, if model is set to 8580
+	Filter8580	filter8580;
 
 	/**
 	* External filter that provides high-pass and low-pass filtering
 	* to adjust sound tone slightly.
 	*/
-	std::unique_ptr<ExternalFilter> const externalFilter;
+	ExternalFilter	externalFilter;
 
 	/// Resampler used by audio generation code.
 	std::unique_ptr<TwoPassSincResampler> resampler;
 
-	/// Paddle X register support
-	std::unique_ptr<Potentiometer> const potX;
-
-	/// Paddle Y register support
-	std::unique_ptr<Potentiometer> const potY;
-
 	/// SID voices
-	std::unique_ptr<Voice> voice[ 3 ];
+	Voice	voice[ 3 ];
 
 	/// Time to live for the last written value
 	int busValueTtl;
@@ -132,7 +127,14 @@ private:
 	*
 	* @return the output sample
 	*/
-	int output () const;
+	inline int output ()
+	{
+		const auto  v1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
+		const auto  v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
+		const auto  v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
+
+		return externalFilter.clock ( filter->clock ( v1, v2, v3 ) );
+	}
 
 	/**
 	* Calculate the number of cycles according to current parameters
@@ -144,7 +146,6 @@ private:
 
 public:
 	SID ();
-	~SID ();
 
 	/**
 	* Set chip model.
@@ -163,16 +164,6 @@ public:
 	* SID reset.
 	*/
 	void reset ();
-
-	/**
-	* 16-bit input (EXT IN). Write 16-bit sample to audio input. NB! The caller
-	* is responsible for keeping the value within 16 bits. Note that to mix in
-	* an external audio signal, the signal should be resampled to 1MHz first to
-	* avoid sampling noise.
-	*
-	* @param value input level to set
-	*/
-	void input ( int value );
 
 	/**
 	* Read registers.
@@ -280,16 +271,6 @@ inline void SID::ageBusValue ( unsigned int n )
 }
 //-----------------------------------------------------------------------------
 
-inline int SID::output () const
-{
-	const auto  v1 = voice[ 0 ]->output ( voice[ 2 ]->wave () );
-	const auto  v2 = voice[ 1 ]->output ( voice[ 0 ]->wave () );
-	const auto  v3 = voice[ 2 ]->output ( voice[ 1 ]->wave () );
-
-	return externalFilter->clock ( filter->clock ( v1, v2, v3 ) );
-}
-//-----------------------------------------------------------------------------
-
 inline int SID::clock ( unsigned int cycles, short* buf )
 {
 	ageBusValue ( cycles );
@@ -303,14 +284,14 @@ inline int SID::clock ( unsigned int cycles, short* buf )
 			for ( auto i = 0u; i < delta_t; i++ )
 			{
 				// clock waveform generators
-				voice[ 0 ]->wave ()->clock ();
-				voice[ 1 ]->wave ()->clock ();
-				voice[ 2 ]->wave ()->clock ();
+				voice[ 0 ].waveformGenerator.clock ();
+				voice[ 1 ].waveformGenerator.clock ();
+				voice[ 2 ].waveformGenerator.clock ();
 
 				// clock envelope generators
-				voice[ 0 ]->envelope ()->clock ();
-				voice[ 1 ]->envelope ()->clock ();
-				voice[ 2 ]->envelope ()->clock ();
+				voice[ 0 ].envelopeGenerator.clock ();
+				voice[ 1 ].envelopeGenerator.clock ();
+				voice[ 2 ].envelopeGenerator.clock ();
 
 				if ( resampler->input ( output () ) )
 					buf[ s++ ] = short ( resampler->output () );

@@ -100,7 +100,7 @@ public:
 	/**
 	* Set SID model.
 	*/
-	virtual void model ( SidConfig::sid_model_t model, bool digiboost ) = 0;
+	virtual void model ( SidConfig::sid_model_t model ) = 0;
 
 	/**
 	* Set the sampling method.

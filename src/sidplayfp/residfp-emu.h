@@ -57,7 +57,7 @@ public:
 
 	void sampling ( float systemclock, float freq ) override;
 
-	void model ( SidConfig::sid_model_t model, bool digiboost ) override;
+	void model ( SidConfig::sid_model_t model ) override;
 
 	// Specific to resid
 	void filter6581Curve ( double filterCurve );

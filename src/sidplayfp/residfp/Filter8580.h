@@ -30,8 +30,6 @@
 namespace reSIDfp
 {
 
-class Integrator8580;
-
 /**
 * Filter for 8580 chip
 * --------------------
@@ -275,11 +273,6 @@ class Integrator8580;
 class Filter8580 final : public Filter
 {
 private:
-	unsigned short** mixer;
-	unsigned short** summer;
-	unsigned short** gain_res;
-	unsigned short** gain_vol;
-
 	const int voiceScaleS11;
 	const int voiceDC;
 
@@ -304,19 +297,18 @@ protected:
 	*/
 	void updateResonance ( unsigned char res ) override { currentResonance = gain_res[ res ]; }
 
-	void updatedMixing () override;
-
 public:
 	Filter8580 ()
-		: mixer ( FilterModelConfig8580::getInstance ()->getMixer () )
-		, summer ( FilterModelConfig8580::getInstance ()->getSummer () )
-		, gain_res ( FilterModelConfig8580::getInstance ()->getGainRes () )
-		, gain_vol ( FilterModelConfig8580::getInstance ()->getGainVol () )
-		, voiceScaleS11 ( FilterModelConfig8580::getInstance ()->getVoiceScaleS11 () )
+		: voiceScaleS11 ( FilterModelConfig8580::getInstance ()->getVoiceScaleS11 () )
 		, voiceDC ( FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC () )
 		, hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
 		, bpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
 	{
+		mixer = FilterModelConfig8580::getInstance ()->getMixer ();
+		summer = FilterModelConfig8580::getInstance ()->getSummer ();
+		gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();
+		gain_vol = FilterModelConfig8580::getInstance ()->getGainVol ();
+
 		setFilterCurve ( cp );
 		ve = mixer[ 0 ][ 0 ];
 	}

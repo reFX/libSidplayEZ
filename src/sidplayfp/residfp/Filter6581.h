@@ -25,11 +25,10 @@
 
 #include "Filter.h"
 #include "FilterModelConfig6581.h"
+#include "Integrator6581.h"
 
 namespace reSIDfp
 {
-
-class Integrator6581;
 
 /**
 * The SID filter is modeled with a two-integrator-loop biquadratic filter,
@@ -318,11 +317,6 @@ class Filter6581 final : public Filter
 private:
 	const uint16_t* f0_dac;
 
-	unsigned short** mixer;
-	unsigned short** summer;
-	unsigned short** gain_res;
-	unsigned short** gain_vol;
-
 	const int voiceScaleS11;
 	const int voiceDC;
 
@@ -345,26 +339,53 @@ protected:
 	*/
 	void updateResonance ( unsigned char res ) override { currentResonance = gain_res[ res ]; }
 
-	void updatedMixing () override;
-
 public:
 	Filter6581 ()
 		: f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
-		, mixer ( FilterModelConfig6581::getInstance ()->getMixer () )
-		, summer ( FilterModelConfig6581::getInstance ()->getSummer () )
-		, gain_res ( FilterModelConfig6581::getInstance ()->getGainRes () )
-		, gain_vol ( FilterModelConfig6581::getInstance ()->getGainVol () )
 		, voiceScaleS11 ( FilterModelConfig6581::getInstance ()->getVoiceScaleS11 () )
 		, voiceDC ( FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC () )
 		, hpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
 		, bpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
 	{
+		mixer = FilterModelConfig6581::getInstance ()->getMixer ();
+		summer = FilterModelConfig6581::getInstance ()->getSummer ();
+		gain_res = FilterModelConfig6581::getInstance ()->getGainRes ();
+		gain_vol = FilterModelConfig6581::getInstance ()->getGainVol ();
+
 		ve = mixer[ 0 ][ 0 ];
 	}
 
-	~Filter6581 () override;
+	~Filter6581 () override
+	{
+		delete[] f0_dac;
+	}
 
-	unsigned short clock ( int voice1, int voice2, int voice3 ) override;
+	inline unsigned short clock ( int voice1, int voice2, int voice3 ) override
+	{
+		voice1 = ( voice1 * voiceScaleS11 >> 15 ) + voiceDC;
+		voice2 = ( voice2 * voiceScaleS11 >> 15 ) + voiceDC;
+		// Voice 3 is silenced by voice3off if it is not routed through the filter
+		voice3 = ( filt3 || !voice3off ) ? ( voice3 * voiceScaleS11 >> 15 ) + voiceDC : 0;
+
+		auto	Vi = 0;
+		auto	Vo = 0;
+
+		( filt1 ? Vi : Vo ) += voice1;
+		( filt2 ? Vi : Vo ) += voice2;
+		( filt3 ? Vi : Vo ) += voice3;
+		Vo += ve;
+		//	( filtE ? Vi : Vo ) += ve;
+
+		Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vi ];
+		Vbp = hpIntegrator->solve ( Vhp );
+		Vlp = bpIntegrator->solve ( Vbp );
+
+		if ( lp )	Vo += Vlp;
+		if ( bp )	Vo += Vbp;
+		if ( hp )	Vo += Vhp;
+
+		return currentGain[ currentMixer[ Vo ] ];
+	}
 
 	/**
 	* Set filter curve type based on single parameter.
@@ -374,38 +395,5 @@ public:
 	void setFilterCurve ( double curvePosition );
 };
 
-} // namespace reSIDfp
-
-#include "Integrator6581.h"
-
-namespace reSIDfp
-{
-
-inline unsigned short Filter6581::clock ( int voice1, int voice2, int voice3 )
-{
-	voice1 = ( voice1 * voiceScaleS11 >> 15 ) + voiceDC;
-	voice2 = ( voice2 * voiceScaleS11 >> 15 ) + voiceDC;
-	// Voice 3 is silenced by voice3off if it is not routed through the filter
-	voice3 = ( filt3 || ! voice3off ) ? ( voice3 * voiceScaleS11 >> 15 ) + voiceDC : 0;
-
-	auto	Vi = 0;
-	auto	Vo = 0;
-
-	( filt1 ? Vi : Vo ) += voice1;
-	( filt2 ? Vi : Vo ) += voice2;
-	( filt3 ? Vi : Vo ) += voice3;
-	Vo += ve;
-//	( filtE ? Vi : Vo ) += ve;
-
-	Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vi ];
-	Vbp = hpIntegrator->solve ( Vhp );
-	Vlp = bpIntegrator->solve ( Vbp );
-
-	if ( lp )	Vo += Vlp;
-	if ( bp )	Vo += Vbp;
-	if ( hp )	Vo += Vhp;
-
-	return currentGain[ currentMixer[ Vo ] ];
-}
 
 } // namespace reSIDfp

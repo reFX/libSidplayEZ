@@ -27,7 +27,7 @@
 
  //-----------------------------------------------------------------------------
 
-libsidplayfp::sidemu* sidbuilder::lock ( libsidplayfp::EventScheduler* env, SidConfig::sid_model_t model, bool digiboost )
+libsidplayfp::sidemu* sidbuilder::lock ( libsidplayfp::EventScheduler* env, SidConfig::sid_model_t model )
 {
 	m_status = true;
 
@@ -35,7 +35,7 @@ libsidplayfp::sidemu* sidbuilder::lock ( libsidplayfp::EventScheduler* env, SidC
 	{
 		if ( sid->lock ( env ) )
 		{
-			sid->model ( model, digiboost );
+			sid->model ( model );
 			return sid;
 		}
 	}

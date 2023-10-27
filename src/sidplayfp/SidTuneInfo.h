@@ -23,226 +23,226 @@
 
 #include <stdint.h>
 
-/**
- * This interface is used to get values from SidTune objects.
- *
- * You must read (i.e. activate) sub-song specific information
- * via:
- *        const SidTuneInfo* tuneInfo = SidTune.getInfo();
- *        const SidTuneInfo* tuneInfo = SidTune.getInfo(songNumber);
- */
+ /**
+  * This interface is used to get values from SidTune objects.
+  *
+  * You must read (i.e. activate) sub-song specific information
+  * via:
+  *        const SidTuneInfo* tuneInfo = SidTune.getInfo();
+  *        const SidTuneInfo* tuneInfo = SidTune.getInfo(songNumber);
+  */
 class SidTuneInfo
 {
 public:
-    typedef enum {
-        CLOCK_UNKNOWN,
-        CLOCK_PAL,
-        CLOCK_NTSC,
-        CLOCK_ANY
-    } clock_t;
+	typedef enum {
+		CLOCK_UNKNOWN,
+		CLOCK_PAL,
+		CLOCK_NTSC,
+		CLOCK_ANY
+	} clock_t;
 
-    typedef enum {
-        SIDMODEL_UNKNOWN,
-        SIDMODEL_6581,
-        SIDMODEL_8580,
-        SIDMODEL_ANY
-    } model_t;
+	typedef enum {
+		SIDMODEL_UNKNOWN,
+		SIDMODEL_6581,
+		SIDMODEL_8580,
+		SIDMODEL_ANY
+	} model_t;
 
-    typedef enum {
-        COMPATIBILITY_C64,   ///< File is C64 compatible
-        COMPATIBILITY_PSID,  ///< File is PSID specific
-        COMPATIBILITY_R64,   ///< File is Real C64 only
-        COMPATIBILITY_BASIC  ///< File requires C64 Basic
-    } compatibility_t;
-
-public:
-    /// Vertical-Blanking-Interrupt
-    static const int SPEED_VBI = 0;
-
-    /// CIA 1 Timer A
-    static const int SPEED_CIA_1A = 60;
+	typedef enum {
+		COMPATIBILITY_C64,   ///< File is C64 compatible
+		COMPATIBILITY_PSID,  ///< File is PSID specific
+		COMPATIBILITY_R64,   ///< File is Real C64 only
+		COMPATIBILITY_BASIC  ///< File requires C64 Basic
+	} compatibility_t;
 
 public:
-    /**
-     * Load Address.
-     */
-    uint16_t loadAddr() const;
+	/// Vertical-Blanking-Interrupt
+	static const int SPEED_VBI = 0;
 
-    /**
-     * Init Address.
-     */
-    uint16_t initAddr() const;
+	/// CIA 1 Timer A
+	static const int SPEED_CIA_1A = 60;
 
-    /**
-     * Play Address.
-     */
-    uint16_t playAddr() const;
+public:
+	/**
+	 * Load Address.
+	 */
+	uint16_t loadAddr () const;
 
-    /**
-     * The number of songs.
-     */
-    unsigned int songs() const;
+	/**
+	 * Init Address.
+	 */
+	uint16_t initAddr () const;
 
-    /**
-     * The default starting song.
-     */
-    unsigned int startSong() const;
+	/**
+	 * Play Address.
+	 */
+	uint16_t playAddr () const;
 
-    /**
-     * The tune that has been initialized.
-     */
-    unsigned int currentSong() const;
+	/**
+	 * The number of songs.
+	 */
+	unsigned int songs () const;
 
-    /**
-     * @name Base addresses
-     * The SID chip base address(es) used by the sidtune.
-     * - 0xD400 for the 1st SID
-     * - 0 if the nth SID is not required
-     */
-    uint16_t sidChipBase(unsigned int i) const;
+	/**
+	 * The default starting song.
+	 */
+	unsigned int startSong () const;
 
-    /**
-     * The number of SID chips required by the tune.
-     */
-    int sidChips() const;
+	/**
+	 * The tune that has been initialized.
+	 */
+	unsigned int currentSong () const;
 
-    /**
-     * Intended speed.
-     */
-    int songSpeed() const;
+	/**
+	 * @name Base addresses
+	 * The SID chip base address(es) used by the sidtune.
+	 * - 0xD400 for the 1st SID
+	 * - 0 if the nth SID is not required
+	 */
+	uint16_t sidChipBase ( unsigned int i ) const;
 
-    /**
-     * First available page for relocation.
-     */
-    uint8_t relocStartPage() const;
+	/**
+	 * The number of SID chips required by the tune.
+	 */
+	int sidChips () const;
 
-    /**
-     * Number of pages available for relocation.
-     */
-    uint8_t relocPages() const;
+	/**
+	 * Intended speed.
+	 */
+	int songSpeed () const;
 
-    /**
-     * @name SID model
-     * The SID chip model(s) requested by the sidtune.
-     */
-    model_t sidModel(unsigned int i) const;
+	/**
+	 * First available page for relocation.
+	 */
+	uint8_t relocStartPage () const;
 
-    /**
-     * Compatibility requirements.
-     */
-    compatibility_t compatibility() const;
+	/**
+	 * Number of pages available for relocation.
+	 */
+	uint8_t relocPages () const;
 
-    /**
-     * @name Tune infos
-     * Song title, credits, ...
-     * - 0 = Title
-     * - 1 = Author
-     * - 2 = Released
-     */
-    //@{
-    unsigned int numberOfInfoStrings() const;     ///< The number of available text info lines
-    const char* infoString(unsigned int i) const; ///< Text info from the format headers etc.
-    //@}
+	/**
+	 * @name SID model
+	 * The SID chip model(s) requested by the sidtune.
+	 */
+	model_t sidModel ( unsigned int i ) const;
 
-    /**
-     * @name Tune comments
-     * MUS comments.
-     */
-    //@{
-    unsigned int numberOfCommentStrings() const;     ///< Number of comments
-    const char* commentString(unsigned int i) const; ///< Used to stash the MUS comment somewhere
-    //@}
+	/**
+	 * Compatibility requirements.
+	 */
+	compatibility_t compatibility () const;
 
-    /**
-     * Length of single-file sidtune file.
-     */
-    uint32_t dataFileLen() const;
+	/**
+	 * @name Tune infos
+	 * Song title, credits, ...
+	 * - 0 = Title
+	 * - 1 = Author
+	 * - 2 = Released
+	 */
+	 //@{
+	unsigned int numberOfInfoStrings () const;     ///< The number of available text info lines
+	const char* infoString ( unsigned int i ) const; ///< Text info from the format headers etc.
+	//@}
 
-    /**
-     * Length of raw C64 data without load address.
-     */
-    uint32_t c64dataLen() const;
+	/**
+	 * @name Tune comments
+	 * MUS comments.
+	 */
+	 //@{
+	unsigned int numberOfCommentStrings () const;     ///< Number of comments
+	const char* commentString ( unsigned int i ) const; ///< Used to stash the MUS comment somewhere
+	//@}
 
-    /**
-     * The tune clock speed.
-     */
-    clock_t clockSpeed() const;
+	/**
+	 * Length of single-file sidtune file.
+	 */
+	uint32_t dataFileLen () const;
 
-    /**
-     * The name of the identified file format.
-     */
-    const char* formatString() const;
+	/**
+	 * Length of raw C64 data without load address.
+	 */
+	uint32_t c64dataLen () const;
 
-    /**
-     * Whether load address might be duplicate.
-     */
-    bool fixLoad() const;
+	/**
+	 * The tune clock speed.
+	 */
+	clock_t clockSpeed () const;
 
-    /**
-     * Path to sidtune files.
-     */
-    const char* path() const;
+	/**
+	 * The name of the identified file format.
+	 */
+	const char* formatString () const;
 
-    /**
-     * A first file: e.g. "foo.sid" or "foo.mus".
-     */
-    const char* dataFileName() const;
+	/**
+	 * Whether load address might be duplicate.
+	 */
+	bool fixLoad () const;
 
-    /**
-     * A second file: e.g. "foo.str".
-     * Returns 0 if none.
-     */
-    const char* infoFileName() const;
+	/**
+	 * Path to sidtune files.
+	 */
+	const char* path () const;
+
+	/**
+	 * A first file: e.g. "foo.sid" or "foo.mus".
+	 */
+	const char* dataFileName () const;
+
+	/**
+	 * A second file: e.g. "foo.str".
+	 * Returns 0 if none.
+	 */
+	const char* infoFileName () const;
 
 private:
-    virtual uint16_t getLoadAddr() const =0;
+	virtual uint16_t getLoadAddr () const = 0;
 
-    virtual uint16_t getInitAddr() const =0;
+	virtual uint16_t getInitAddr () const = 0;
 
-    virtual uint16_t getPlayAddr() const =0;
+	virtual uint16_t getPlayAddr () const = 0;
 
-    virtual unsigned int getSongs() const =0;
+	virtual unsigned int getSongs () const = 0;
 
-    virtual unsigned int getStartSong() const =0;
+	virtual unsigned int getStartSong () const = 0;
 
-    virtual unsigned int getCurrentSong() const =0;
+	virtual unsigned int getCurrentSong () const = 0;
 
-    virtual uint16_t getSidChipBase(unsigned int i) const =0;
+	virtual uint16_t getSidChipBase ( unsigned int i ) const = 0;
 
-    virtual int getSidChips() const =0;
+	virtual int getSidChips () const = 0;
 
-    virtual int getSongSpeed() const =0;
+	virtual int getSongSpeed () const = 0;
 
-    virtual uint8_t getRelocStartPage() const =0;
+	virtual uint8_t getRelocStartPage () const = 0;
 
-    virtual uint8_t getRelocPages() const =0;
+	virtual uint8_t getRelocPages () const = 0;
 
-    virtual model_t getSidModel(unsigned int i) const =0;
+	virtual model_t getSidModel ( unsigned int i ) const = 0;
 
-    virtual compatibility_t getCompatibility() const =0;
+	virtual compatibility_t getCompatibility () const = 0;
 
-    virtual unsigned int getNumberOfInfoStrings() const =0;
-    virtual const char* getInfoString(unsigned int i) const =0;
+	virtual unsigned int getNumberOfInfoStrings () const = 0;
+	virtual const char* getInfoString ( unsigned int i ) const = 0;
 
-    virtual unsigned int getNumberOfCommentStrings() const =0;
-    virtual const char* getCommentString(unsigned int i) const =0;
+	virtual unsigned int getNumberOfCommentStrings () const = 0;
+	virtual const char* getCommentString ( unsigned int i ) const = 0;
 
-    virtual uint32_t getDataFileLen() const =0;
+	virtual uint32_t getDataFileLen () const = 0;
 
-    virtual uint32_t getC64dataLen() const =0;
+	virtual uint32_t getC64dataLen () const = 0;
 
-    virtual clock_t getClockSpeed() const =0;
+	virtual clock_t getClockSpeed () const = 0;
 
-    virtual const char* getFormatString() const =0;
+	virtual const char* getFormatString () const = 0;
 
-    virtual bool getFixLoad() const =0;
+	virtual bool getFixLoad () const = 0;
 
-    virtual const char* getPath() const =0;
+	virtual const char* getPath () const = 0;
 
-    virtual const char* getDataFileName() const =0;
+	virtual const char* getDataFileName () const = 0;
 
-    virtual const char* getInfoFileName() const =0;
+	virtual const char* getInfoFileName () const = 0;
 
 protected:
-    ~SidTuneInfo() {}
+	~SidTuneInfo () {}
 };

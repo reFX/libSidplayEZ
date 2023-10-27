@@ -24,13 +24,6 @@
 
 namespace reSIDfp
 {
-
-//-----------------------------------------------------------------------------
-
-Filter6581::~Filter6581 ()
-{
-	delete[] f0_dac;
-}
 //-----------------------------------------------------------------------------
 
 void Filter6581::updatedCenterFrequency ()
@@ -39,32 +32,6 @@ void Filter6581::updatedCenterFrequency ()
 
 	hpIntegrator->setVw ( Vw );
 	bpIntegrator->setVw ( Vw );
-}
-//-----------------------------------------------------------------------------
-
-void Filter6581::updatedMixing ()
-{
-	currentGain = gain_vol[ vol ];
-
-	auto	ni = 0u;
-	auto	no = 0u;
-
-	( filt1 ? ni : no )++;
-	( filt2 ? ni : no )++;
-
-	if ( filt3 ) ni++;
-	else if ( ! voice3off ) no++;
-
-	no++;
-//	( filtE ? ni : no )++;
-
-	currentSummer = summer[ ni ];
-
-	if ( lp ) no++;
-	if ( bp ) no++;
-	if ( hp ) no++;
-
-	currentMixer = mixer[ no ];
 }
 //-----------------------------------------------------------------------------
 

@@ -27,118 +27,118 @@ namespace reSIDfp
 {
 
 /**
-	* A 24 bit accumulator is the basis for waveform generation.
-	* FREQ is added to the lower 16 bits of the accumulator each cycle.
-	* The accumulator is set to zero when TEST is set, and starts counting
-	* when TEST is cleared.
-	*
-	* Waveforms are generated as follows:
-	*
-	* - No waveform:
-	* When no waveform is selected, the DAC input is floating.
-	*
-	*
-	* - Triangle:
-	* The upper 12 bits of the accumulator are used.
-	* The MSB is used to create the falling edge of the triangle by inverting
-	* the lower 11 bits. The MSB is thrown away and the lower 11 bits are
-	* left-shifted (half the resolution, full amplitude).
-	* Ring modulation substitutes the MSB with MSB EOR NOT sync_source MSB.
-	*
-	*
-	* - Sawtooth:
-	* The output is identical to the upper 12 bits of the accumulator.
-	*
-	*
-	* - Pulse:
-	* The upper 12 bits of the accumulator are used.
-	* These bits are compared to the pulse width register by a 12 bit digital
-	* comparator; output is either all one or all zero bits.
-	* The pulse setting is delayed one cycle after the compare.
-	* The test bit, when set to one, holds the pulse waveform output at 0xfff
-	* regardless of the pulse width setting.
-	*
-	*
-	* - Noise:
-	* The noise output is taken from intermediate bits of a 23-bit shift register
-	* which is clocked by bit 19 of the accumulator.
-	* The shift is delayed 2 cycles after bit 19 is set high.
-	*
-	* Operation: Calculate EOR result, shift register, set bit 0 = result.
-	*
-	*                    reset  +--------------------------------------------+
-	*                      |    |                                            |
-	*               test--OR-->EOR<--+                                       |
-	*                      |         |                                       |
-	*                      2 2 2 1 1 1 1 1 1 1 1 1 1                         |
-	*     Register bits:   2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 <---+
-	*                          |   |       |     |   |       |     |   |
-	*     Waveform bits:       1   1       9     8   7       6     5   4
-	*                          1   0
-	*
-	* The low 4 waveform bits are zero (grounded).
-	*/
-class WaveformGenerator
+* A 24 bit accumulator is the basis for waveform generation.
+* FREQ is added to the lower 16 bits of the accumulator each cycle.
+* The accumulator is set to zero when TEST is set, and starts counting
+* when TEST is cleared.
+*
+* Waveforms are generated as follows:
+*
+* - No waveform:
+* When no waveform is selected, the DAC input is floating.
+*
+*
+* - Triangle:
+* The upper 12 bits of the accumulator are used.
+* The MSB is used to create the falling edge of the triangle by inverting
+* the lower 11 bits. The MSB is thrown away and the lower 11 bits are
+* left-shifted (half the resolution, full amplitude).
+* Ring modulation substitutes the MSB with MSB EOR NOT sync_source MSB.
+*
+*
+* - Sawtooth:
+* The output is identical to the upper 12 bits of the accumulator.
+*
+*
+* - Pulse:
+* The upper 12 bits of the accumulator are used.
+* These bits are compared to the pulse width register by a 12 bit digital
+* comparator; output is either all one or all zero bits.
+* The pulse setting is delayed one cycle after the compare.
+* The test bit, when set to one, holds the pulse waveform output at 0xfff
+* regardless of the pulse width setting.
+*
+*
+* - Noise:
+* The noise output is taken from intermediate bits of a 23-bit shift register
+* which is clocked by bit 19 of the accumulator.
+* The shift is delayed 2 cycles after bit 19 is set high.
+*
+* Operation: Calculate EOR result, shift register, set bit 0 = result.
+*
+*                    reset  +--------------------------------------------+
+*                      |    |                                            |
+*               test--OR-->EOR<--+                                       |
+*                      |         |                                       |
+*                      2 2 2 1 1 1 1 1 1 1 1 1 1                         |
+*     Register bits:   2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 <---+
+*                          |   |       |     |   |       |     |   |
+*     Waveform bits:       1   1       9     8   7       6     5   4
+*                          1   0
+*
+* The low 4 waveform bits are zero (grounded).
+*/
+class WaveformGenerator final
 {
 private:
-	matrix_t* model_wave;
-	matrix_t* model_pulldown;
+	matrix_t*	model_wave = nullptr;
+	matrix_t*	model_pulldown = nullptr;
 
-	short* wave;
-	short* pulldown;
+	short*	wave = nullptr;
+	short*	pulldown = nullptr;
 
 	// PWout = (PWn/40.95)%
-	unsigned int pw;
+	unsigned int pw = 0;
 
-	unsigned int shift_register;
+	unsigned int shift_register = 0;
 
 	/// Shift register is latched when transitioning to shift phase 1.
 	unsigned int shift_latch;
 
 	/// Emulation of pipeline causing bit 19 to clock the shift register.
-	int shift_pipeline;
+	int shift_pipeline = 0;
 
-	unsigned int ring_msb_mask;
-	unsigned int no_noise;
-	unsigned int noise_output;
-	unsigned int no_noise_or_noise_output;
-	unsigned int no_pulse;
-	unsigned int pulse_output;
+	unsigned int ring_msb_mask = 0;
+	unsigned int no_noise = 0;
+	unsigned int noise_output = 0;
+	unsigned int no_noise_or_noise_output = 0;
+	unsigned int no_pulse = 0;
+	unsigned int pulse_output = 0;
 
 	/// The control register right-shifted 4 bits; used for output function table lookup.
-	unsigned int waveform;
+	unsigned int waveform = 0;
 
-	unsigned int waveform_output;
+	unsigned int waveform_output = 0;
 
 	/// Current accumulator value.
-	unsigned int accumulator;
+	unsigned int accumulator = 0x555555;	// Accumulator's even bits are high on powerup
 
 	// Fout = (Fn*Fclk/16777216)Hz
-	unsigned int freq;
+	unsigned int freq = 0;
 
 	/// 8580 tri/saw pipeline
-	unsigned int tri_saw_pipeline;
+	unsigned int tri_saw_pipeline = 0x555;
 
 	/// The OSC3 value
-	unsigned int osc3;
+	unsigned int osc3 = 0;
 
 	/// Remaining time to fully reset shift register.
-	unsigned int shift_register_reset;
+	unsigned int shift_register_reset = 0;
 
 	// The wave signal TTL when no waveform is selected.
-	unsigned int floating_output_ttl;
+	unsigned int floating_output_ttl = 0;
 
 	/// The control register bits. Gate is handled by EnvelopeGenerator.
 	//@{
-	bool test;
-	bool sync;
+	bool test = false;
+	bool sync = false;
 	//@}
 
 	/// Test bit is latched at phi2 for the noise XOR.
 	bool test_or_reset;
 
 	/// Tell whether the accumulator MSB was set high on this cycle.
-	bool msb_rising;
+	bool msb_rising = false;
 
 	bool is6581; //-V730_NOINIT this is initialized in the SID constructor
 
@@ -150,8 +150,6 @@ private:
 	void set_noise_output ();
 
 	void set_no_noise_or_noise_output ();
-
-	void waveBitfade ();
 
 	void shiftregBitfade ();
 
@@ -170,7 +168,61 @@ public:
 	/**
 	* SID clocking.
 	*/
-	void clock ();
+	inline void clock ()
+	{
+		if ( test )
+		{
+			if ( shift_register_reset && ( --shift_register_reset == 0 ) )
+			{
+				shiftregBitfade ();
+				shift_latch = shift_register;
+
+				// New noise waveform output.
+				set_noise_output ();
+			}
+
+			// Latch the test bit value for shift phase 2.
+			test_or_reset = true;
+
+			// The test bit sets pulse high.
+			pulse_output = 0xfff;
+		}
+		else
+		{
+			// Calculate new accumulator value;
+			const auto	accumulator_old = accumulator;
+			accumulator = ( accumulator + freq ) & 0xffffff;
+
+			// Check which bit have changed from low to high
+			const auto	accumulator_bits_set = ~accumulator_old & accumulator;
+
+			// Check whether the MSB is set high. This is used for synchronization.
+			msb_rising = accumulator_bits_set & 0x800000;
+
+			// Shift noise register once for each time accumulator bit 19 is set high.
+			// The shift is delayed 2 cycles.
+			if ( accumulator_bits_set & 0x080000 )
+			{
+				// Pipeline: Detect rising bit, shift phase 1, shift phase 2.
+				shift_pipeline = 2;
+			}
+			else if ( shift_pipeline != 0 )
+			{
+				switch ( --shift_pipeline )
+				{
+					case 0:
+						shift_phase2 ( waveform, waveform );
+						break;
+
+					case 1:
+						// Start shift phase 1
+						test_or_reset = false;
+						shift_latch = shift_register;
+						break;
+				}
+			}
+		}
+	}
 
 	/**
 	* Synchronize oscillators.
@@ -180,36 +232,7 @@ public:
 	* @param syncDest The oscillator that will be synced
 	* @param syncSource The sync source oscillator
 	*/
-	void synchronize ( WaveformGenerator* syncDest, const WaveformGenerator* syncSource ) const;
-
-	/**
-		* Constructor.
-		*/
-	WaveformGenerator () :
-		model_wave ( nullptr ),
-		model_pulldown ( nullptr ),
-		wave ( nullptr ),
-		pulldown ( nullptr ),
-		pw ( 0 ),
-		shift_register ( 0 ),
-		shift_pipeline ( 0 ),
-		ring_msb_mask ( 0 ),
-		no_noise ( 0 ),
-		noise_output ( 0 ),
-		no_noise_or_noise_output ( 0 ),
-		no_pulse ( 0 ),
-		pulse_output ( 0 ),
-		waveform ( 0 ),
-		waveform_output ( 0 ),
-		accumulator ( 0x555555 ),          // Accumulator's even bits are high on powerup
-		freq ( 0 ),
-		tri_saw_pipeline ( 0x555 ),
-		osc3 ( 0 ),
-		shift_register_reset ( 0 ),
-		floating_output_ttl ( 0 ),
-		test ( false ),
-		sync ( false ),
-		msb_rising ( false ) {}
+	void synchronize ( WaveformGenerator& syncDest, WaveformGenerator& syncSource );
 
 	/**
 	* Write FREQ LO register.
@@ -257,12 +280,81 @@ public:
 	* @param ringModulator The oscillator ring-modulating current one.
 	* @return the waveform generator digital output
 	*/
-	unsigned int output ( const WaveformGenerator* ringModulator );
+	inline unsigned int output ( const WaveformGenerator& ringModulator )
+	{
+		// Set output value.
+		if ( waveform )
+		{
+			const auto	ix = ( accumulator ^ ( ~ringModulator.accumulator & ring_msb_mask ) ) >> 12;
+
+			// The bit masks no_pulse and no_noise are used to achieve branch-free
+			// calculation of the output value.
+			waveform_output = wave[ ix ] & ( no_pulse | pulse_output ) & no_noise_or_noise_output;
+			if ( pulldown )
+				waveform_output = pulldown[ waveform_output ];
+
+			// Triangle/Sawtooth output is delayed half cycle on 8580
+			// This will appear as a one cycle delay on OSC3 as it is latched in the first phase of the clock
+			if ( ( waveform & 3 ) && ! is6581 )
+			{
+				osc3 = tri_saw_pipeline & ( no_pulse | pulse_output ) & no_noise_or_noise_output;
+				if ( pulldown )
+					osc3 = pulldown[ osc3 ];
+
+				tri_saw_pipeline = wave[ ix ];
+			}
+			else
+			{
+				osc3 = waveform_output;
+			}
+
+			// In the 6581 the top bit of the accumulator may be driven low by combined waveforms
+			// when the sawtooth is selected
+			if (	is6581
+				 && ( waveform & 0x2 )
+				 && ( ( waveform_output & 0x800 ) == 0 ) )
+			{
+				accumulator &= 0x7fffff;
+			}
+
+			write_shift_register ();
+		}
+		else
+		{
+			// Age floating DAC input.
+			if ( floating_output_ttl && ( --floating_output_ttl == 0 ) )
+			{
+				constexpr auto	FLOATING_OUTPUT_FADE_6581R3 = 1400u;
+				constexpr auto	FLOATING_OUTPUT_FADE_8580R5 = 50000u;
+
+				waveform_output &= waveform_output >> 1;
+				osc3 = waveform_output;
+				if ( waveform_output )
+					floating_output_ttl = is6581 ? FLOATING_OUTPUT_FADE_6581R3 : FLOATING_OUTPUT_FADE_8580R5;
+			}
+		}
+
+		// The pulse level is defined as (accumulator >> 12) >= pw ? 0xfff : 0x000.
+		// The expression -((accumulator >> 12) >= pw) & 0xfff yields the same
+		// results without any branching (and thus without any pipeline stalls).
+		// NB! This expression relies on that the result of a boolean expression
+		// is either 0 or 1, and furthermore requires two's complement integer.
+		// A few more cycles may be saved by storing the pulse width left shifted
+		// 12 bits, and dropping the and with 0xfff (this is valid since pulse is
+		// used as a bit mask on 12 bit values), yielding the expression
+		// -(accumulator >= pw24). However this only results in negligible savings.
+
+		// The result of the pulse width compare is delayed one cycle.
+		// Push next pulse level into pulse level pipeline.
+		pulse_output = ( ( accumulator >> 12 ) >= pw ) ? 0xfff : 0x000;
+
+		return waveform_output;
+	}
 
 	/**
 	* Read OSC3 value.
 	*/
-	unsigned char readOSC () const { return static_cast<unsigned char>( osc3 >> 4 ); }
+	unsigned char readOSC () const { return (unsigned char)( osc3 >> 4 ); }
 
 	/**
 	* Read accumulator value.
@@ -285,122 +377,6 @@ public:
 	bool readSync () const { return sync; }
 };
 
-inline void WaveformGenerator::clock ()
-{
-	if ( test )
-	{
-		if ( ( shift_register_reset != 0 ) && ( --shift_register_reset == 0 ) )
-		{
-			shiftregBitfade ();
-			shift_latch = shift_register;
 
-			// New noise waveform output.
-			set_noise_output ();
-		}
-
-		// Latch the test bit value for shift phase 2.
-		test_or_reset = true;
-
-		// The test bit sets pulse high.
-		pulse_output = 0xfff;
-	}
-	else
-	{
-		// Calculate new accumulator value;
-		const unsigned int accumulator_old = accumulator;
-		accumulator = ( accumulator + freq ) & 0xffffff;
-
-		// Check which bit have changed from low to high
-		const unsigned int accumulator_bits_set = ~accumulator_old & accumulator;
-
-		// Check whether the MSB is set high. This is used for synchronization.
-		msb_rising = ( accumulator_bits_set & 0x800000 ) != 0;
-
-		// Shift noise register once for each time accumulator bit 19 is set high.
-		// The shift is delayed 2 cycles.
-		if ( ( accumulator_bits_set & 0x080000 ) != 0 )
-		{
-			// Pipeline: Detect rising bit, shift phase 1, shift phase 2.
-			shift_pipeline = 2;
-		}
-		else if ( shift_pipeline != 0 )
-		{
-			switch ( --shift_pipeline )
-			{
-				case 0:
-					shift_phase2 ( waveform, waveform );
-					break;
-				case 1:
-					// Start shift phase 1
-					test_or_reset = false;
-					shift_latch = shift_register;
-					break;
-			}
-		}
-	}
-}
-
-inline unsigned int WaveformGenerator::output ( const WaveformGenerator* ringModulator )
-{
-	// Set output value.
-	if ( waveform != 0 )
-	{
-		const unsigned int ix = ( accumulator ^ ( ~ringModulator->accumulator & ring_msb_mask ) ) >> 12;
-
-		// The bit masks no_pulse and no_noise are used to achieve branch-free
-		// calculation of the output value.
-		waveform_output = wave[ ix ] & ( no_pulse | pulse_output ) & no_noise_or_noise_output;
-		if ( pulldown != nullptr )
-			waveform_output = pulldown[ waveform_output ];
-
-		// Triangle/Sawtooth output is delayed half cycle on 8580.
-		// This will appear as a one cycle delay on OSC3 as it is latched
-		// in the first phase of the clock.
-		if ( ( waveform & 3 ) && !is6581 )
-		{
-			osc3 = tri_saw_pipeline & ( no_pulse | pulse_output ) & no_noise_or_noise_output;
-			if ( pulldown != nullptr )
-				osc3 = pulldown[ osc3 ];
-			tri_saw_pipeline = wave[ ix ];
-		}
-		else
-		{
-			osc3 = waveform_output;
-		}
-
-		// In the 6581 the top bit of the accumulator may be driven low by combined waveforms
-		// when the sawtooth is selected
-		if ( is6581
-				&& ( waveform & 0x2 )
-				&& ( ( waveform_output & 0x800 ) == 0 ) )
-			accumulator &= 0x7fffff;
-
-		write_shift_register ();
-	}
-	else
-	{
-		// Age floating DAC input.
-		if ( floating_output_ttl != 0 && ( --floating_output_ttl == 0 ) )
-		{
-			waveBitfade ();
-		}
-	}
-
-	// The pulse level is defined as (accumulator >> 12) >= pw ? 0xfff : 0x000.
-	// The expression -((accumulator >> 12) >= pw) & 0xfff yields the same
-	// results without any branching (and thus without any pipeline stalls).
-	// NB! This expression relies on that the result of a boolean expression
-	// is either 0 or 1, and furthermore requires two's complement integer.
-	// A few more cycles may be saved by storing the pulse width left shifted
-	// 12 bits, and dropping the and with 0xfff (this is valid since pulse is
-	// used as a bit mask on 12 bit values), yielding the expression
-	// -(accumulator >= pw24). However this only results in negligible savings.
-
-	// The result of the pulse width compare is delayed one cycle.
-	// Push next pulse level into pulse level pipeline.
-	pulse_output = ( ( accumulator >> 12 ) >= pw ) ? 0xfff : 0x000;
-
-	return waveform_output;
-}
 
 } // namespace reSIDfp

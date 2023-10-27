@@ -31,8 +31,8 @@ namespace libsidplayfp
 {
 
 /**
-	* The implementation of the SidTuneInfo interface.
-	*/
+* The implementation of the SidTuneInfo interface.
+*/
 class SidTuneInfoImpl final : public SidTuneInfo
 {
 public:

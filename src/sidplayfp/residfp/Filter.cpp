@@ -27,22 +27,6 @@ namespace reSIDfp
 
 //-----------------------------------------------------------------------------
 
-/*void Filter::enable (bool enable)
-{
-	enabled = enable;
-
-	if (enabled)
-	{
-		writeRES_FILT(filt);
-	}
-	else
-	{
-		filt1 = filt2 = filt3 = filtE = false;
-	}
-}
-*/
-//-----------------------------------------------------------------------------
-
 void Filter::reset ()
 {
 	writeFC_LO ( 0 );
@@ -93,6 +77,30 @@ void Filter::writeMODE_VOL ( unsigned char mode_vol )
 	voice3off = mode_vol & 0x80;
 
 	updatedMixing ();
+}
+//-----------------------------------------------------------------------------
+
+void Filter::updatedMixing ()
+{
+	currentGain = gain_vol[ vol ];
+
+	auto	ni = 0u;
+	auto	no = 0u;
+
+	if ( filt1 ) { ni++; } else { no++; }
+	if ( filt2 ) { ni++; } else { no++; }
+	if ( filt3 ) { ni++; } else if ( ! voice3off ) { no++; }
+
+	no++;
+//	if ( filtE ) { ni++; } else { no++; }
+
+	currentSummer = summer[ ni ];
+
+	if ( lp ) no++;
+	if ( bp ) no++;
+	if ( hp ) no++;
+
+	currentMixer = mixer[ no ];
 }
 //-----------------------------------------------------------------------------
 

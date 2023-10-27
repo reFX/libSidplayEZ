@@ -102,7 +102,7 @@ private:
 	*
 	* @throw configError
 	*/
-	void sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultModel, bool digiboost, bool forced, const std::vector<unsigned int>& extraSidAddresses );
+	void sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultModel, bool forced, const std::vector<unsigned int>& extraSidAddresses );
 
 	/**
 	* Set the SID emulation parameters.

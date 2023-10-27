@@ -61,32 +61,6 @@ void Filter8580::updatedCenterFrequency ()
 }
 //-----------------------------------------------------------------------------
 
-void Filter8580::updatedMixing ()
-{
-	currentGain = gain_vol[ vol ];
-
-	auto	ni = 0u;
-	auto	no = 0u;
-
-	( filt1 ? ni : no )++;
-	( filt2 ? ni : no )++;
-
-	if ( filt3 ) ni++;
-	else if ( ! voice3off ) no++;
-
-	no++;
-//	( filtE ? ni : no )++;
-
-	currentSummer = summer[ ni ];
-
-	if ( lp ) no++;
-	if ( bp ) no++;
-	if ( hp ) no++;
-
-	currentMixer = mixer[ no ];
-}
-//-----------------------------------------------------------------------------
-
 void Filter8580::setFilterCurve ( double curvePosition )
 {
 	// Adjust cp

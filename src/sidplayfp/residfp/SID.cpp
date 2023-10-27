@@ -28,15 +28,14 @@
 #include "Dac.h"
 #include "Filter6581.h"
 #include "Filter8580.h"
-#include "Potentiometer.h"
 #include "WaveformCalculator.h"
 #include "resample/TwoPassSincResampler.h"
 
 namespace reSIDfp
 {
 
-const unsigned int ENV_DAC_BITS = 8;
-const unsigned int OSC_DAC_BITS = 12;
+constexpr auto	ENV_DAC_BITS = 8u;
+constexpr auto	OSC_DAC_BITS = 12u;
 
 /**
 * The waveform D/A converter introduces a DC offset in the signal
@@ -125,44 +124,28 @@ unsigned int constexpr OFFSET_8580 = 0x9c0;
 * [2]: http://noname.c64.org/csdb/forums/?roomid=11&topicid=29025&showallposts=1
 */
 //@{
-int constexpr BUS_TTL_6581 = 0x01d00;
-int constexpr BUS_TTL_8580 = 0xa2000;
+constexpr auto	BUS_TTL_6581 = 0x01d00;
+constexpr auto	BUS_TTL_8580 = 0xa2000;
 //@}
 
 //-----------------------------------------------------------------------------
 
 SID::SID ()
-	: filter6581 ( new Filter6581 () )
-	, filter8580 ( new Filter8580 () )
-	, externalFilter ( new ExternalFilter () )
-	, resampler ( nullptr )
-	, potX ( new Potentiometer () )
-	, potY ( new Potentiometer () )
 {
-	voice[ 0 ].reset ( new Voice () );
-	voice[ 1 ].reset ( new Voice () );
-	voice[ 2 ].reset ( new Voice () );
-
 	reset ();
 	setChipModel ( MOS8580 );
 }
 //-----------------------------------------------------------------------------
 
-SID::~SID ()
-{
-	// Needed to delete auto_ptr with complete type
-}
-//-----------------------------------------------------------------------------
-
 void SID::setFilter6581Curve ( double filterCurve )
 {
-	filter6581->setFilterCurve ( filterCurve );
+	filter6581.setFilterCurve ( filterCurve );
 }
 //-----------------------------------------------------------------------------
 
 void SID::setFilter8580Curve ( double filterCurve )
 {
-	filter8580->setFilterCurve ( filterCurve );
+	filter8580.setFilterCurve ( filterCurve );
 }
 //-----------------------------------------------------------------------------
 
@@ -171,20 +154,20 @@ void SID::voiceSync ( bool sync )
 	// Synchronize the 3 waveform generators
 	if ( sync )
 		for ( auto i = 0; i < 3; i++ )
-			voice[ i ]->wave ()->synchronize ( voice[ ( i + 1 ) % 3 ]->wave (), voice[ ( i + 2 ) % 3 ]->wave () );
+			voice[ i ].waveformGenerator.synchronize ( voice[ ( i + 1 ) % 3 ].waveformGenerator, voice[ ( i + 2 ) % 3 ].waveformGenerator );
 
 	// Calculate the time to next voice sync
 	nextVoiceSync = std::numeric_limits<int>::max ();
 
 	for ( auto i = 0; i < 3; i++ )
 	{
-		auto const	wave = voice[ i ]->wave ();
-		const auto	freq = wave->readFreq ();
+		auto&		wave = voice[ i ].waveformGenerator;
+		const auto	freq = wave.readFreq ();
 
-		if ( wave->readTest () || freq == 0 || ! voice[ ( i + 1 ) % 3 ]->wave ()->readSync () )
+		if ( wave.readTest () || freq == 0 || ! voice[ ( i + 1 ) % 3 ].waveformGenerator.readSync () )
 			continue;
 
-		const auto	accumulator = wave->readAccumulator ();
+		const auto	accumulator = wave.readAccumulator ();
 		const auto	thisVoiceSync = ( ( 0x7fffff - accumulator ) & 0xffffff ) / freq + 1;
 
 		if ( thisVoiceSync < nextVoiceSync )
@@ -198,17 +181,14 @@ void SID::setChipModel ( ChipModel _model )
 	switch ( _model )
 	{
 		case MOS6581:
-			filter = filter6581.get ();
+			filter = &filter6581;
 			modelTTL = BUS_TTL_6581;
 			break;
 
 		case MOS8580:
-			filter = filter8580.get ();
+			filter = &filter8580;
 			modelTTL = BUS_TTL_8580;
 			break;
-
-		default:
-			throw SIDError ( "Unknown chip type" );
 	}
 
 	model = _model;
@@ -222,44 +202,43 @@ void SID::setChipModel ( ChipModel _model )
 		Dac dacBuilder ( ENV_DAC_BITS );
 		dacBuilder.kinkedDac ( model );
 
-		for ( unsigned int i = 0; i < ( 1 << ENV_DAC_BITS ); i++ )
+		for ( auto i = 0u; i < ( 1 << ENV_DAC_BITS ); i++ )
 			envDAC[ i ] = float ( dacBuilder.getOutput ( i ) );
 	}
 
 	// calculate oscillator DAC table
-	const auto  is6581 = _model == MOS6581;
 	{
 		Dac dacBuilder ( OSC_DAC_BITS );
 		dacBuilder.kinkedDac ( model );
 
-		const auto  offset = dacBuilder.getOutput ( is6581 ? OFFSET_6581 : OFFSET_8580 );
+		const auto  offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
 
 		for ( auto i = 0u; i < ( 1 << OSC_DAC_BITS ); i++ )
 			oscDAC[ i ] = float ( dacBuilder.getOutput ( i ) - offset );
 	}
 
 	// set voice tables
-	for ( auto i = 0; i < 3; i++ )
+	for ( auto& vce : voice )
 	{
-		voice[ i ]->setEnvDAC ( envDAC );
-		voice[ i ]->setWavDAC ( oscDAC );
-		voice[ i ]->wave ()->setModel ( is6581 );
-		voice[ i ]->wave ()->setWaveformModels ( wavetables );
-		voice[ i ]->wave ()->setPulldownModels ( pulldowntables );
+		vce.setEnvDAC ( envDAC );
+		vce.setWavDAC ( oscDAC );
+		vce.waveformGenerator.setModel ( model == MOS6581 );
+		vce.waveformGenerator.setWaveformModels ( wavetables );
+		vce.waveformGenerator.setPulldownModels ( pulldowntables );
 	}
 }
 //-----------------------------------------------------------------------------
 
 void SID::reset ()
 {
-	for ( auto i = 0; i < 3; i++ )
-		voice[ i ]->reset ();
+	for ( auto& vce : voice )
+		vce.reset ();
 
-	filter6581->reset ();
-	filter8580->reset ();
-	externalFilter->reset ();
+	filter6581.reset ();
+	filter8580.reset ();
+	externalFilter.reset ();
 
-	if ( resampler.get () )
+	if ( resampler )
 		resampler->reset ();
 
 	busValue = 0;
@@ -268,34 +247,27 @@ void SID::reset ()
 }
 //-----------------------------------------------------------------------------
 
-void SID::input ( int /*value*/ )
-{
-//	filter6581->input ( value );
-//	filter8580->input ( value );
-}
-//-----------------------------------------------------------------------------
-
 unsigned char SID::read ( int offset )
 {
 	switch ( offset )
 	{
 		case 0x19: // X value of paddle
-			busValue = potX->readPOT ();
+			busValue = 0xff;
 			busValueTtl = modelTTL;
 			break;
 
 		case 0x1a: // Y value of paddle
-			busValue = potY->readPOT ();
+			busValue = 0xff;
 			busValueTtl = modelTTL;
 			break;
 
 		case 0x1b: // Voice #3 waveform output
-			busValue = voice[ 2 ]->wave ()->readOSC ();
+			busValue = voice[ 2 ].waveformGenerator.readOSC ();
 			busValueTtl = modelTTL;
 			break;
 
 		case 0x1c: // Voice #3 ADSR output
-			busValue = voice[ 2 ]->envelope ()->readENV ();
+			busValue = voice[ 2 ].envelopeGenerator.readENV ();
 			busValueTtl = modelTTL;
 			break;
 
@@ -319,107 +291,111 @@ void SID::write ( int offset, unsigned char value )
 	switch ( offset )
 	{
 		case 0x00: // Voice #1 frequency (Low-byte)
-			voice[ 0 ]->wave ()->writeFREQ_LO ( value );
+			voice[ 0 ].waveformGenerator.writeFREQ_LO ( value );
 			break;
 
 		case 0x01: // Voice #1 frequency (High-byte)
-			voice[ 0 ]->wave ()->writeFREQ_HI ( value );
+			voice[ 0 ].waveformGenerator.writeFREQ_HI ( value );
 			break;
 
 		case 0x02: // Voice #1 pulse width (Low-byte)
-			voice[ 0 ]->wave ()->writePW_LO ( value );
+			voice[ 0 ].waveformGenerator.writePW_LO ( value );
 			break;
 
 		case 0x03: // Voice #1 pulse width (bits #8-#15)
-			voice[ 0 ]->wave ()->writePW_HI ( value );
+			voice[ 0 ].waveformGenerator.writePW_HI ( value );
 			break;
 
 		case 0x04: // Voice #1 control register
-			voice[ 0 ]->writeCONTROL_REG ( value );
+			voice[ 0 ].writeCONTROL_REG ( value );
 			break;
 
 		case 0x05: // Voice #1 Attack and Decay length
-			voice[ 0 ]->envelope ()->writeATTACK_DECAY ( value );
+			voice[ 0 ].envelopeGenerator.writeATTACK_DECAY ( value );
 			break;
 
 		case 0x06: // Voice #1 Sustain volume and Release length
-			voice[ 0 ]->envelope ()->writeSUSTAIN_RELEASE ( value );
+			voice[ 0 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );
 			break;
 
 		case 0x07: // Voice #2 frequency (Low-byte)
-			voice[ 1 ]->wave ()->writeFREQ_LO ( value );
+			voice[ 1 ].waveformGenerator.writeFREQ_LO ( value );
 			break;
 
 		case 0x08: // Voice #2 frequency (High-byte)
-			voice[ 1 ]->wave ()->writeFREQ_HI ( value );
+			voice[ 1 ].waveformGenerator.writeFREQ_HI ( value );
 			break;
 
 		case 0x09: // Voice #2 pulse width (Low-byte)
-			voice[ 1 ]->wave ()->writePW_LO ( value );
+			voice[ 1 ].waveformGenerator.writePW_LO ( value );
 			break;
 
 		case 0x0a: // Voice #2 pulse width (bits #8-#15)
-			voice[ 1 ]->wave ()->writePW_HI ( value );
+			voice[ 1 ].waveformGenerator.writePW_HI ( value );
 			break;
 
 		case 0x0b: // Voice #2 control register
-			voice[ 1 ]->writeCONTROL_REG ( value );
+			voice[ 1 ].writeCONTROL_REG ( value );
 			break;
 
 		case 0x0c: // Voice #2 Attack and Decay length
-			voice[ 1 ]->envelope ()->writeATTACK_DECAY ( value );
+			voice[ 1 ].envelopeGenerator.writeATTACK_DECAY ( value );
 			break;
 
 		case 0x0d: // Voice #2 Sustain volume and Release length
-			voice[ 1 ]->envelope ()->writeSUSTAIN_RELEASE ( value );
+			voice[ 1 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );
 			break;
 
 		case 0x0e: // Voice #3 frequency (Low-byte)
-			voice[ 2 ]->wave ()->writeFREQ_LO ( value );
+			voice[ 2 ].waveformGenerator.writeFREQ_LO ( value );
 			break;
 
 		case 0x0f: // Voice #3 frequency (High-byte)
-			voice[ 2 ]->wave ()->writeFREQ_HI ( value );
+			voice[ 2 ].waveformGenerator.writeFREQ_HI ( value );
 			break;
 
 		case 0x10: // Voice #3 pulse width (Low-byte)
-			voice[ 2 ]->wave ()->writePW_LO ( value );
+			voice[ 2 ].waveformGenerator.writePW_LO ( value );
 			break;
 
 		case 0x11: // Voice #3 pulse width (bits #8-#15)
-			voice[ 2 ]->wave ()->writePW_HI ( value );
+			voice[ 2 ].waveformGenerator.writePW_HI ( value );
 			break;
 
 		case 0x12: // Voice #3 control register
-			voice[ 2 ]->writeCONTROL_REG ( value );
+			voice[ 2 ].writeCONTROL_REG ( value );
 			break;
 
 		case 0x13: // Voice #3 Attack and Decay length
-			voice[ 2 ]->envelope ()->writeATTACK_DECAY ( value );
+			voice[ 2 ].envelopeGenerator.writeATTACK_DECAY ( value );
 			break;
 
 		case 0x14: // Voice #3 Sustain volume and Release length
-			voice[ 2 ]->envelope ()->writeSUSTAIN_RELEASE ( value );
+			voice[ 2 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );
 			break;
 
 		case 0x15: // Filter cut off frequency (bits #0-#2)
-			filter6581->writeFC_LO ( value );
-			filter8580->writeFC_LO ( value );
+//			filter6581.writeFC_LO ( value );
+//			filter8580.writeFC_LO ( value );
+			filter->writeFC_LO ( value );
 			break;
 
 		case 0x16: // Filter cut off frequency (bits #3-#10)
-			filter6581->writeFC_HI ( value );
-			filter8580->writeFC_HI ( value );
+//			filter6581.writeFC_HI ( value );
+//			filter8580.writeFC_HI ( value );
+			filter->writeFC_HI ( value );
 			break;
 
 		case 0x17: // Filter control
-			filter6581->writeRES_FILT ( value );
-			filter8580->writeRES_FILT ( value );
+// 			filter6581.writeRES_FILT ( value );
+// 			filter8580.writeRES_FILT ( value );
+			filter->writeRES_FILT ( value );
 			break;
 
 		case 0x18: // Volume and filter modes
-			filter6581->writeMODE_VOL ( value );
-			filter8580->writeMODE_VOL ( value );
+// 			filter6581.writeMODE_VOL ( value );
+// 			filter8580.writeMODE_VOL ( value );
+			filter->writeMODE_VOL ( value );
 			break;
 
 		default:
@@ -433,7 +409,7 @@ void SID::write ( int offset, unsigned char value )
 
 void SID::setSamplingParameters ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
 {
-	externalFilter->setClockFrequency ( clockFrequency );
+	externalFilter.setClockFrequency ( clockFrequency );
 
 	resampler.reset ( TwoPassSincResampler::create ( clockFrequency, samplingFrequency, highestAccurateFrequency ) );
 }
@@ -450,16 +426,16 @@ void SID::clockSilent ( unsigned int cycles )
 			for ( auto i = 0; i < delta_t; i++ )
 			{
 				// clock waveform generators (can affect OSC3)
-				voice[ 0 ]->wave ()->clock ();
-				voice[ 1 ]->wave ()->clock ();
-				voice[ 2 ]->wave ()->clock ();
+				voice[ 0 ].waveformGenerator.clock ();
+				voice[ 1 ].waveformGenerator.clock ();
+				voice[ 2 ].waveformGenerator.clock ();
 
-				voice[ 0 ]->wave ()->output ( voice[ 2 ]->wave () );
-				voice[ 1 ]->wave ()->output ( voice[ 0 ]->wave () );
-				voice[ 2 ]->wave ()->output ( voice[ 1 ]->wave () );
+				voice[ 0 ].waveformGenerator.output ( voice[ 2 ].waveformGenerator );
+				voice[ 1 ].waveformGenerator.output ( voice[ 0 ].waveformGenerator );
+				voice[ 2 ].waveformGenerator.output ( voice[ 1 ].waveformGenerator );
 
 				// clock ENV3 only
-				voice[ 2 ]->envelope ()->clock ();
+				voice[ 2 ].envelopeGenerator.clock ();
 			}
 
 			cycles -= delta_t;

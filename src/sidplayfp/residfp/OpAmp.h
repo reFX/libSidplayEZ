@@ -64,11 +64,11 @@ namespace reSIDfp
  *     f = a*(b - vx)^2 - c - (b - vo)^2
  *     df = 2*((b - vo)*dvo - a*(b - vx))
  */
-class OpAmp
+class OpAmp final
 {
 private:
     /// Current root position (cached as guess to speed up next iteration)
-    double x;
+    double  x = 0.0;
 
     const double Vddt;
     const double vmin;
@@ -86,11 +86,12 @@ public:
      * @param vmax
      */
 	OpAmp ( const std::vector<Spline::Point>& opamp, double Vddt, double vmin, double vmax )
-		: x ( 0.0 )
-		, Vddt ( Vddt )
+		: Vddt ( Vddt )
 		, vmin ( vmin )
 		, vmax ( vmax )
-		, opamp ( new Spline ( opamp ) ) {}
+		, opamp ( new Spline ( opamp ) )
+    {
+    }
 
     /**
      * Reset root position
@@ -107,7 +108,55 @@ public:
      * @param vi input voltage
      * @return vo output voltage
      */
-	double solve ( double n, double vi );
+	double solve ( double n, double vi )
+	{
+		constexpr auto	EPSILON = 1e-8;
+
+		// Start off with an estimate of x and a root bracket [ak, bk].
+			// f is decreasing, so that f(ak) > 0 and f(bk) < 0.
+		auto    ak = vmin;
+		auto    bk = vmax;
+
+		const auto  a = n + 1.0;
+		const auto  b = Vddt;
+		const auto  b_vi = ( b > vi ) ? ( b - vi ) : 0.0;
+		const auto  c = n * ( b_vi * b_vi );
+
+		for ( ;;)
+		{
+			const auto  xk = x;
+
+			// Calculate f and df
+			const auto	out = opamp->evaluate ( x );
+			const auto  vo = out.x;
+			const auto  dvo = out.y;
+
+			const auto  b_vx = ( b > x ) ? b - x : 0.;
+			const auto  b_vo = ( b > vo ) ? b - vo : 0.;
+
+			// f = a*(b - vx)^2 - c - (b - vo)^2
+			const auto	f = a * ( b_vx * b_vx ) - c - ( b_vo * b_vo );
+
+			// df = 2*((b - vo)*dvo - a*(b - vx))
+			const auto	df = 2.0 * ( b_vo * dvo - a * b_vx );
+
+			// Newton-Raphson step: xk1 = xk - f(xk)/f'(xk)
+			x -= f / df;
+
+			if ( std::fabs ( x - xk ) < EPSILON )
+				return opamp->evaluate ( x ).x;
+
+			// Narrow down root bracket
+ 			if ( f < 0.0 )
+ 				bk = xk;
+ 			else
+ 				ak = xk;
+
+			// Bisection step (ala Dekker's method)
+			if ( x <= ak || x >= bk )
+				x = ( ak + bk ) * 0.5;
+		}
+	}
 };
 
 } // namespace reSIDfp

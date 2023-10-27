@@ -305,12 +305,12 @@ bool Player::config ( const SidConfig& cfg, bool force )
 			if ( secondSidAddress )
 				addresses.push_back ( secondSidAddress );
 
-			const uint16_t thirdSidAddress = tuneInfo->sidChipBase ( 2 ) != 0 ? tuneInfo->sidChipBase ( 2 ) :	cfg.thirdSidAddress;
+			const uint16_t thirdSidAddress = tuneInfo->sidChipBase ( 2 ) != 0 ? tuneInfo->sidChipBase ( 2 ) : cfg.thirdSidAddress;
 			if ( thirdSidAddress )
 				addresses.push_back ( thirdSidAddress );
 
 			// SID emulation setup (must be performed before the environment setup call)
-			sidCreate ( cfg.sidEmulation, cfg.defaultSidModel, cfg.digiBoost, cfg.forceSidModel, addresses );
+			sidCreate ( cfg.sidEmulation, cfg.defaultSidModel, cfg.forceSidModel, addresses );
 
 			// Determine c64 model
 			const auto	model = c64model ( cfg.defaultC64Model, cfg.forceC64Model );
@@ -452,7 +452,7 @@ void Player::sidRelease ()
 }
 //-----------------------------------------------------------------------------
 
-void Player::sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultModel, bool digiboost, bool forced, const std::vector<unsigned int>& extraSidAddresses )
+void Player::sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultModel, bool forced, const std::vector<unsigned int>& extraSidAddresses )
 {
 	if ( ! builder )
 		return;
@@ -470,7 +470,7 @@ void Player::sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultMode
 
 	// Setup base SID
 	const auto  userModel = getSidModel ( tuneInfo->sidModel ( 0 ), defaultModel, forced );
-	auto    s = builder->lock ( m_c64.getEventScheduler (), userModel, digiboost );
+	auto    s = builder->lock ( m_c64.getEventScheduler (), userModel );
 	if ( ! builder->getStatus () )
 		throw configError ( builder->error () );
 
@@ -490,7 +490,7 @@ void Player::sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultMode
 		{
 			const auto  _userModel = getSidModel ( tuneInfo->sidModel ( i + 1 ), defaultModel, forced );
 
-			auto    es = builder->lock ( m_c64.getEventScheduler (), _userModel, digiboost );
+			auto    es = builder->lock ( m_c64.getEventScheduler (), _userModel );
 			if ( ! builder->getStatus () )
 				throw configError ( builder->error () );
 

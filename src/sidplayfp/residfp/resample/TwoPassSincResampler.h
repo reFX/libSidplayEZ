@@ -28,8 +28,8 @@
 namespace reSIDfp
 {
 /**
-	* Compose a more efficient SINC from chaining two other SINCs
-	*/
+* Compose a more efficient SINC from chaining two other SINCs
+*/
 class TwoPassSincResampler final
 {
 private:
