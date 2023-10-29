@@ -80,25 +80,27 @@ private:
 	std::vector<int16_t>	waveTable;
 	std::vector<int16_t>	pulldownTable;
 
-	/// Resampler used by audio generation code.
+	// Resampler used by audio generation code
 	TwoPassSincResampler	resampler;
 
-	/// SID voices
-	Voice	voice[ 3 ];
+	static constexpr int	numVoices = 3;
 
-	/// Time to live for the last written value
+	// SID voices
+	Voice	voice[ numVoices ];
+
+	// Time to live for the last written value
 	int busValueTtl;
 
-	/// Current chip model's bus value TTL
+	// Current chip model's bus value TTL
 	int modelTTL;
 
-	/// Time until #voiceSync must be run.
+	// Time until #voiceSync must be run.
 	unsigned int nextVoiceSync;
 
-	/// Currently active chip model.
+	// Currently active chip model.
 	ChipModel model;
 
-	/// Last written value
+	// Last written value
 	unsigned char busValue;
 
 	/**
@@ -106,23 +108,16 @@ private:
 	*
 	* @See Dac
 	*/
-	float envDAC[ 256 ];
+	float	envDAC[ 256 ];
 
 	/**
 	* Emulated nonlinearity of the oscillator DAC.
 	*
 	* @See Dac
 	*/
-	float oscDAC[ 4096 ];
+	float	oscDAC[ 4096 ];
 
 private:
-	/**
-	* Age the bus value and zero it if it's TTL has expired.
-	*
-	* @param n the number of cycles
-	*/
-	void ageBusValue ( unsigned int n );
-
 	/**
 	* Get output sample.
 	*
@@ -139,11 +134,38 @@ private:
 
 	/**
 	* Calculate the number of cycles according to current parameters
-	* that it takes to reach sync.
+	* that it takes to reach sync
 	*
 	* @param sync whether to do the actual voice synchronization
 	*/
-	void voiceSync ( bool sync );
+	inline void voiceSync ( bool sync )
+	{
+		// Synchronize the 3 waveform generators
+		if ( sync )
+		{
+			voice[ 0 ].waveformGenerator.synchronize ( voice[ 1 ].waveformGenerator, voice[ 2 ].waveformGenerator );
+			voice[ 1 ].waveformGenerator.synchronize ( voice[ 2 ].waveformGenerator, voice[ 0 ].waveformGenerator );
+			voice[ 2 ].waveformGenerator.synchronize ( voice[ 0 ].waveformGenerator, voice[ 1 ].waveformGenerator );
+		}
+
+		// Calculate the time to next voice sync
+		nextVoiceSync = std::numeric_limits<int>::max ();
+
+		for ( auto i = 0; i < numVoices; i++ )
+		{
+			auto&		wave = voice[ i ].waveformGenerator;
+			const auto	freq = wave.readFreq ();
+
+			if ( wave.readTest () || freq == 0 || ! voice[ ( i + 1 ) % 3 ].waveformGenerator.readSync () )
+				continue;
+
+			const auto	accumulator = wave.readAccumulator ();
+			const auto	thisVoiceSync = ( ( 0x7fffff - accumulator ) & 0xffffff ) / freq + 1;
+
+			if ( thisVoiceSync < nextVoiceSync )
+				nextVoiceSync = thisVoiceSync;
+		}
+	}
 
 public:
 	SID ();
@@ -167,7 +189,7 @@ public:
 	void reset ();
 
 	/**
-	* Read registers.
+	* Read registers
 	*
 	* Reading a write only register returns the last char written to any SID register.
 	* The individual bits in this value start to fade down towards zero after a few cycles.
@@ -229,85 +251,64 @@ public:
 	* @param buf audio output buffer
 	* @return number of samples produced
 	*/
-	int clock ( unsigned int cycles, short* buf );
+	inline int clock ( unsigned int cycles, int16_t* buf )
+	{
+		if ( busValueTtl )
+		{
+			if ( busValueTtl -= cycles; busValueTtl <= 0 )
+			{
+				busValue = 0;
+				busValueTtl = 0;
+			}
+		}
 
-	/**
-	* Clock SID forward with no audio production.
-	*
-	* _Warning_:
-	* You can't mix this method of clocking with the audio-producing
-	* clock() because components that don't affect OSC3/ENV3 are not
-	* emulated.
-	*
-	* @param cycles c64 clocks to clock.
-	*/
-	void clockSilent ( unsigned int cycles );
+		auto    s = 0;
+
+		while ( cycles )
+		{
+			if ( auto delta_t = std::min ( nextVoiceSync, cycles ); delta_t > 0 )
+			{
+				for ( auto i = 0u; i < delta_t; i++ )
+				{
+					// clock waveform generators
+					voice[ 0 ].waveformGenerator.clock ();
+					voice[ 1 ].waveformGenerator.clock ();
+					voice[ 2 ].waveformGenerator.clock ();
+
+					// clock envelope generators
+					voice[ 0 ].envelopeGenerator.clock ();
+					voice[ 1 ].envelopeGenerator.clock ();
+					voice[ 2 ].envelopeGenerator.clock ();
+
+					if ( resampler.input ( output () ) )
+						buf[ s++ ] = int16_t ( resampler.output () );
+				}
+
+				cycles -= delta_t;
+				nextVoiceSync -= delta_t;
+			}
+
+			if ( ! nextVoiceSync )
+				voiceSync ( true );
+		}
+
+		return s;
+	}
 
 	/**
 	* Set filter curve parameter for 6581 model.
 	*
 	* @see Filter6581::setFilterCurve(double)
 	*/
-	void setFilter6581Curve ( double filterCurve );
+	void setFilter6581Curve ( double filterCurve )	{	filter6581.setFilterCurve ( filterCurve );	}
 
 	/**
 	* Set filter curve parameter for 8580 model.
 	*
 	* @see Filter8580::setFilterCurve(double)
 	*/
-	void setFilter8580Curve ( double filterCurve );
+	void setFilter8580Curve ( double filterCurve )	{	filter8580.setFilterCurve ( filterCurve );	}
 };
-//-----------------------------------------------------------------------------
-
-inline void SID::ageBusValue ( unsigned int n )
-{
-	if ( ! busValueTtl )
-		return;
-
-	if ( busValueTtl -= n; busValueTtl <= 0 )
-	{
-		busValue = 0;
-		busValueTtl = 0;
-	}
-}
-//-----------------------------------------------------------------------------
-
-inline int SID::clock ( unsigned int cycles, int16_t* buf )
-{
-	ageBusValue ( cycles );
-
-	auto    s = 0;
-
-	while ( cycles )
-	{
-		if ( auto delta_t = std::min ( nextVoiceSync, cycles ); delta_t > 0 )
-		{
-			for ( auto i = 0u; i < delta_t; i++ )
-			{
-				// clock waveform generators
-				voice[ 0 ].waveformGenerator.clock ();
-				voice[ 1 ].waveformGenerator.clock ();
-				voice[ 2 ].waveformGenerator.clock ();
-
-				// clock envelope generators
-				voice[ 0 ].envelopeGenerator.clock ();
-				voice[ 1 ].envelopeGenerator.clock ();
-				voice[ 2 ].envelopeGenerator.clock ();
-
-				if ( resampler.input ( output () ) )
-					buf[ s++ ] = int16_t ( resampler.output () );
-			}
-
-			cycles -= delta_t;
-			nextVoiceSync -= delta_t;
-		}
-
-		if ( ! nextVoiceSync )
-			voiceSync ( true );
-	}
-
-	return s;
-}
 //-----------------------------------------------------------------------------
 
 } // namespace reSIDfp

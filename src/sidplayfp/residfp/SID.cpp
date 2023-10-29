@@ -138,45 +138,6 @@ SID::SID ()
 }
 //-----------------------------------------------------------------------------
 
-void SID::setFilter6581Curve ( double filterCurve )
-{
-	filter6581.setFilterCurve ( filterCurve );
-}
-//-----------------------------------------------------------------------------
-
-void SID::setFilter8580Curve ( double filterCurve )
-{
-	filter8580.setFilterCurve ( filterCurve );
-}
-//-----------------------------------------------------------------------------
-
-void SID::voiceSync ( bool sync )
-{
-	// Synchronize the 3 waveform generators
-	if ( sync )
-		for ( auto i = 0; i < 3; i++ )
-			voice[ i ].waveformGenerator.synchronize ( voice[ ( i + 1 ) % 3 ].waveformGenerator, voice[ ( i + 2 ) % 3 ].waveformGenerator );
-
-	// Calculate the time to next voice sync
-	nextVoiceSync = std::numeric_limits<int>::max ();
-
-	for ( auto i = 0; i < 3; i++ )
-	{
-		auto&		wave = voice[ i ].waveformGenerator;
-		const auto	freq = wave.readFreq ();
-
-		if ( wave.readTest () || freq == 0 || ! voice[ ( i + 1 ) % 3 ].waveformGenerator.readSync () )
-			continue;
-
-		const auto	accumulator = wave.readAccumulator ();
-		const auto	thisVoiceSync = ( ( 0x7fffff - accumulator ) & 0xffffff ) / freq + 1;
-
-		if ( thisVoiceSync < nextVoiceSync )
-			nextVoiceSync = thisVoiceSync;
-	}
-}
-//-----------------------------------------------------------------------------
-
 void SID::setChipModel ( ChipModel _model )
 {
 	model = _model;
@@ -286,119 +247,37 @@ void SID::write ( int offset, unsigned char value )
 
 	switch ( offset )
 	{
-		case 0x00: // Voice #1 frequency (Low-byte)
-			voice[ 0 ].waveformGenerator.writeFREQ_LO ( value );
-			break;
-
-		case 0x01: // Voice #1 frequency (High-byte)
-			voice[ 0 ].waveformGenerator.writeFREQ_HI ( value );
-			break;
-
-		case 0x02: // Voice #1 pulse width (Low-byte)
-			voice[ 0 ].waveformGenerator.writePW_LO ( value );
-			break;
-
-		case 0x03: // Voice #1 pulse width (bits #8-#15)
-			voice[ 0 ].waveformGenerator.writePW_HI ( value );
-			break;
-
-		case 0x04: // Voice #1 control register
-			voice[ 0 ].writeCONTROL_REG ( value );
-			break;
-
-		case 0x05: // Voice #1 Attack and Decay length
-			voice[ 0 ].envelopeGenerator.writeATTACK_DECAY ( value );
-			break;
-
-		case 0x06: // Voice #1 Sustain volume and Release length
-			voice[ 0 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );
-			break;
-
-		case 0x07: // Voice #2 frequency (Low-byte)
-			voice[ 1 ].waveformGenerator.writeFREQ_LO ( value );
-			break;
-
-		case 0x08: // Voice #2 frequency (High-byte)
-			voice[ 1 ].waveformGenerator.writeFREQ_HI ( value );
-			break;
-
-		case 0x09: // Voice #2 pulse width (Low-byte)
-			voice[ 1 ].waveformGenerator.writePW_LO ( value );
-			break;
-
-		case 0x0a: // Voice #2 pulse width (bits #8-#15)
-			voice[ 1 ].waveformGenerator.writePW_HI ( value );
-			break;
-
-		case 0x0b: // Voice #2 control register
-			voice[ 1 ].writeCONTROL_REG ( value );
-			break;
-
-		case 0x0c: // Voice #2 Attack and Decay length
-			voice[ 1 ].envelopeGenerator.writeATTACK_DECAY ( value );
-			break;
-
-		case 0x0d: // Voice #2 Sustain volume and Release length
-			voice[ 1 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );
-			break;
-
-		case 0x0e: // Voice #3 frequency (Low-byte)
-			voice[ 2 ].waveformGenerator.writeFREQ_LO ( value );
-			break;
-
-		case 0x0f: // Voice #3 frequency (High-byte)
-			voice[ 2 ].waveformGenerator.writeFREQ_HI ( value );
-			break;
-
-		case 0x10: // Voice #3 pulse width (Low-byte)
-			voice[ 2 ].waveformGenerator.writePW_LO ( value );
-			break;
-
-		case 0x11: // Voice #3 pulse width (bits #8-#15)
-			voice[ 2 ].waveformGenerator.writePW_HI ( value );
-			break;
-
-		case 0x12: // Voice #3 control register
-			voice[ 2 ].writeCONTROL_REG ( value );
-			break;
-
-		case 0x13: // Voice #3 Attack and Decay length
-			voice[ 2 ].envelopeGenerator.writeATTACK_DECAY ( value );
-			break;
-
-		case 0x14: // Voice #3 Sustain volume and Release length
-			voice[ 2 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );
-			break;
-
-		case 0x15: // Filter cut off frequency (bits #0-#2)
-//			filter6581.writeFC_LO ( value );
-//			filter8580.writeFC_LO ( value );
-			filter->writeFC_LO ( value );
-			break;
-
-		case 0x16: // Filter cut off frequency (bits #3-#10)
-//			filter6581.writeFC_HI ( value );
-//			filter8580.writeFC_HI ( value );
-			filter->writeFC_HI ( value );
-			break;
-
-		case 0x17: // Filter control
-// 			filter6581.writeRES_FILT ( value );
-// 			filter8580.writeRES_FILT ( value );
-			filter->writeRES_FILT ( value );
-			break;
-
-		case 0x18: // Volume and filter modes
-// 			filter6581.writeMODE_VOL ( value );
-// 			filter8580.writeMODE_VOL ( value );
-			filter->writeMODE_VOL ( value );
-			break;
+		case 0x00:	voice[ 0 ].waveformGenerator.writeFREQ_LO ( value );			break;	// Voice #1 frequency (Low-byte)
+		case 0x01:	voice[ 0 ].waveformGenerator.writeFREQ_HI ( value );			break;	// Voice #1 frequency (High-byte)
+		case 0x02:	voice[ 0 ].waveformGenerator.writePW_LO ( value );				break;	// Voice #1 pulse width (Low-byte)
+		case 0x03:	voice[ 0 ].waveformGenerator.writePW_HI ( value );				break;	// Voice #1 pulse width (bits #8-#15)
+		case 0x04:	voice[ 0 ].writeCONTROL_REG ( value );							break;	// Voice #1 control register
+		case 0x05:	voice[ 0 ].envelopeGenerator.writeATTACK_DECAY ( value );		break;	// Voice #1 Attack and Decay length
+		case 0x06:	voice[ 0 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );	break;	// Voice #1 Sustain volume and Release length
+		case 0x07:	voice[ 1 ].waveformGenerator.writeFREQ_LO ( value );			break;	// Voice #2 frequency (Low-byte)
+		case 0x08:	voice[ 1 ].waveformGenerator.writeFREQ_HI ( value );			break;	// Voice #2 frequency (High-byte)
+		case 0x09:	voice[ 1 ].waveformGenerator.writePW_LO ( value );				break;	// Voice #2 pulse width (Low-byte)
+		case 0x0a:	voice[ 1 ].waveformGenerator.writePW_HI ( value );				break;	// Voice #2 pulse width (bits #8-#15)
+		case 0x0b:	voice[ 1 ].writeCONTROL_REG ( value );							break;	// Voice #2 control register
+		case 0x0c:	voice[ 1 ].envelopeGenerator.writeATTACK_DECAY ( value );		break;	// Voice #2 Attack and Decay length
+		case 0x0d:	voice[ 1 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );	break;	// Voice #2 Sustain volume and Release length
+		case 0x0e:	voice[ 2 ].waveformGenerator.writeFREQ_LO ( value );			break;	// Voice #3 frequency (Low-byte)
+		case 0x0f:	voice[ 2 ].waveformGenerator.writeFREQ_HI ( value );			break;	// Voice #3 frequency (High-byte)
+		case 0x10:	voice[ 2 ].waveformGenerator.writePW_LO ( value );				break;	// Voice #3 pulse width (Low-byte)
+		case 0x11:	voice[ 2 ].waveformGenerator.writePW_HI ( value );				break;	// Voice #3 pulse width (bits #8-#15)
+		case 0x12:	voice[ 2 ].writeCONTROL_REG ( value );							break;	// Voice #3 control register
+		case 0x13:	voice[ 2 ].envelopeGenerator.writeATTACK_DECAY ( value );		break;	// Voice #3 Attack and Decay length
+		case 0x14:	voice[ 2 ].envelopeGenerator.writeSUSTAIN_RELEASE ( value );	break;	// Voice #3 Sustain volume and Release length
+		case 0x15:	filter->writeFC_LO ( value );									break;	// Filter cut off frequency (bits #0-#2)
+		case 0x16:	filter->writeFC_HI ( value );									break;	// Filter cut off frequency (bits #3-#10)
+		case 0x17:	filter->writeRES_FILT ( value );								break;	// Filter control
+		case 0x18:	filter->writeMODE_VOL ( value );								break;	// Volume and filter modes
 
 		default:
 			break;
 	}
 
-	// Update voicesync just in case.
+	// Update voicesync just in case
 	voiceSync ( false );
 }
 //-----------------------------------------------------------------------------
@@ -408,39 +287,6 @@ void SID::setSamplingParameters ( double clockFrequency, double samplingFrequenc
 	externalFilter.setClockFrequency ( clockFrequency );
 
 	resampler.setup ( clockFrequency, samplingFrequency, highestAccurateFrequency );
-}
-//-----------------------------------------------------------------------------
-
-void SID::clockSilent ( unsigned int cycles )
-{
-	ageBusValue ( cycles );
-
-	while ( cycles )
-	{
-		if ( int delta_t = std::min ( nextVoiceSync, cycles ); delta_t > 0 )
-		{
-			for ( auto i = 0; i < delta_t; i++ )
-			{
-				// clock waveform generators (can affect OSC3)
-				voice[ 0 ].waveformGenerator.clock ();
-				voice[ 1 ].waveformGenerator.clock ();
-				voice[ 2 ].waveformGenerator.clock ();
-
-				voice[ 0 ].waveformGenerator.output ( voice[ 2 ].waveformGenerator );
-				voice[ 1 ].waveformGenerator.output ( voice[ 0 ].waveformGenerator );
-				voice[ 2 ].waveformGenerator.output ( voice[ 1 ].waveformGenerator );
-
-				// clock ENV3 only
-				voice[ 2 ].envelopeGenerator.clock ();
-			}
-
-			cycles -= delta_t;
-			nextVoiceSync -= delta_t;
-		}
-
-		if ( ! nextVoiceSync )
-			voiceSync ( true );
-	}
 }
 //-----------------------------------------------------------------------------
 
