@@ -28,8 +28,7 @@
 #include "EventScheduler.h"
 
 #include "c64/c64sid.h"
-
-class sidbuilder;
+#include "sidplayfp/residfp/SID.h"
 
 namespace libsidplayfp
 {
@@ -37,8 +36,11 @@ namespace libsidplayfp
 /**
 * Inherit this class to create a new SID emulation.
 */
-class sidemu : public c64sid
+class sidemu final : public c64sid
 {
+private:
+	reSIDfp::SID	m_sid;
+
 public:
 	/**
 	* Buffer size. 5000 is roughly 5 ms at 96 kHz
@@ -48,9 +50,6 @@ public:
 		OUTPUTBUFFERSIZE = 5000
 	};
 
-private:
-	sidbuilder*	const m_builder;
-
 protected:
 	static const char ERR_UNSUPPORTED_FREQ[];
 	static const char ERR_INVALID_SAMPLING[];
@@ -59,13 +58,13 @@ protected:
 protected:
 	EventScheduler*	eventScheduler = nullptr;
 
-	event_clock_t m_accessClk;
+	event_clock_t	m_accessClk = 0;
 
 	/// The sample buffer
 	int16_t		m_buffer[ OUTPUTBUFFERSIZE ];
 
 	/// Current position in buffer
-	int m_bufferpos = 0;
+	int	m_bufferpos = 0;
 
 	bool m_status = true;
 	bool isLocked = false;
@@ -73,34 +72,34 @@ protected:
 	std::string m_error = "N/A";
 
 public:
-	sidemu ( sidbuilder* builder )
-		: m_builder ( builder )
+	sidemu ();
+
+	void reset ( uint8_t volume ) override;
+
+	/**
+	* Clock the SID chip
+	*/
+	inline void clock ()
 	{
+		const event_clock_t	cycles = eventScheduler->getTime ( EVENT_CLOCK_PHI1 ) - m_accessClk;
+		m_accessClk += cycles;
+		m_bufferpos += m_sid.clock ( (unsigned int)cycles, m_buffer + m_bufferpos );
 	}
 
-	virtual ~sidemu () {}
+	/**
+	* Set execution environment and lock sid to it
+	*/
+	bool lock ( EventScheduler* scheduler );
 
 	/**
-	* Clock the SID chip.
+	* Unlock sid
 	*/
-	virtual void clock () = 0;
-
-	/**
-	* Set execution environment and lock sid to it.
-	*/
-	virtual bool lock ( EventScheduler* scheduler );
-
-	/**
-	* Unlock sid.
-	*/
-	virtual void unlock ();
-
-	// Standard SID functions
+	void unlock ();
 
 	/**
 	* Set SID model.
 	*/
-	virtual void model ( SidConfig::sid_model_t model ) = 0;
+	void model ( SidConfig::sid_model_t _model );
 
 	/**
 	* Set the sampling method.
@@ -110,14 +109,18 @@ public:
 	* @param method
 	* @param fast
 	*/
-	virtual void sampling ( [[ maybe_unused ]] float systemfreq, [[ maybe_unused ]] float outputfreq ) {}
+	void sampling ( float systemfreq, float outputfreq );
 
 	/**
 	* Get a detailed error message.
 	*/
 	const char* error () const { return m_error.c_str (); }
 
-	sidbuilder* builder () const { return m_builder; }
+	uint8_t read ( uint8_t addr ) override				{	clock ();	return m_sid.read ( addr );	}
+	void write ( uint8_t addr, uint8_t data ) override	{	clock ();	m_sid.write ( addr, data );	}
+
+	void filter6581Curve ( double filterCurve )			{	m_sid.setFilter6581Curve ( filterCurve );	}
+	void filter8580Curve ( double filterCurve )			{	m_sid.setFilter8580Curve ( filterCurve );	}
 
 	/**
 	* Get the current position in buffer.

@@ -1,6 +1,7 @@
-Authors of reSIDfp.
+Authors of reSIDez
 
 Dag Lem: Designed and programmed complete emulation engine.
 Antti S. Lankila: Distortion simulation and calculation of combined waveforms
 Ken Händel: source code conversion to Java
 Leandro Nini: port to c++, merge with reSID 1.0
+Michael Hartmann: simplifications and modernizations

@@ -31,6 +31,20 @@ const char sidemu::ERR_INVALID_CHIP[] = "Invalid chip model.";
 
 //-----------------------------------------------------------------------------
 
+sidemu::sidemu ()
+{
+	reset ( 0 );
+}
+//-----------------------------------------------------------------------------
+
+void sidemu::reset ( uint8_t volume )
+{
+	m_accessClk = 0;
+	m_sid.reset ();
+	m_sid.write ( 0x18, volume );
+}
+//-----------------------------------------------------------------------------
+
 bool sidemu::lock ( EventScheduler* scheduler )
 {
 	if ( isLocked )
@@ -47,6 +61,31 @@ void sidemu::unlock ()
 {
 	isLocked = false;
 	eventScheduler = nullptr;
+}
+//-----------------------------------------------------------------------------
+
+void sidemu::model ( SidConfig::sid_model_t _model )
+{
+	m_sid.setChipModel ( _model == SidConfig::MOS6581 ? reSIDfp::MOS6581 : reSIDfp::MOS8580 );
+	m_status = true;
+}
+//-----------------------------------------------------------------------------
+
+void sidemu::sampling ( float systemfreq, float outputfreq )
+{
+	try
+	{
+		const auto  halfFreq = int ( std::min ( outputfreq * ( 20000.0f / 44100.0f ), 20000.0f ) );
+		m_sid.setSamplingParameters ( systemfreq, outputfreq, halfFreq );
+	}
+	catch ( reSIDfp::SIDError const& )
+	{
+		m_status = false;
+		m_error = ERR_UNSUPPORTED_FREQ;
+		return;
+	}
+
+	m_status = true;
 }
 //-----------------------------------------------------------------------------
 

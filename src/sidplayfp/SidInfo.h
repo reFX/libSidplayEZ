@@ -59,7 +59,7 @@ public:
 	/// Describes the speed current song is running at
 	const char* speedString () const { return getSpeedString (); }
 
-	/// Description of the laoded ROM images
+	/// Description of the loaded ROM images
 	//@{
 	const char* kernalDesc () const { return getKernalDesc (); }
 	const char* basicDesc () const { return getBasicDesc (); }

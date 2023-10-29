@@ -35,7 +35,7 @@ namespace libsidplayfp
 /**
  * SidTune
  */
-class SidTune
+class SidTune final
 {
 public:
 	static constexpr int MD5_LENGTH = 32;

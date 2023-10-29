@@ -117,17 +117,14 @@ uint8_t psiddrv::iomap ( uint16_t addr ) const
 	}
 
 	/*
-		* $34 for init/play in $d000 - $dfff
-		* $35 for init/play in $e000 - $ffff
-		* $36 for load end/play in $a000 - $ffff
-		* $37 for the rest
-		*/
-	if ( addr < 0xa000 )
-		return 0x37;  // Basic-ROM, Kernal-ROM, I/O
-	if ( addr < 0xd000 )
-		return 0x36;  // Kernal-ROM, I/O
-	if ( addr >= 0xe000 )
-		return 0x35;  // I/O only
+	* $34 for init/play in $d000 - $dfff
+	* $35 for init/play in $e000 - $ffff
+	* $36 for load end/play in $a000 - $ffff
+	* $37 for the rest
+	*/
+	if ( addr < 0xa000 )		return 0x37;  // Basic-ROM, Kernal-ROM, I/O
+	if ( addr < 0xd000 )		return 0x36;  // Kernal-ROM, I/O
+	if ( addr >= 0xe000 )		return 0x35;  // I/O only
 
 	return 0x34;  // RAM only
 }
@@ -138,12 +135,12 @@ bool psiddrv::drvReloc ()
 	const int startlp = m_tuneInfo->loadAddr () >> 8;
 	const int endlp = ( m_tuneInfo->loadAddr () + ( m_tuneInfo->c64dataLen () - 1 ) ) >> 8;
 
-	uint8_t relocStartPage = m_tuneInfo->relocStartPage ();
-	uint8_t relocPages = m_tuneInfo->relocPages ();
+	auto	relocStartPage = m_tuneInfo->relocStartPage ();
+	auto	relocPages = m_tuneInfo->relocPages ();
 
 	if ( m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_BASIC )
 	{
-		// The psiddrv is only used for initialisation and to
+		// The psiddrv is only used for initialization and to
 		// autorun basic tunes as running the kernel falls
 		// into a manual load/run mode
 		relocStartPage = 0x04;
@@ -162,7 +159,7 @@ bool psiddrv::drvReloc ()
 		// find area where to dump the driver in.
 		// It's only 1 block long, so any free block we can find
 		// between $0400 and $d000 will do.
-		for ( int i = 4; i < 0xd0; i++ )
+		for ( auto i = 4; i < 0xd0; i++ )
 		{
 			if ( i >= startlp && i <= endlp )
 				continue;
@@ -188,8 +185,8 @@ bool psiddrv::drvReloc ()
 	reloc_driver = psid_driver;
 	reloc_size = sizeof ( psid_driver );
 
-	reloc65 relocator ( relocAddr - 10 );
-	if ( !relocator.reloc ( &reloc_driver, &reloc_size ) )
+	reloc65	relocator ( relocAddr - 10 );
+	if ( ! relocator.reloc ( &reloc_driver, &reloc_size ) )
 	{
 		m_errorString = ERR_PSIDDRV_RELOC;
 		return false;
@@ -199,7 +196,7 @@ bool psiddrv::drvReloc ()
 	reloc_size -= 10;
 
 	m_driverAddr = relocAddr;
-	m_driverLength = static_cast<uint16_t>( reloc_size );
+	m_driverLength = uint16_t ( reloc_size );
 
 	// Round length to end of page
 	m_driverLength += 0xff;
@@ -254,8 +251,7 @@ void psiddrv::install ( sidmemory& mem, uint8_t video ) const
 	pos++;
 
 	// Set init address
-	mem.writeMemWord ( pos, m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_BASIC ?
-						0xbf55 : m_tuneInfo->initAddr () );
+	mem.writeMemWord ( pos, m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_BASIC ? 0xbf55 : m_tuneInfo->initAddr () );
 	pos += 2;
 
 	// Set play address

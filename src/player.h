@@ -27,6 +27,7 @@
 #include "sidplayfp/SidConfig.h"
 #include "sidplayfp/SidTuneInfo.h"
 #include "SidInfoImpl.h"
+#include "sidemu.h"
 
 #include "mixer.h"
 #include "c64/c64.h"
@@ -52,31 +53,18 @@ private:
 
 	} state_t;
 
-private:
-	/// Commodore 64 emulator
-	c64 m_c64;
+	c64			m_c64;				// Commodore 64 emulator
+	Mixer		m_mixer;			// Mixer
+	SidTune*	m_tune = nullptr;	// Emulator info
+	SidInfoImpl	m_info;				// Tune info
+	SidConfig	m_cfg;				// User Configuration Settings
+	sidemu		m_sidEmu[ 3 ];		// emulation of an actual SID chip
 
-	/// Mixer
-	Mixer m_mixer;
+	const char*	m_errorString;
 
-	/// Emulator info
-	SidTune* m_tune = nullptr;
+	state_t		m_isPlaying = STOPPED;	// Playback status
+	uint8_t		videoSwitch;			// PAL/NTSC switch value
 
-	/// User Configuration Settings
-	SidInfoImpl m_info;
-
-	/// User Configuration Settings
-	SidConfig m_cfg;
-
-	/// Error message
-	const char* m_errorString;
-
-	std::atomic<state_t> m_isPlaying = STOPPED;
-
-	/// PAL/NTSC switch value
-	uint8_t videoSwitch;
-
-private:
 	/**
 	* Get the C64 model for the current loaded tune.
 	*
@@ -85,54 +73,37 @@ private:
 	*/
 	c64::model_t c64model ( SidConfig::c64_model_t defaultModel, bool forced );
 
-	/**
-	* Initialize the emulation.
-	*
-	* @throw configError
-	*/
 	void initialise ();
 
-	/**
-	* Release the SID builders.
-	*/
 	void sidRelease ();
+	void sidCreate ( SidConfig::sid_model_t defaultModel, bool forced, const std::vector<uint16_t>& sidAddresses );
 
-	/**
-	* Create the SID emulation(s).
-	*
-	* @throw configError
-	*/
-	void sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultModel, bool forced, const std::vector<uint16_t>& sidAddresses );
-
-	/**
-	* Set the SID emulation parameters.
-	*
-	* @param cpuFreq the CPU clock frequency
-	* @param frequency the output sampling frequency
-	*/
 	void sidParams ( double cpuFreq, int frequency );
 
-	inline void run ( unsigned int events );
+	inline void run ( unsigned int events )
+	{
+		while ( events-- )
+			m_c64.clock ();
+	}
 
 public:
 	Player ();
-	~Player () {}
 
-	const SidConfig& config () const { return m_cfg; }
+	bool setConfig ( const SidConfig& cfg, bool force = false );
+	const SidConfig& getConfig () const { return m_cfg; }
 
-	const SidInfo& info () const { return m_info; }
+	const SidInfo& getInfo () const { return m_info; }
 
-	bool config ( const SidConfig& cfg, bool force = false );
-
-	bool load ( SidTune* tune );
-
+	bool loadTune ( SidTune* tune );
 	uint32_t play ( short* buffer, uint32_t samples );
-
+	void stop ();
 	bool isPlaying () const { return m_isPlaying != STOPPED; }
 
-	void stop ();
+	int getNumChips () const { return m_mixer.getNumChips (); }
+	void set6581FilterCurve ( const double value );
 
-	uint32_t timeMs () const { return m_c64.getTimeMs (); }
+	uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds
+	uint32_t timeMs () const { return m_c64.getTimeMs (); }				// Time in milliseconds
 
 	const char* error () const { return m_errorString; }
 

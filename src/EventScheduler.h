@@ -56,10 +56,10 @@ class EventScheduler
 {
 private:
 	// The first event of the chain.
-	Event*	firstEvent;
+	Event*	firstEvent = nullptr;
 
 	// EventScheduler's current clock.
-	event_clock_t currentTime;
+	event_clock_t currentTime = 0;
 
 	/**
 	* Scan the event queue and schedule event for execution.
@@ -83,10 +83,6 @@ private:
 	}
 
 public:
-	EventScheduler () :
-		firstEvent ( nullptr ),
-		currentTime ( 0 ) {}
-
 	/**
 	* Add event to pending queue.
 	*
@@ -132,7 +128,7 @@ public:
 	*/
 	void clock ()
 	{
-		Event& event = *firstEvent;
+		Event&	event = *firstEvent;
 		firstEvent = firstEvent->next;
 		currentTime = event.triggerTime;
 		event.event ();

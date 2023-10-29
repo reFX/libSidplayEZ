@@ -1,16 +1,21 @@
-libsidplayfp
+libSidPlayEZ
 ============
 
-https://github.com/reFX/libsidplayfp
+https://github.com/reFX/libSidPlayEZ
 
-libsidplayfp is a C64 music player library which integrates
+libSidPlayEZ is a C64 music player library which integrates
 the reSID SID chip emulation into a cycle-based emulator
 environment, constantly aiming to improve emulation of the
 C64 system and the SID chips.
 
+This is a modified version of libsidplayfp from Leandro Nini.
+All future emulation improvements to libsidplayfp will be
+integrated into this version as well.
+
 Copyright (c) 2000-2001 Simon White
 Copyright (c) 2007-2010 Antti Lankila
 Copyright (c) 2010-2023 Leandro Nini <drfiemost@users.sourceforge.net>
+Copyright (c) 2023 Michael Hartmann
 
 -----------------------------------------------------------------------------
 
@@ -27,12 +32,6 @@ Copyright (c) 2010-2023 Leandro Nini <drfiemost@users.sourceforge.net>
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
------------------------------------------------------------------------------
-
-API documentation available online at
-
-https://libsidplayfp.github.io/libsidplayfp/
 
 -----------------------------------------------------------------------------
 

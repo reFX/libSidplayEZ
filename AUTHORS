@@ -1,4 +1,4 @@
-libsidplayfp is a C64 music player library which integrates
+libSidPlayEZ is a C64 music player library which integrates
 the reSID and reSIDfp SID chip emulation into a cycle-based
 emulator environment, constantly aiming to improve emulation
 of the C64 system and the SID chips.
@@ -6,8 +6,9 @@ of the C64 system and the SID chips.
 Copyright (c) 2000 Simon White
 Copyright (c) 2007-2010 Antti Lankila
 Copyright (c) 2010-2023 Leandro Nini
+Copyright (c) 2023 Michael Hartmann
 
-This version of the freely available libsidplayfp emulator engine source code
+This version of the freely available libSidPlayEZ emulator engine source code
 contains the following contributed or derived work. In the order they first
 supplied contributions or code was derived from their work:
 
@@ -20,10 +21,9 @@ supplied contributions or code was derived from their work:
     Leandro Nini      - build system rewrite, code refactoring,
                         backporting fixes from jsidplay2 and VICE,
                         emulation improvements
-    LaLa              - stilview
     André Fachat      - reloc65
-    Jarno Paananen    - HardSID UNIX builder
-    Thibaut VARENE    - exSID driver and builder
+    Michael Hartmann  - build system removal, code refactoring,
+                        simplifications, modernizations
 
 VIC II, CIA and cpu-port emulation is based on VICE code.
 CIA SDR and interrupt handling are based on Denise emulator
@@ -46,4 +46,3 @@ Credit where credit is due, so if I missed anyone please let me know.
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-

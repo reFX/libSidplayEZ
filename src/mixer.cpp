@@ -106,19 +106,13 @@ void Mixer::doMix ()
 }
 //-----------------------------------------------------------------------------
 
-void Mixer::begin ( short* buffer, uint32_t count )
+void Mixer::init ( int16_t* buffer, uint32_t count )
 {
-	// sanity checks
-
 	// don't allow odd counts for stereo playback
-	if ( m_stereo && ( count & 1 ) )
-		throw badBufferSize ();
+	assert ( m_stereo == false || ( count & 1 ) == 0 );
 
-	// TODO short buffers make the emulator crash, should investigate why
-	//      in the meantime set a reasonable lower bound of 5ms
-	const uint32_t lowerBound = m_sampleRate / ( m_stereo ? 100 : 200 );
-	if ( count && ( count < lowerBound ) )
-		throw badBufferSize ();
+	// we need a minimum buffer-size, otherwise a crash might occur
+	assert ( count > ( ( m_stereo + 1 ) * 100 ) );
 
 	m_sampleIndex = 0;
 	m_sampleCount = count;
@@ -132,17 +126,17 @@ void Mixer::updateParams ()
 	{
 		case 1:
 			m_mix[ 0 ] = m_stereo ? &Mixer::stereo_OneChip : &Mixer::mono1;
-			if ( m_stereo ) m_mix[ 1 ] = &Mixer::stereo_OneChip;
+			m_mix[ 1 ] = &Mixer::stereo_OneChip;
 			break;
 
 		case 2:
 			m_mix[ 0 ] = m_stereo ? &Mixer::stereo_ch1_TwoChips : &Mixer::mono2;
-			if ( m_stereo ) m_mix[ 1 ] = &Mixer::stereo_ch2_TwoChips;
+			m_mix[ 1 ] = &Mixer::stereo_ch2_TwoChips;
 			break;
 
 		case 3:
 			m_mix[ 0 ] = m_stereo ? &Mixer::stereo_ch1_ThreeChips : &Mixer::mono3;
-			if ( m_stereo ) m_mix[ 1 ] = &Mixer::stereo_ch2_ThreeChips;
+			m_mix[ 1 ] = &Mixer::stereo_ch2_ThreeChips;
 			break;
 	}
 }
@@ -163,10 +157,7 @@ void Mixer::addSid ( sidemu* chip )
 	m_chips.push_back ( chip );
 	m_buffers.push_back ( chip->buffer () );
 
-	m_iSamples.resize ( m_buffers.size () );
-
-	if ( m_mix.size () > 0 )
-		updateParams ();
+	updateParams ();
 }
 //-----------------------------------------------------------------------------
 
@@ -176,8 +167,6 @@ void Mixer::setStereo ( bool stereo )
 		return;
 
 	m_stereo = stereo;
-
-	m_mix.resize ( m_stereo ? 2 : 1 );
 
 	updateParams ();
 }

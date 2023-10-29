@@ -26,7 +26,7 @@
 
 #include "player.h"
 
-class  SidConfig;
+struct SidConfig;
 class  SidTune;
 class  SidInfo;
 class  EventContext;
