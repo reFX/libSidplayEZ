@@ -1,23 +1,23 @@
 #pragma once
 /*
- * This file is part of libsidplayfp, a SID player engine.
- *
- * Copyright 2012-2014 Leandro Nini <drfiemost@users.sourceforge.net>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+* This file is part of libsidplayfp, a SID player engine.
+*
+* Copyright 2012-2014 Leandro Nini <drfiemost@users.sourceforge.net>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 #include "Bank.h"
 #include <vector>
@@ -29,70 +29,46 @@ namespace libsidplayfp
 {
 
 /**
- * Extra SID bank.
- */
+* Extra SID bank.
+*/
 class ExtraSidBank final : public Bank
 {
 private:
-    typedef std::vector<c64sid*> sids_t;
+	// Size of mapping table. Each 32 bytes another SID chip base address can be assigned to
+	static constexpr int	MAPPER_SIZE = 256 / 32;
 
-private:
-    /**
-     * Size of mapping table. Each 32 bytes another SID chip base address
-     * can be assigned to.
-     */
-    static const int MAPPER_SIZE = 8;
+	/**
+	* SID mapping table.
+	* Maps a SID chip base address to a SID
+	* or to the underlying bank.
+	*/
+	Bank*	mapper[ MAPPER_SIZE ] = {};
 
-private:
-    /**
-     * SID mapping table.
-     * Maps a SID chip base address to a SID
-     * or to the underlying bank.
-     */
-    Bank *mapper[MAPPER_SIZE];
-
-    sids_t sids;
-
-private:
-    static void resetSID(sids_t::value_type &e) { e->reset(0xf); }
-
-    static unsigned int mapperIndex(int address) { return address >> 5 & (MAPPER_SIZE - 1); }
+	std::vector<c64sid*>	sids;
 
 public:
-    virtual ~ExtraSidBank() {}
+	void reset ()
+	{
+		for ( auto sid : sids )
+			sid->reset ( 0xF );
+	}
 
-    void reset()
-    {
-        std::for_each(sids.begin(), sids.end(), resetSID);
-    }
+	void resetSIDMapper ( Bank* bank )					{	std::fill_n ( mapper, MAPPER_SIZE, bank );	}
 
-    void resetSIDMapper(Bank *bank)
-    {
-        for (int i = 0; i < MAPPER_SIZE; i++)
-            mapper[i] = bank;
-    }
+	uint8_t peek ( uint16_t addr ) override				{	return mapper[ addr >> 5 & ( MAPPER_SIZE - 1 ) ]->peek ( addr );	}
+	void poke ( uint16_t addr, uint8_t data ) override	{	mapper[ addr >> 5 & ( MAPPER_SIZE - 1 ) ]->poke ( addr, data );		}
 
-    uint8_t peek(uint16_t addr) override
-    {
-        return mapper[mapperIndex(addr)]->peek(addr);
-    }
-
-    void poke(uint16_t addr, uint8_t data) override
-    {
-        mapper[mapperIndex(addr)]->poke(addr, data);
-    }
-
-    /**
-     * Set SID emulation.
-     *
-     * @param s the emulation
-     * @param address the address where to put the chip
-     */
-    void addSID(c64sid *s, int address)
-    {
-        sids.push_back(s);
-        mapper[mapperIndex(address)] = s;
-    }
+	/**
+	* Set SID emulation.
+	*
+	* @param s the emulation
+	* @param address the address where to put the chip
+	*/
+	void addSID ( c64sid* s, uint16_t address )
+	{
+		sids.push_back ( s );
+		mapper[ address >> 5 & ( MAPPER_SIZE - 1 ) ] = s;
+	}
 };
 
 }

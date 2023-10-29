@@ -44,12 +44,10 @@ public:
 
 	int m_songSpeed = SPEED_VBI;
 
-	clock_t m_clockSpeed = CLOCK_UNKNOWN;
-
-	compatibility_t m_compatibility = COMPATIBILITY_C64;
+	clock_t			m_clockSpeed = CLOCK_UNKNOWN;
+	compatibility_t	m_compatibility = COMPATIBILITY_C64;
 
 	uint32_t m_dataFileLen = 0;
-
 	uint32_t m_c64dataLen = 0;
 
 	uint16_t m_loadAddr = 0;
@@ -57,61 +55,46 @@ public:
 	uint16_t m_playAddr = 0;
 
 	uint8_t m_relocStartPage = 0;
-
 	uint8_t m_relocPages = 0;
 
-	std::string m_path;
+	std::string	m_path;
+	std::string	m_dataFileName;
+	std::string	m_infoFileName;
 
-	std::string m_dataFileName;
+	std::vector<model_t>	m_sidModels = { SIDMODEL_UNKNOWN };
+	std::vector<uint16_t>	m_sidChipAddresses = { 0xD400 };
 
-	std::string m_infoFileName;
+	std::vector<std::string>	m_infoString;
+	std::vector<std::string>	m_commentString;
 
-	std::vector<model_t> m_sidModels = { SIDMODEL_UNKNOWN };
+	bool	m_fixLoad = false;
 
-	std::vector<uint16_t> m_sidChipAddresses = { 0xD400 };
-
-	std::vector<std::string> m_infoString;
-
-	std::vector<std::string> m_commentString;
-
-	bool m_fixLoad = false;
-
-private:    // prevent copying
-	SidTuneInfoImpl ( const SidTuneInfoImpl& );
-	SidTuneInfoImpl& operator=( SidTuneInfoImpl& );
+private:
+	// prevent copying
+	SidTuneInfoImpl ( const SidTuneInfoImpl& ) = delete;
+	SidTuneInfoImpl& operator=( SidTuneInfoImpl& ) = delete;
 
 public:
 	SidTuneInfoImpl () = default;
 
 	uint16_t getLoadAddr () const override { return m_loadAddr; }
-
 	uint16_t getInitAddr () const override { return m_initAddr; }
-
 	uint16_t getPlayAddr () const override { return m_playAddr; }
 
 	unsigned int getSongs () const override { return m_songs; }
-
 	unsigned int getStartSong () const override { return m_startSong; }
-
 	unsigned int getCurrentSong () const override { return m_currentSong; }
 
-	uint16_t getSidChipBase ( unsigned int i ) const override
-	{
-		return i < m_sidChipAddresses.size () ? m_sidChipAddresses[ i ] : 0;
-	}
+	uint16_t getSidChipBase ( unsigned int i ) const override	{	return i < m_sidChipAddresses.size () ? m_sidChipAddresses[ i ] : 0;	}
 
 	int getSidChips () const override { return int ( m_sidChipAddresses.size () ); }
 
 	int getSongSpeed () const override { return m_songSpeed; }
 
 	uint8_t getRelocStartPage () const override { return m_relocStartPage; }
-
 	uint8_t getRelocPages () const override { return m_relocPages; }
 
-	model_t getSidModel ( unsigned int i ) const override
-	{
-		return i < m_sidModels.size () ? m_sidModels[ i ] : SIDMODEL_UNKNOWN;
-	}
+	model_t getSidModel ( unsigned int i ) const override	{	return i < m_sidModels.size () ? m_sidModels[ i ] : SIDMODEL_UNKNOWN;	}
 
 	compatibility_t getCompatibility () const override { return m_compatibility; }
 
@@ -122,9 +105,7 @@ public:
 	const char* getCommentString ( unsigned int i ) const override { return i < getNumberOfCommentStrings () ? m_commentString[ i ].c_str () : ""; }
 
 	uint32_t getDataFileLen () const override { return m_dataFileLen; }
-
 	uint32_t getC64dataLen () const override { return m_c64dataLen; }
-
 	clock_t getClockSpeed () const override { return m_clockSpeed; }
 
 	const char* getFormatString () const override { return m_formatString; }
@@ -132,9 +113,7 @@ public:
 	bool getFixLoad () const override { return m_fixLoad; }
 
 	const char* getPath () const override { return m_path.c_str (); }
-
 	const char* getDataFileName () const override { return m_dataFileName.c_str (); }
-
 	const char* getInfoFileName () const override { return ! m_infoFileName.empty () ? m_infoFileName.c_str () : nullptr; }
 };
 

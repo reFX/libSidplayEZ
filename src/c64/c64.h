@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include <cstdio>
 
-#include <map>
+#include <unordered_map>
 
 #include "Banks/IOBank.h"
 #include "Banks/ColorRAMBank.h"
@@ -66,18 +66,18 @@ class c64 final : private c64env
 public:
 	typedef enum
 	{
-		PAL_B = 0     ///< PAL C64
-		, NTSC_M       ///< NTSC C64
-		, OLD_NTSC_M   ///< Old NTSC C64
-		, PAL_N        ///< C64 Drean
-		, PAL_M        ///< C64 Brasil
+		PAL_B,		// PAL C64
+		NTSC_M,		// NTSC C64
+		OLD_NTSC_M,	// Old NTSC C64
+		PAL_N,		// C64 Drean
+		PAL_M,		// C64 Brasil
 	} model_t;
 
 	typedef enum
 	{
-		OLD = 0     ///< Old CIA
-		, NEW        ///< New CIA
-		, OLD_4485   ///< Old CIA, special batch labeled 4485
+		OLD,		// Old CIA
+		NEW,        // New CIA
+		OLD_4485,	// Old CIA, special batch labeled 4485
 	} cia_model_t;
 
 private:
@@ -112,7 +112,7 @@ private:
 	SidBank sidBank;
 
 	/// Extra SIDs
-	std::map<int, ExtraSidBank*>    extraSidBanks;
+	std::unordered_map<int, ExtraSidBank*>    extraSidBanks;
 
 	/// I/O Area #1 and #2
 	DisconnectedBusBank disconnectedBusBank;
@@ -188,7 +188,7 @@ public:
 
 	uint32_t getTimeMs () const
 	{
-		return static_cast<uint32_t>( ( eventScheduler.getTime ( EVENT_CLOCK_PHI1 ) * 1000 ) / cpuFrequency );
+		return uint32_t ( ( eventScheduler.getTime ( EVENT_CLOCK_PHI1 ) * 1000 ) / cpuFrequency );
 	}
 
 	/**
@@ -234,7 +234,7 @@ public:
 	*
 	* @return false if address is unsupported
 	*/
-	bool addExtraSid ( c64sid* s, int address );
+	bool addExtraSid ( c64sid* s, uint16_t address );
 
 	/**
 	* Remove all the SIDs.
@@ -254,6 +254,7 @@ public:
 
 	uint16_t getCia1TimerA () const { return cia1.getTimerA (); }
 };
+//-----------------------------------------------------------------------------
 
 void c64::interruptIRQ ( bool state )
 {

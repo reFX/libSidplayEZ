@@ -2,6 +2,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
+* Copyright 2023 Michael Hartmann
 * Copyright 2011-2013 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004 Dag Lem <resid@nimrod.no>
@@ -20,6 +21,8 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+
+#include <vector>
 
 namespace reSIDfp
 {
@@ -56,7 +59,7 @@ private:
 	/// Filter length
 	int firN;
 
-	const int cyclesPerSample;
+	int cyclesPerSample = 0;
 
 	int sampleOffset = 0;
 
@@ -87,11 +90,51 @@ public:
 	* @param samplingFrequency Desired output sampling rate
 	* @param highestAccurateFrequency
 	*/
-	SincResampler ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency );
+	void setup ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency );
 
-	bool input ( int input );
+	inline bool input ( int input )
+	{
+		auto	ready = false;
 
-	int output () const { return outputValue; }
+		/*
+		* Clip the input as it may overflow the 16 bit range.
+		*
+		* Approximate measured input ranges:
+		* 6581: [-24262,+25080]  (Kawasaki_Synthesizer_Demo)
+		* 8580: [-21514,+35232]  (64_Forever, Drum_Fool)
+		*/
+		auto softClip = [] ( int x )
+		{
+			constexpr auto	threshold = 28000;
+			if ( x < threshold )
+				return short ( x );
+
+			constexpr auto	t = threshold / 32768.0;
+			constexpr auto	a = 1.0 - t;
+			constexpr auto	b = 1.0 / a;
+
+			auto	value = double ( x - threshold ) / 32768.0;
+			value = t + a * std::tanh ( b * value );
+
+			return int16_t ( value * 32768.0 );
+		};
+
+		sample[ sampleIndex ] = sample[ sampleIndex + RINGSIZE ] = softClip ( input );
+		sampleIndex = ( sampleIndex + 1 ) & ( RINGSIZE - 1 );
+
+		if ( sampleOffset < 1024 )
+		{
+			outputValue = fir ( sampleOffset );
+			ready = true;
+			sampleOffset += cyclesPerSample;
+		}
+
+		sampleOffset -= 1024;
+
+		return ready;
+	}
+
+	inline int output () const { return outputValue; }
 
 	void reset ();
 };

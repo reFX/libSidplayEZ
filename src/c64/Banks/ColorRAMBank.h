@@ -38,7 +38,7 @@ namespace libsidplayfp
 class ColorRAMBank final : public Bank
 {
 private:
-	uint8_t ram[ 0x0400 ];
+	uint8_t	ram[ 0x0400 ];
 
 public:
 	void reset () { std::fill_n ( ram, std::size ( ram ), 0 ); }

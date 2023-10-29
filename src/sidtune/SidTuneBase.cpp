@@ -131,7 +131,7 @@ const SidTuneInfo* SidTuneBase::getInfo ( unsigned int songNum )
 unsigned int SidTuneBase::selectSong ( unsigned int selectedSong )
 {
 	// Check whether selected song is valid, use start song if not
-	const unsigned int song = ( selectedSong == 0 || selectedSong > info.m_songs ) ? info.m_startSong : selectedSong;
+	const auto	song = ( selectedSong == 0 || selectedSong > info.m_songs ) ? info.m_startSong : selectedSong;
 
 	// Copy any song-specific variable information
 	// such a speed/clock setting to the info structure.
@@ -219,7 +219,7 @@ void SidTuneBase::loadFile ( const char* fileName, buffer_t& bufferRef )
 
 SidTuneBase::SidTuneBase ()
 {
-	// Initialize the object with some safe defaults.
+	// Initialize the object with some safe defaults
 	for ( auto si = 0u; si < MAX_SONGS; si++ )
 	{
 		songSpeed[ si ] = uint8_t ( info.m_songSpeed );
@@ -244,6 +244,7 @@ SidTuneBase* SidTuneBase::getFromBuffer ( const uint8_t* const buffer, uint32_t 
 		throw loadError ( ERR_UNRECOGNIZED_FORMAT );
 
 	s->acceptSidTune ( "-", "-", buf1, false );
+
 	return s;
 }
 //-----------------------------------------------------------------------------

@@ -81,7 +81,7 @@ private:
 	std::vector<int16_t>	pulldownTable;
 
 	/// Resampler used by audio generation code.
-	std::unique_ptr<TwoPassSincResampler> resampler;
+	TwoPassSincResampler	resampler;
 
 	/// SID voices
 	Voice	voice[ 3 ];
@@ -272,7 +272,7 @@ inline void SID::ageBusValue ( unsigned int n )
 }
 //-----------------------------------------------------------------------------
 
-inline int SID::clock ( unsigned int cycles, short* buf )
+inline int SID::clock ( unsigned int cycles, int16_t* buf )
 {
 	ageBusValue ( cycles );
 
@@ -294,8 +294,8 @@ inline int SID::clock ( unsigned int cycles, short* buf )
 				voice[ 1 ].envelopeGenerator.clock ();
 				voice[ 2 ].envelopeGenerator.clock ();
 
-				if ( resampler->input ( output () ) )
-					buf[ s++ ] = short ( resampler->output () );
+				if ( resampler.input ( output () ) )
+					buf[ s++ ] = int16_t ( resampler.output () );
 			}
 
 			cycles -= delta_t;

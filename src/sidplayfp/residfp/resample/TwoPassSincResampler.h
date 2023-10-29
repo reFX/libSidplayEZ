@@ -2,6 +2,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
+* Copyright 2023 Michael Hartmann
 * Copyright 2011-2015 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 *
@@ -32,19 +33,8 @@ namespace reSIDfp
 */
 class TwoPassSincResampler final
 {
-private:
-	std::unique_ptr<SincResampler> const s1;
-	std::unique_ptr<SincResampler> const s2;
-
-	TwoPassSincResampler ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency, double intermediateFrequency ) :
-		s1 ( new SincResampler ( clockFrequency, intermediateFrequency, highestAccurateFrequency ) ),
-		s2 ( new SincResampler ( intermediateFrequency, samplingFrequency, highestAccurateFrequency ) )
-	{
-	}
-
 public:
-	// Named constructor
-	static TwoPassSincResampler* create ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
+	void setup ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
 	{
 		// Calculation according to Laurent Ganier. It evaluates to about 120 kHz at typical settings.
 		// Some testing around the chosen value seems to confirm that this does work.
@@ -54,27 +44,32 @@ public:
 								* ( samplingFrequency - 2.0 * highestAccurateFrequency ) / samplingFrequency
 							);
 
-		return new TwoPassSincResampler ( clockFrequency, samplingFrequency, highestAccurateFrequency, intermediateFrequency );
+		s1.setup ( clockFrequency, intermediateFrequency, highestAccurateFrequency );
+		s2.setup ( intermediateFrequency, samplingFrequency, highestAccurateFrequency );
 	}
 
-	bool input ( int sample )
+	inline bool input ( int sample )
 	{
-		if ( s1->input ( sample ) )
-			return s2->input ( s1->output () );
+		if ( s1.input ( sample ) )
+			return s2.input ( s1.output () );
 
 		return false;
 	}
 
-	int output () const
+	inline int output () const
 	{
-		return s2->output ();
+		return s2.output ();
 	}
 
 	void reset ()
 	{
-		s1->reset ();
-		s2->reset ();
+		s1.reset ();
+		s2.reset ();
 	}
+
+private:
+	SincResampler	s1;
+	SincResampler	s2;
 };
 
 } // namespace reSIDfp

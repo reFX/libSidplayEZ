@@ -23,14 +23,14 @@
 
 #include <stdint.h>
 
- /**
-  * This interface is used to get values from SidTune objects.
-  *
-  * You must read (i.e. activate) sub-song specific information
-  * via:
-  *        const SidTuneInfo* tuneInfo = SidTune.getInfo();
-  *        const SidTuneInfo* tuneInfo = SidTune.getInfo(songNumber);
-  */
+/**
+* This interface is used to get values from SidTune objects.
+*
+* You must read (i.e. activate) sub-song specific information
+* via:
+*        const SidTuneInfo* tuneInfo = SidTune.getInfo();
+*        const SidTuneInfo* tuneInfo = SidTune.getInfo(songNumber);
+*/
 class SidTuneInfo
 {
 public:
@@ -49,49 +49,22 @@ public:
 	} model_t;
 
 	typedef enum {
-		COMPATIBILITY_C64,   ///< File is C64 compatible
-		COMPATIBILITY_PSID,  ///< File is PSID specific
-		COMPATIBILITY_R64,   ///< File is Real C64 only
-		COMPATIBILITY_BASIC  ///< File requires C64 Basic
+		COMPATIBILITY_C64,		// File is C64 compatible
+		COMPATIBILITY_PSID,		// File is PSID specific
+		COMPATIBILITY_R64,		// File is Real C64 only
+		COMPATIBILITY_BASIC		// File requires C64 Basic
 	} compatibility_t;
 
-public:
-	/// Vertical-Blanking-Interrupt
-	static const int SPEED_VBI = 0;
+	static constexpr int SPEED_VBI = 0;		// Vertical-Blanking-Interrupt
+	static constexpr int SPEED_CIA_1A = 60;	// CIA 1 Timer A
 
-	/// CIA 1 Timer A
-	static const int SPEED_CIA_1A = 60;
+	uint16_t loadAddr () const { return getLoadAddr (); }
+	uint16_t initAddr () const { return getInitAddr (); }
+	uint16_t playAddr () const { return getPlayAddr (); }
 
-public:
-	/**
-	 * Load Address.
-	 */
-	uint16_t loadAddr () const;
-
-	/**
-	 * Init Address.
-	 */
-	uint16_t initAddr () const;
-
-	/**
-	 * Play Address.
-	 */
-	uint16_t playAddr () const;
-
-	/**
-	 * The number of songs.
-	 */
-	unsigned int songs () const;
-
-	/**
-	 * The default starting song.
-	 */
-	unsigned int startSong () const;
-
-	/**
-	 * The tune that has been initialized.
-	 */
-	unsigned int currentSong () const;
+	unsigned int songs () const { return getSongs (); }				// Number of songs
+	unsigned int startSong () const { return getStartSong (); }		// The default starting song
+	unsigned int currentSong () const { return getCurrentSong (); }
 
 	/**
 	 * @name Base addresses
@@ -99,126 +72,67 @@ public:
 	 * - 0xD400 for the 1st SID
 	 * - 0 if the nth SID is not required
 	 */
-	uint16_t sidChipBase ( unsigned int i ) const;
+	uint16_t sidChipBase ( unsigned int i ) const { return getSidChipBase ( i ); }
+	int sidChips () const { return getSidChips (); }		// The number of SID chips required by the tune
+
+	int songSpeed () const { return getSongSpeed (); }
+
+	uint8_t relocStartPage () const { return getRelocStartPage (); }	// First available page for relocation
+	uint8_t relocPages () const { return getRelocPages (); }			// Number of pages available for relocation
+
+	SidTuneInfo::model_t sidModel ( unsigned int i ) const { return getSidModel ( i ); }	// The SID chip model(s) requested by the sidtune
+	SidTuneInfo::compatibility_t compatibility () const { return getCompatibility (); }		// Compatibility requirements
 
 	/**
-	 * The number of SID chips required by the tune.
-	 */
-	int sidChips () const;
-
-	/**
-	 * Intended speed.
-	 */
-	int songSpeed () const;
-
-	/**
-	 * First available page for relocation.
-	 */
-	uint8_t relocStartPage () const;
-
-	/**
-	 * Number of pages available for relocation.
-	 */
-	uint8_t relocPages () const;
-
-	/**
-	 * @name SID model
-	 * The SID chip model(s) requested by the sidtune.
-	 */
-	model_t sidModel ( unsigned int i ) const;
-
-	/**
-	 * Compatibility requirements.
-	 */
-	compatibility_t compatibility () const;
-
-	/**
-	 * @name Tune infos
 	 * Song title, credits, ...
 	 * - 0 = Title
 	 * - 1 = Author
 	 * - 2 = Released
 	 */
-	 //@{
-	unsigned int numberOfInfoStrings () const;     ///< The number of available text info lines
-	const char* infoString ( unsigned int i ) const; ///< Text info from the format headers etc.
-	//@}
+	unsigned int numberOfInfoStrings () const { return getNumberOfInfoStrings (); }
+	const char* infoString ( unsigned int i ) const { return getInfoString ( i ); }
 
-	/**
-	 * @name Tune comments
-	 * MUS comments.
-	 */
-	 //@{
-	unsigned int numberOfCommentStrings () const;     ///< Number of comments
-	const char* commentString ( unsigned int i ) const; ///< Used to stash the MUS comment somewhere
-	//@}
+	//
+	// MUS comments
+	//
+	unsigned int numberOfCommentStrings () const { return getNumberOfCommentStrings (); }
+	const char* commentString ( unsigned int i ) const { return getCommentString ( i ); }
 
-	/**
-	 * Length of single-file sidtune file.
-	 */
-	uint32_t dataFileLen () const;
+	uint32_t dataFileLen () const { return getDataFileLen (); }		// Length of single-file sidtune file
+	uint32_t c64dataLen () const { return getC64dataLen (); }		// Length of raw C64 data without load address
 
-	/**
-	 * Length of raw C64 data without load address.
-	 */
-	uint32_t c64dataLen () const;
+	SidTuneInfo::clock_t clockSpeed () const { return getClockSpeed (); }	// The tune clock speed
 
-	/**
-	 * The tune clock speed.
-	 */
-	clock_t clockSpeed () const;
+	const char* formatString () const { return getFormatString (); }		// The name of the identified file format
 
-	/**
-	 * The name of the identified file format.
-	 */
-	const char* formatString () const;
+	bool fixLoad () const { return getFixLoad (); }					// Whether load address might be duplicate
 
-	/**
-	 * Whether load address might be duplicate.
-	 */
-	bool fixLoad () const;
-
-	/**
-	 * Path to sidtune files.
-	 */
-	const char* path () const;
-
-	/**
-	 * A first file: e.g. "foo.sid" or "foo.mus".
-	 */
-	const char* dataFileName () const;
-
+	const char* path () const { return getPath (); }					// Path to sidtune file
+	const char* dataFileName () const { return getDataFileName (); }	// A first file: e.g. "foo.sid" or "foo.mus"
 	/**
 	 * A second file: e.g. "foo.str".
 	 * Returns 0 if none.
 	 */
-	const char* infoFileName () const;
+	const char* infoFileName () const { return getInfoFileName (); }
 
 private:
 	virtual uint16_t getLoadAddr () const = 0;
-
 	virtual uint16_t getInitAddr () const = 0;
-
 	virtual uint16_t getPlayAddr () const = 0;
 
 	virtual unsigned int getSongs () const = 0;
-
 	virtual unsigned int getStartSong () const = 0;
-
 	virtual unsigned int getCurrentSong () const = 0;
 
 	virtual uint16_t getSidChipBase ( unsigned int i ) const = 0;
-
 	virtual int getSidChips () const = 0;
 
 	virtual int getSongSpeed () const = 0;
 
 	virtual uint8_t getRelocStartPage () const = 0;
-
 	virtual uint8_t getRelocPages () const = 0;
 
 	virtual model_t getSidModel ( unsigned int i ) const = 0;
-
 	virtual compatibility_t getCompatibility () const = 0;
 
 	virtual unsigned int getNumberOfInfoStrings () const = 0;
@@ -228,7 +142,6 @@ private:
 	virtual const char* getCommentString ( unsigned int i ) const = 0;
 
 	virtual uint32_t getDataFileLen () const = 0;
-
 	virtual uint32_t getC64dataLen () const = 0;
 
 	virtual clock_t getClockSpeed () const = 0;
@@ -238,11 +151,6 @@ private:
 	virtual bool getFixLoad () const = 0;
 
 	virtual const char* getPath () const = 0;
-
 	virtual const char* getDataFileName () const = 0;
-
 	virtual const char* getInfoFileName () const = 0;
-
-protected:
-	~SidTuneInfo () {}
 };

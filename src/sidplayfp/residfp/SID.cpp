@@ -235,8 +235,7 @@ void SID::reset ()
 	filter8580.reset ();
 	externalFilter.reset ();
 
-	if ( resampler )
-		resampler->reset ();
+	resampler.reset ();
 
 	busValue = 0;
 	busValueTtl = 0;
@@ -408,7 +407,7 @@ void SID::setSamplingParameters ( double clockFrequency, double samplingFrequenc
 {
 	externalFilter.setClockFrequency ( clockFrequency );
 
-	resampler.reset ( TwoPassSincResampler::create ( clockFrequency, samplingFrequency, highestAccurateFrequency ) );
+	resampler.setup ( clockFrequency, samplingFrequency, highestAccurateFrequency );
 }
 //-----------------------------------------------------------------------------
 

@@ -34,14 +34,13 @@ namespace libsidplayfp
 {
 
 /**
-	* Cycle-exact 6502/6510 emulation core.
-	*
-	* Code is based on work by Simon A. White <sidplay2@yahoo.com>.
-	* Original Java port by Ken Händel. Later on, it has been hacked to
-	* improve compatibility with Lorenz suite on VICE's test suite.
-	*
-	* @author alankila
-	*/
+* Cycle-exact 6502/6510 emulation core
+*
+* Code is based on work by Simon A. White <sidplay2@yahoo.com>
+* Original Java port by Ken Händel. Later on, it has been hacked to improve compatibility with Lorenz suite on VICE's test suite
+*
+* @author alankila
+*/
 class MOS6510
 {
 public:
@@ -49,17 +48,17 @@ public:
 
 private:
 	/**
-		* IRQ/NMI magic limit values.
-		* Need to be larger than about 0x103 << 3,
-		* but can't be min/max for Integer type.
-		*/
+	* IRQ/NMI magic limit values.
+	* Need to be larger than about 0x103 << 3,
+	* but can't be min/max for Integer type.
+	*/
 	static const int MAX = 65536;
 
-	/// Stack page location
+	// Stack page location
 	static const uint8_t SP_PAGE = 0x01;
 
 public:
-	/// Status register interrupt bit.
+	// Status register interrupt bit.
 	static const int SR_INTERRUPT = 2;
 
 private:
@@ -70,36 +69,36 @@ private:
 	};
 
 private:
-	/// Event scheduler
+	// Event scheduler
 	EventScheduler& eventScheduler;
 
-	/// Current instruction and subcycle within instruction
+	// Current instruction and subcycle within instruction
 	int cycleCount;
 
-	/// When IRQ was triggered. -MAX means "during some previous instruction", MAX means "no IRQ"
+	// When IRQ was triggered. -MAX means "during some previous instruction", MAX means "no IRQ"
 	int interruptCycle;
 
-	/// IRQ asserted on CPU
+	// IRQ asserted on CPU
 	bool irqAssertedOnPin;
 
-	/// NMI requested?
+	// NMI requested?
 	bool nmiFlag;
 
-	/// RST requested?
+	// RST requested?
 	bool rstFlag;
 
-	/// RDY pin state (stop CPU on read)
+	// RDY pin state (stop CPU on read)
 	bool rdy;
 
-	/// Address Low summer carry
+	// Address Low summer carry
 	bool adl_carry;
 
 	bool d1x1;
 
-	/// The RDY pin state during last throw away read.
+	// The RDY pin state during last throw away read.
 	bool rdyOnThrowAwayRead;
 
-	/// Status register
+	// Status register
 	Flags flags;
 
 	// Data regarding current instruction
@@ -113,143 +112,139 @@ private:
 	uint8_t Register_X;
 	uint8_t Register_Y;
 
-	/// Table of CPU opcode implementations
+	// Table of CPU opcode implementations
 	struct ProcessorCycle instrTable[ 0x101 << 3 ];
 
 private:
-	/// Represents an instruction subcycle that writes
-	EventCallback<MOS6510> m_nosteal;
-
-	/// Represents an instruction subcycle that reads
-	EventCallback<MOS6510> m_steal;
-
+	EventCallback<MOS6510> m_nosteal;	// Represents an instruction subcycle that writes
+	EventCallback<MOS6510> m_steal;		// Represents an instruction subcycle that reads
 	EventCallback<MOS6510> clearInt;
 
 	void eventWithoutSteals ();
 	void eventWithSteals ();
 	void removeIRQ ();
 
-	inline void Initialise ();
+	void Initialise ();
 
 	// Declare Interrupt Routines
-	inline void IRQLoRequest ();
-	inline void IRQHiRequest ();
-	inline void interruptsAndNextOpcode ();
-	inline void calculateInterruptTriggerCycle ();
+	void IRQLoRequest ();
+	void IRQHiRequest ();
+	void interruptsAndNextOpcode ();
+	void calculateInterruptTriggerCycle ();
 
 	// Declare Instruction Routines
-	inline void fetchNextOpcode ();
-	inline void throwAwayFetch ();
-	inline void throwAwayRead ();
-	inline void FetchDataByte ();
-	inline void FetchLowAddr ();
-	inline void FetchLowAddrX ();
-	inline void FetchLowAddrY ();
-	inline void FetchHighAddr ();
-	inline void FetchHighAddrX ();
-	inline void FetchHighAddrX2 ();
-	inline void FetchHighAddrY ();
-	inline void FetchHighAddrY2 ();
-	inline void FetchLowEffAddr ();
-	inline void FetchHighEffAddr ();
-	inline void FetchHighEffAddrY ();
-	inline void FetchHighEffAddrY2 ();
-	inline void FetchLowPointer ();
-	inline void FetchLowPointerX ();
-	inline void FetchHighPointer ();
-	inline void FetchEffAddrDataByte ();
-	inline void PutEffAddrDataByte ();
-	inline void PushLowPC ();
-	inline void PushHighPC ();
-	inline void PushSR ();
-	inline void PopLowPC ();
-	inline void PopHighPC ();
-	inline void PopSR ();
-	inline void brkPushLowPC ();
-	inline void WasteCycle ();
+	void fetchNextOpcode ();
+	void throwAwayFetch ();
+	void throwAwayRead ();
+	void FetchDataByte ();
+	void FetchLowAddr ();
+	void FetchLowAddrX ();
+	void FetchLowAddrY ();
+	void FetchHighAddr ();
+	void FetchHighAddrX ();
+	void FetchHighAddrX2 ();
+	void FetchHighAddrY ();
+	void FetchHighAddrY2 ();
+	void FetchLowEffAddr ();
+	void FetchHighEffAddr ();
+	void FetchHighEffAddrY ();
+	void FetchHighEffAddrY2 ();
+	void FetchLowPointer ();
+	void FetchLowPointerX ();
+	void FetchHighPointer ();
+	void FetchEffAddrDataByte ();
+	void PutEffAddrDataByte ();
+	void PushLowPC ();
+	void PushHighPC ();
+	void PushSR ();
+	void PopLowPC ();
+	void PopHighPC ();
+	void PopSR ();
+	void brkPushLowPC ();
+	void WasteCycle ();
 
-	inline void Push ( uint8_t data );
-	inline uint8_t Pop ();
-	inline void compare ( uint8_t data );
+	void Push ( uint8_t data );
+	uint8_t Pop ();
+	void compare ( uint8_t data );
 
 	// Declare Instruction Operation Routines
-	inline void adc_instr ();
-	inline void alr_instr ();
-	inline void anc_instr ();
-	inline void and_instr ();
-	inline void ane_instr ();
-	inline void arr_instr ();
-	inline void asl_instr ();
-	inline void asla_instr ();
-	inline void aso_instr ();
-	inline void axa_instr ();
-	inline void axs_instr ();
-	inline void bcc_instr ();
-	inline void bcs_instr ();
-	inline void beq_instr ();
-	inline void bit_instr ();
-	inline void bmi_instr ();
-	inline void bne_instr ();
-	inline void branch_instr ( bool condition );
-	inline void fix_branch ();
-	inline void bpl_instr ();
-	inline void bvc_instr ();
-	inline void bvs_instr ();
-	inline void clc_instr ();
-	inline void cld_instr ();
-	inline void cli_instr ();
-	inline void clv_instr ();
-	inline void cmp_instr ();
-	inline void cpx_instr ();
-	inline void cpy_instr ();
-	inline void dcm_instr ();
-	inline void dec_instr ();
-	inline void dex_instr ();
-	inline void dey_instr ();
-	inline void eor_instr ();
-	inline void inc_instr ();
-	inline void ins_instr ();
-	inline void inx_instr ();
-	inline void iny_instr ();
-	inline void jmp_instr ();
-	inline void las_instr ();
-	inline void lax_instr ();
-	inline void lda_instr ();
-	inline void ldx_instr ();
-	inline void ldy_instr ();
-	inline void lse_instr ();
-	inline void lsr_instr ();
-	inline void lsra_instr ();
-	inline void oal_instr ();
-	inline void ora_instr ();
-	inline void pha_instr ();
-	inline void pla_instr ();
-	inline void rla_instr ();
-	inline void rol_instr ();
-	inline void rola_instr ();
-	inline void ror_instr ();
-	inline void rora_instr ();
-	inline void rra_instr ();
-	inline void rti_instr ();
-	inline void rts_instr ();
-	inline void sbx_instr ();
-	inline void say_instr ();
-	inline void sbc_instr ();
-	inline void sec_instr ();
-	inline void sed_instr ();
-	inline void sei_instr ();
-	inline void shs_instr ();
-	inline void sta_instr ();
-	inline void stx_instr ();
-	inline void sty_instr ();
-	inline void tax_instr ();
-	inline void tay_instr ();
-	inline void tsx_instr ();
-	inline void txa_instr ();
-	inline void txs_instr ();
-	inline void tya_instr ();
-	inline void xas_instr ();
-	inline void sh_instr ();
+	void adc_instr ();
+	void alr_instr ();
+	void anc_instr ();
+	void and_instr ();
+	void ane_instr ();
+	void arr_instr ();
+	void asl_instr ();
+	void asla_instr ();
+	void aso_instr ();
+	void axa_instr ();
+	void axs_instr ();
+	void bcc_instr ();
+	void bcs_instr ();
+	void beq_instr ();
+	void bit_instr ();
+	void bmi_instr ();
+	void bne_instr ();
+	void branch_instr ( bool condition );
+	void fix_branch ();
+	void bpl_instr ();
+	void bvc_instr ();
+	void bvs_instr ();
+	void clc_instr ();
+	void cld_instr ();
+	void cli_instr ();
+	void clv_instr ();
+	void cmp_instr ();
+	void cpx_instr ();
+	void cpy_instr ();
+	void dcm_instr ();
+	void dec_instr ();
+	void dex_instr ();
+	void dey_instr ();
+	void eor_instr ();
+	void inc_instr ();
+	void ins_instr ();
+	void inx_instr ();
+	void iny_instr ();
+	void jmp_instr ();
+	void las_instr ();
+	void lax_instr ();
+	void lda_instr ();
+	void ldx_instr ();
+	void ldy_instr ();
+	void lse_instr ();
+	void lsr_instr ();
+	void lsra_instr ();
+	void oal_instr ();
+	void ora_instr ();
+	void pha_instr ();
+	void pla_instr ();
+	void rla_instr ();
+	void rol_instr ();
+	void rola_instr ();
+	void ror_instr ();
+	void rora_instr ();
+	void rra_instr ();
+	void rti_instr ();
+	void rts_instr ();
+	void sbx_instr ();
+	void say_instr ();
+	void sbc_instr ();
+	void sec_instr ();
+	void sed_instr ();
+	void sei_instr ();
+	void shs_instr ();
+	void sta_instr ();
+	void stx_instr ();
+	void sty_instr ();
+	void tax_instr ();
+	void tay_instr ();
+	void tsx_instr ();
+	void txa_instr ();
+	void txs_instr ();
+	void tya_instr ();
+	void xas_instr ();
+	void sh_instr ();
 
 	/**
 	* @throws haltInstruction
@@ -257,16 +252,15 @@ private:
 	void invalidOpcode ();
 
 	// Declare Arithmetic Operations
-	inline void doADC ();
-	inline void doSBC ();
+	void doADC ();
+	void doSBC ();
 
 	inline bool checkInterrupts () const { return rstFlag || nmiFlag || ( irqAssertedOnPin && ! flags.getI () ); }
 
-	inline void buildInstructionTable ();
+	void buildInstructionTable ();
 
 protected:
 	MOS6510 ( EventScheduler& scheduler );
-	~MOS6510 () {}
 
 	/**
 	* Get data from system environment.
@@ -297,5 +291,6 @@ public:
 	void triggerIRQ ();
 	void clearIRQ ();
 };
+//-----------------------------------------------------------------------------
 
 }

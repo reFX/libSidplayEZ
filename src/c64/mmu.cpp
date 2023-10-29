@@ -28,21 +28,16 @@
 namespace libsidplayfp
 {
 
-class Bank;
-
 MMU::MMU ( EventScheduler& scheduler, IOBank* ioBank )
 	: eventScheduler ( scheduler )
 	, ioBank ( ioBank )
 	, zeroRAMBank ( *this, ramBank )
 {
+	std::fill_n ( cpuReadMap, std::size ( cpuReadMap ), &ramBank );
+	std::fill_n ( cpuWriteMap, std::size ( cpuWriteMap ), &ramBank );
+
 	cpuReadMap[ 0 ] = &zeroRAMBank;
 	cpuWriteMap[ 0 ] = &zeroRAMBank;
-
-	for ( auto i = 1; i < 16; i++ )
-	{
-		cpuReadMap[ i ] = &ramBank;
-		cpuWriteMap[ i ] = &ramBank;
-	}
 }
 //-----------------------------------------------------------------------------
 
@@ -67,7 +62,7 @@ void MMU::updateMappingPHI2 ()
 	}
 	else
 	{
-		cpuReadMap[ 0xd ] = ( !charen && ( loram || hiram ) ) ? (Bank*)&characterRomBank : &ramBank;
+		cpuReadMap[ 0xd ] = ( ! charen && ( loram || hiram ) ) ? (Bank*)&characterRomBank : &ramBank;
 		cpuWriteMap[ 0xd ] = &ramBank;
 	}
 }

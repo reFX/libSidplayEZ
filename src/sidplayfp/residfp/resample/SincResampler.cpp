@@ -1,6 +1,7 @@
 /*
  * This file is part of libsidplayfp, a SID player engine.
  *
+ * Copyright 2023 Michael Hartmann
  * Copyright 2011-2020 Leandro Nini <drfiemost@users.sourceforge.net>
  * Copyright 2007-2010 Antti Lankila
  * Copyright 2004 Dag Lem <resid@nimrod.no>
@@ -23,7 +24,6 @@
 #include "SincResampler.h"
 
 #include <cassert>
-#include <cstring>
 #include <cmath>
 
 constexpr auto	M_PI = 3.14159265358979323846;
@@ -41,44 +41,8 @@ constexpr auto	M_PI = 3.14159265358979323846;
 
 namespace reSIDfp
 {
-
-// Maximum error acceptable in I0 is 1e-6, or ~96 dB
-constexpr auto	I0E = 1e-6;
-constexpr auto	BITS = 16;
-
-//-----------------------------------------------------------------------------
-
 /**
-* Compute the 0th order modified Bessel function of the first kind.
-* This function is originally from resample-1.5/filterkit.c by J. O. Smith.
-* It is used to build the Kaiser window for resampling.
-*
-* @param x evaluate I0 at x
-* @return value of I0 at x.
-*/
-double I0 ( double x )
-{
-	auto	sum = 1.0;
-	auto	u = 1.0;
-	auto	n = 1.0;
-	const auto	halfx = x / 2.0;
-
-	do
-	{
-		const auto	temp = halfx / n;
-
-		u *= temp * temp;
-		sum += u;
-		n += 1.0;
-
-	} while ( u >= I0E * sum );
-
-	return sum;
-}
-//-----------------------------------------------------------------------------
-
-/**
-* Calculate convolution with sample and sinc.
+* Calculate convolution with sample and sinc
 *
 * @param a sample buffer input
 * @param b sinc buffer
@@ -221,14 +185,50 @@ int SincResampler::fir ( int subcycle )
 }
 //-----------------------------------------------------------------------------
 
-SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
-	: cyclesPerSample ( int ( clockFrequency / samplingFrequency * 1024.0 ) )
+void SincResampler::setup ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
 {
+	constexpr auto	BITS = 16;
+
+	reset ();
+
+	cyclesPerSample = int ( clockFrequency / samplingFrequency * 1024.0 );
+
 	// 16 bits -> -96dB stopband attenuation.
 	const auto	A = -20.0 * std::log10 ( 1.0 / ( 1 << BITS ) );
 
 	// A fraction of the bandwidth is allocated to the transition band, which we double because we design the filter to transition halfway at Nyquist
 	const auto	dw = ( 1.0 - 2.0 * highestAccurateFrequency / samplingFrequency ) * M_PI * 2.0;
+
+	auto I0 = [] ( double x )
+	{
+		// Maximum error acceptable in I0 is 1e-6, or ~96 dB
+		constexpr auto	I0E = 1e-6;
+
+		/**
+		* Compute the 0th order modified Bessel function of the first kind.
+		* This function is originally from resample-1.5/filterkit.c by J. O. Smith.
+		* It is used to build the Kaiser window for resampling.
+		*
+		* @param x evaluate I0 at x
+		* @return value of I0 at x.
+		*/
+		auto	sum = 1.0;
+		auto	u = 1.0;
+		auto	n = 1.0;
+		const auto	halfx = x / 2.0;
+
+		do
+		{
+			const auto	temp = halfx / n;
+
+			u *= temp * temp;
+			sum += u;
+			n += 1.0;
+
+		} while ( u >= I0E * sum );
+
+		return sum;
+	};
 
 	// For calculation of beta and N see the reference for the Kaiser window function in the MATLAB Signal Processing Toolbox:
 	// http://www.mathworks.com/help/signal/ref/kaiserord.html
@@ -291,49 +291,6 @@ SincResampler::SincResampler ( double clockFrequency, double samplingFrequency, 
 			*dst++ = int16_t ( scale * sincWt * kaiserXt );
 		}
 	}
-}
-//-----------------------------------------------------------------------------
-
-bool SincResampler::input ( int input )
-{
-	auto	ready = false;
-
-	/*
-	* Clip the input as it may overflow the 16 bit range.
-	*
-	* Approximate measured input ranges:
-	* 6581: [-24262,+25080]  (Kawasaki_Synthesizer_Demo)
-	* 8580: [-21514,+35232]  (64_Forever, Drum_Fool)
-	*/
-	auto softClip = [] ( int x )
-	{
-		constexpr auto	threshold = 28000;
-		if ( x < threshold )
-			return short ( x );
-
-		constexpr auto	t = threshold / 32768.0;
-		constexpr auto	a = 1.0 - t;
-		constexpr auto	b = 1.0 / a;
-
-		auto	value = double ( x - threshold ) / 32768.0;
-		value = t + a * std::tanh ( b * value );
-
-		return int16_t ( value * 32768.0 );
-	};
-
-	sample[ sampleIndex ] = sample[ sampleIndex + RINGSIZE ] = softClip ( input );
-	sampleIndex = ( sampleIndex + 1 ) & ( RINGSIZE - 1 );
-
-	if ( sampleOffset < 1024 )
-	{
-		outputValue = fir ( sampleOffset );
-		ready = true;
-		sampleOffset += cyclesPerSample;
-	}
-
-	sampleOffset -= 1024;
-
-	return ready;
 }
 //-----------------------------------------------------------------------------
 

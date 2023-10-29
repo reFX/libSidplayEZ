@@ -38,14 +38,14 @@ namespace libsidplayfp
 class SidTune
 {
 public:
-	static const int MD5_LENGTH = 32;
+	static constexpr int MD5_LENGTH = 32;
 
 private:  // -------------------------------------------------------------
-	libsidplayfp::SidTuneBase* tune;
+	libsidplayfp::SidTuneBase*	tune = nullptr;
 
-	const char* m_statusString;
+	const char*	m_statusString = nullptr;
 
-	bool m_status;
+	bool	m_status;
 
 public:  // ----------------------------------------------------------------
 	typedef void ( *LoaderFunc )( const char* fileName, std::vector<uint8_t>& bufferRef );
@@ -139,12 +139,12 @@ public:  // ----------------------------------------------------------------
 	 *
 	 * @return current state (true = okay, false = error)
 	 */
-	bool getStatus () const;
+	bool getStatus () const	{	return m_status;	}
 
 	/**
 	 * Error/status message of last operation.
 	 */
-	const char* statusString () const;
+	const char* statusString () const { return m_statusString; }
 
 	/**
 	 * Copy sidtune into C64 memory (64 KB).

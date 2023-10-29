@@ -36,8 +36,6 @@ private:
 	uint8_t lastpoke[ 0x20 ];
 
 protected:
-	virtual ~c64sid () {}
-
 	virtual uint8_t read ( uint8_t addr ) = 0;
 	virtual void write ( uint8_t addr, uint8_t data ) = 0;
 

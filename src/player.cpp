@@ -300,25 +300,28 @@ bool Player::config ( const SidConfig& cfg, bool force )
 		{
 			sidRelease ();
 
-			std::vector<unsigned int> addresses;
-			const uint16_t secondSidAddress = tuneInfo->sidChipBase ( 1 ) != 0 ? tuneInfo->sidChipBase ( 1 ) : cfg.secondSidAddress;
-			if ( secondSidAddress )
-				addresses.push_back ( secondSidAddress );
+			std::vector<uint16_t>	addresses = { 0xD400 };	// First SID chip is always at $D400
 
-			const uint16_t thirdSidAddress = tuneInfo->sidChipBase ( 2 ) != 0 ? tuneInfo->sidChipBase ( 2 ) : cfg.thirdSidAddress;
-			if ( thirdSidAddress )
-				addresses.push_back ( thirdSidAddress );
+			auto addSid = [ &addresses, tuneInfo ] ( const auto sidIndex, uint16_t fallbackAddr )
+			{
+				if ( auto newSidAddress = tuneInfo->sidChipBase ( sidIndex ) )
+				{
+					addresses.push_back ( newSidAddress );
+					return;
+				}
+
+				if ( fallbackAddr )
+					addresses.push_back ( fallbackAddr );
+			};
+
+			addSid ( 1, cfg.secondSidAddress );
+			addSid ( 2, cfg.thirdSidAddress );
 
 			// SID emulation setup (must be performed before the environment setup call)
 			sidCreate ( cfg.sidEmulation, cfg.defaultSidModel, cfg.forceSidModel, addresses );
 
-			// Determine c64 model
-			const auto	model = c64model ( cfg.defaultC64Model, cfg.forceC64Model );
-			m_c64.setModel ( model );
-
-			const auto	ciaModel = getCiaModel ( cfg.ciaModel );
-			m_c64.setCiaModel ( ciaModel );
-
+			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
+			m_c64.setCiaModel ( getCiaModel ( cfg.ciaModel ) );
 			sidParams ( m_c64.getMainCpuSpeed (), cfg.frequency );
 
 			// Configure, setup and install C64 environment/events
@@ -452,7 +455,7 @@ void Player::sidRelease ()
 }
 //-----------------------------------------------------------------------------
 
-void Player::sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultModel, bool forced, const std::vector<unsigned int>& extraSidAddresses )
+void Player::sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultModel, bool forced, const std::vector<uint16_t>& sidAddresses )
 {
 	if ( ! builder )
 		return;
@@ -468,37 +471,20 @@ void Player::sidCreate ( sidbuilder* builder, SidConfig::sid_model_t defaultMode
 		return sidModel == SidTuneInfo::SIDMODEL_6581 ? SidConfig::MOS6581 : SidConfig::MOS8580;
 	};
 
-	// Setup base SID
-	const auto  userModel = getSidModel ( tuneInfo->sidModel ( 0 ), defaultModel, forced );
-	auto    s = builder->lock ( m_c64.getEventScheduler (), userModel );
-	if ( ! builder->getStatus () )
-		throw configError ( builder->error () );
-
-	m_c64.setBaseSid ( s );
-	m_mixer.addSid ( s );
-
-	// Setup extra SIDs if needed
-	if ( extraSidAddresses.size () )
+	for ( auto i = 0; auto extraAddr : sidAddresses )
 	{
-		// If bits 6-7 are set to Unknown then the second SID will be set to the same SID
-		// model as the first SID.
-		defaultModel = userModel;
+		defaultModel = getSidModel ( tuneInfo->sidModel ( i ), defaultModel, forced );
 
-		const auto	extraSidChips = (unsigned int)extraSidAddresses.size ();
+		auto	s = builder->lock ( m_c64.getEventScheduler (), defaultModel );
+		if ( ! builder->getStatus () )
+			throw configError ( builder->error () );
 
-		for ( auto i = 0u; i < extraSidChips; i++ )
-		{
-			const auto  _userModel = getSidModel ( tuneInfo->sidModel ( i + 1 ), defaultModel, forced );
+		if ( i++ == 0 )
+			m_c64.setBaseSid ( s );
+		else if ( ! m_c64.addExtraSid ( s, extraAddr ) )
+			throw configError ( ERR_UNSUPPORTED_SID_ADDR );
 
-			auto    es = builder->lock ( m_c64.getEventScheduler (), _userModel );
-			if ( ! builder->getStatus () )
-				throw configError ( builder->error () );
-
-			if ( ! m_c64.addExtraSid ( es, int ( extraSidAddresses[ i ] ) ) )
-				throw configError ( ERR_UNSUPPORTED_SID_ADDR );
-
-			m_mixer.addSid ( es );
-		}
+		m_mixer.addSid ( s );
 	}
 }
 //-----------------------------------------------------------------------------

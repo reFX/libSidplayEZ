@@ -20,7 +20,7 @@
 */
 
 #include <stdint.h>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <utility>
 
@@ -35,7 +35,7 @@ namespace libsidplayfp
 class romCheck
 {
 private:
-	typedef std::map<std::string, const char*> md5map;
+	typedef std::unordered_map<std::string, const char*> md5map;
 
 private:
 	/**
@@ -85,7 +85,7 @@ protected:
 
 	void add ( const char* md5, const char* desc )
 	{
-		m_checksums.insert ( std::make_pair ( md5, desc ) );
+		m_checksums[ md5 ] = desc;
 	}
 
 public:

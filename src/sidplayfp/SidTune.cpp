@@ -21,10 +21,6 @@
 #include "SidTune.h"
 #include "sidtune/SidTuneBase.h"
 
-using namespace libsidplayfp;
-
-const char MSG_NO_ERRORS[] = "No errors";
-
 //-----------------------------------------------------------------------------
 
 SidTune::SidTune ( const char* fileName, bool separatorIsSlash )
@@ -34,14 +30,12 @@ SidTune::SidTune ( const char* fileName, bool separatorIsSlash )
 //-----------------------------------------------------------------------------
 
 SidTune::SidTune ( LoaderFunc loader, const char* fileName, bool separatorIsSlash )
-	: tune ( nullptr )
 {
 	load ( loader, fileName, separatorIsSlash );
 }
 //-----------------------------------------------------------------------------
 
 SidTune::SidTune ( const uint8_t* oneFileFormatSidtune, uint32_t sidtuneLength )
-	: tune ( nullptr )
 {
 	read ( oneFileFormatSidtune, sidtuneLength );
 }
@@ -64,11 +58,11 @@ void SidTune::load ( LoaderFunc loader, const char* fileName, bool separatorIsSl
 	try
 	{
 		delete tune;
-		tune = SidTuneBase::load ( loader, fileName, separatorIsSlash );
+		tune = libsidplayfp::SidTuneBase::load ( loader, fileName, separatorIsSlash );
 		m_status = true;
-		m_statusString = MSG_NO_ERRORS;
+		m_statusString = "No errors";
 	}
-	catch ( loadError const& e )
+	catch ( libsidplayfp::loadError const& e )
 	{
 		tune = nullptr;
 		m_status = false;
@@ -82,11 +76,11 @@ void SidTune::read ( const uint8_t* sourceBuffer, uint32_t bufferLen )
 	try
 	{
 		delete tune;
-		tune = SidTuneBase::read ( sourceBuffer, bufferLen );
+		tune = libsidplayfp::SidTuneBase::read ( sourceBuffer, bufferLen );
 		m_status = true;
-		m_statusString = MSG_NO_ERRORS;
+		m_statusString = "No errors";
 	}
-	catch ( loadError const& e )
+	catch ( libsidplayfp::loadError const& e )
 	{
 		tune = nullptr;
 		m_status = false;
@@ -113,18 +107,13 @@ const SidTuneInfo* SidTune::getInfo ( unsigned int songNum )
 }
 //-----------------------------------------------------------------------------
 
-bool SidTune::getStatus () const { return m_status; }
-
-const char* SidTune::statusString () const { return m_statusString; }
-
-//-----------------------------------------------------------------------------
-
-bool SidTune::placeSidTuneInC64mem ( sidmemory& mem )
+bool SidTune::placeSidTuneInC64mem ( libsidplayfp::sidmemory& mem )
 {
 	if ( ! tune )
 		return false;
 
 	tune->placeSidTuneInC64mem ( mem );
+
 	return true;
 }
 //-----------------------------------------------------------------------------

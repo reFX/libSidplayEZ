@@ -37,8 +37,6 @@ protected:
 	PSID () {}
 
 public:
-	~PSID () override {}
-
 	/**
 	* @return pointer to a SidTune or 0 if not a PSID file
 	* @throw loadError if PSID file is corrupt

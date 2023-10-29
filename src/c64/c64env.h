@@ -37,8 +37,10 @@ private:
 	EventScheduler& eventScheduler;
 
 public:
-	c64env ( EventScheduler& scheduler ) :
-		eventScheduler ( scheduler ) {}
+	c64env ( EventScheduler& scheduler )
+		: eventScheduler ( scheduler )
+	{
+	}
 
 	EventScheduler& scheduler () const { return eventScheduler; }
 

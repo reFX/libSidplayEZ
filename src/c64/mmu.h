@@ -48,36 +48,23 @@ class MMU final : public PLA, public sidmemory
 private:
 	EventScheduler& eventScheduler;
 
-	/// CPU port signals
+	// CPU port signals
 	bool    loram = false;
 	bool    hiram = false;
 	bool    charen = false;
 
-	/// CPU read memory mapping in 4k chunks
-	Bank*	cpuReadMap[ 16 ];
+	Bank*	cpuReadMap[ 16 ];		// CPU read memory mapping in 4k chunks
+	Bank*	cpuWriteMap[ 16 ];		// CPU write memory mapping in 4k chunks
+	IOBank*	ioBank;					// IO region handler
 
-	/// CPU write memory mapping in 4k chunks
-	Bank*	cpuWriteMap[ 16 ];
+	KernalRomBank		kernalRomBank;		// Kernal ROM
+	BasicRomBank		basicRomBank;		// BASIC ROM
+	CharacterRomBank	characterRomBank;	// Character ROM
 
-	/// IO region handler
-	IOBank*	ioBank;
+	SystemRAMBank	ramBank;				// RAM
+	ZeroRAMBank		zeroRAMBank;			// RAM bank 0
 
-	/// Kernal ROM
-	KernalRomBank kernalRomBank;
-
-	/// BASIC ROM
-	BasicRomBank basicRomBank;
-
-	/// Character ROM
-	CharacterRomBank characterRomBank;
-
-	/// RAM
-	SystemRAMBank ramBank;
-
-	/// RAM bank 0
-	ZeroRAMBank zeroRAMBank;
-
-	/// random seed
+	// random seed
 	mutable unsigned int seed = 3686734;
 
 	void setCpuPort ( uint8_t state ) override;
@@ -107,26 +94,24 @@ public:
 	void fillRam ( uint16_t start, const uint8_t* source, unsigned int size ) override	{	std::copy_n ( source, size, ramBank.ram + start );	}
 
 	// SID specific hacks
-	void installResetHook ( uint16_t addr ) override { kernalRomBank.installResetHook ( addr ); }
-
-	void installBasicTrap ( uint16_t addr ) override { basicRomBank.installTrap ( addr ); }
-
-	void setBasicSubtune ( uint8_t tune ) override { basicRomBank.setSubtune ( tune ); }
+	void installResetHook ( uint16_t addr ) override	{	kernalRomBank.installResetHook ( addr );	}
+	void installBasicTrap ( uint16_t addr ) override	{	basicRomBank.installTrap ( addr );			}
+	void setBasicSubtune ( uint8_t tune ) override		{	basicRomBank.setSubtune ( tune );			}
 
 	/**
-		* Access memory as seen by CPU.
-		*
-		* @param addr the address where to read from
-		* @return value at address
-		*/
+	* Access memory as seen by CPU.
+	*
+	* @param addr the address where to read from
+	* @return value at address
+	*/
 	uint8_t cpuRead ( uint16_t addr ) const { return cpuReadMap[ addr >> 12 ]->peek ( addr ); }
 
 	/**
-		* Access memory as seen by CPU.
-		*
-		* @param addr the address where to write
-		* @param data the value to write
-		*/
+	* Access memory as seen by CPU.
+	*
+	* @param addr the address where to write
+	* @param data the value to write
+	*/
 	void cpuWrite ( uint16_t addr, uint8_t data ) { cpuWriteMap[ addr >> 12 ]->poke ( addr, data ); }
 };
 

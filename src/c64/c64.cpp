@@ -32,34 +32,33 @@ namespace libsidplayfp
 
 typedef struct
 {
-	double colorBurst;         ///< Colorburst frequency in Herz
-	double divider;            ///< Clock frequency divider
-	double powerFreq;          ///< Power line frequency in Herz
-	MOS656X::model_t vicModel; ///< Video chip model
+	double				colorBurst;		// Colorburst frequency in Herz
+	double				divider;		// Clock frequency divider
+	double				powerFreq;		// Power line frequency in Herz
+	MOS656X::model_t	vicModel;		// Video chip model
 
 } model_data_t;
 
 typedef struct
 {
-	MOS652X::model_t ciaModel; ///< CIA chip model
+	MOS652X::model_t	ciaModel;		// CIA chip model
 } cia_model_data_t;
 
 /*
-	* Color burst frequencies:
-	*
-	* NTSC  - 3.579545455 MHz = 315/88 MHz
-	* PAL-B - 4.43361875 MHz = 283.75 * 15625 Hz + 25 Hz.
-	* PAL-M - 3.57561149 MHz
-	* PAL-N - 3.58205625 MHz
-	*/
-
+* Color burst frequencies:
+*
+* NTSC  - 3.579545455 MHz = 315/88 MHz
+* PAL-B - 4.43361875 MHz = 283.75 * 15625 Hz + 25 Hz.
+* PAL-M - 3.57561149 MHz
+* PAL-N - 3.58205625 MHz
+*/
 const model_data_t modelData[] =
 {
-	{	4433618.75,  18.0, 50.0, MOS656X::MOS6569		},	// PAL-B
-	{	3579545.455, 14.0, 60.0, MOS656X::MOS6567R8		},	// NTSC-M
-	{	3579545.455, 14.0, 60.0, MOS656X::MOS6567R56A	},	// Old NTSC-M
-	{	3582056.25,  14.0, 50.0, MOS656X::MOS6572		},	// PAL-N
-	{	3575611.49,  14.0, 50.0, MOS656X::MOS6573		},	// PAL-M
+	{	4'433'618.75,  18.0, 50.0, MOS656X::MOS6569		},	// PAL-B
+	{	3'579'545.455, 14.0, 60.0, MOS656X::MOS6567R8	},	// NTSC-M
+	{	3'579'545.455, 14.0, 60.0, MOS656X::MOS6567R56A	},	// Old NTSC-M
+	{	3'582'056.25,  14.0, 50.0, MOS656X::MOS6572		},	// PAL-N
+	{	3'575'611.49,  14.0, 50.0, MOS656X::MOS6573		},	// PAL-M
 };
 //-----------------------------------------------------------------------------
 
@@ -161,33 +160,35 @@ void c64::setBaseSid ( c64sid* s )
 }
 //-----------------------------------------------------------------------------
 
-bool c64::addExtraSid ( c64sid* s, int address )
+bool c64::addExtraSid ( c64sid* s, uint16_t address )
 {
-	// Check for valid address in the IO area range ($dxxx)
-	if ( ( address & 0xf000 ) != 0xd000 )
+	// Check for valid address in the IO area range ($Dxxx)
+	if ( ( address & 0xF000 ) != 0xD000 )
 		return false;
 
-	const auto	idx = ( address >> 8 ) & 0xf;
+	const auto	idx = ( address >> 8 ) & 0xF;
 
-	// Only allow second SID chip in SID area ($d400-$d7ff)
-	// or IO Area ($de00-$dfff)
-	if ( ( idx < 0x4 ) || ( ( idx > 0x7 ) && ( idx < 0xe ) ) )
+	// Only allow second SID chip in SID area ($D400 - $D7FF) or IO Area ($DE00 - $DFFF)
+	if ( idx < 0x4 || ( idx > 0x7 && idx < 0xE ) )
 		return false;
 
-	// Add new SID bank
-	auto	it = extraSidBanks.find ( idx );
-	if ( it != extraSidBanks.end () )
+	ExtraSidBank*	extraSidBank;
+
+	if ( auto it = extraSidBanks.find ( idx ); it == extraSidBanks.end () )
 	{
-		auto	extraSidBank = it->second;
-		extraSidBank->addSID ( s, address );
+		// Add new SID bank
+		extraSidBank = new ExtraSidBank;
+		extraSidBank->resetSIDMapper ( ioBank.getBank ( idx ) );
+		ioBank.setBank ( idx, extraSidBank );
+
+		extraSidBanks[ idx ] = extraSidBank;
 	}
 	else
 	{
-		auto	extraSidBank = extraSidBanks.insert ( it, { idx, new ExtraSidBank () } )->second;
-		extraSidBank->resetSIDMapper ( ioBank.getBank ( idx ) );
-		ioBank.setBank ( idx, extraSidBank );
-		extraSidBank->addSID ( s, address );
+		// Address range ($x000 - 0xFFF) already in use by another bank
+		extraSidBank = it->second;
 	}
+	extraSidBank->addSID ( s, address );
 
 	return true;
 }

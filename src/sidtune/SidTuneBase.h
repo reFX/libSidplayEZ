@@ -38,12 +38,14 @@ namespace libsidplayfp
 */
 class loadError
 {
-private:
-	const char* m_msg;
 public:
 	loadError ( const char* msg ) : m_msg ( msg ) {}
 	const char* message () const { return m_msg; }
+
+private:
+	const char* m_msg;
 };
+//-----------------------------------------------------------------------------
 
 /**
 * SidTuneBaseBase
@@ -51,19 +53,9 @@ public:
 class SidTuneBase
 {
 protected:
-	typedef std::vector<uint8_t> buffer_t;
+	using buffer_t = std::vector<uint8_t>;
 
-protected:
-	/// Also PSID file format limit.
-	static const unsigned int MAX_SONGS = 256;
-
-	// Generic error messages
-	static const char ERR_TRUNCATED[];
-	static const char ERR_INVALID[];
-
-public:  // ----------------------------------------------------------------
-	virtual ~SidTuneBase () {}
-
+public:
 	typedef void ( *LoaderFunc )( const char* fileName, buffer_t& bufferRef );
 
 	/**
@@ -163,7 +155,15 @@ public:  // ----------------------------------------------------------------
 	*/
 	const uint8_t* c64Data () const { return &cache[ fileOffset ]; }
 
-protected:  // -------------------------------------------------------------
+	virtual ~SidTuneBase () = default;
+
+protected:
+	/// Also PSID file format limit.
+	static constexpr unsigned int MAX_SONGS = 256;
+
+	// Generic error messages
+	static const char ERR_TRUNCATED[];
+	static const char ERR_INVALID[];
 
 	SidTuneInfoImpl	info;
 
@@ -245,10 +245,9 @@ private:
 	*/
 	static SidTuneBase* getFromBuffer ( const uint8_t* const buffer, uint32_t bufferLen );
 
-private:
 	// prevent copying
-	SidTuneBase ( const SidTuneBase& );
-	SidTuneBase& operator=( SidTuneBase& );
+	SidTuneBase ( const SidTuneBase& ) = delete;
+	SidTuneBase& operator=( SidTuneBase& ) = delete;
 };
 
 }
