@@ -57,7 +57,7 @@ struct psidHeader
 	uint16_t	start;					// start song out of [1..256]
 	uint32_t	speed;					// bit: 0=50 Hz, 1=CIA 1 Timer A (default: 60 Hz)
 
-	char	name[ PSID_MAXSTRLEN ];		// ASCII strings, 31 characters long and terminated by a trailing zero
+	char	name[ PSID_MAXSTRLEN ];		// ASCII strings, 32 characters long and NOT terminated by a trailing zero
 	char	author[ PSID_MAXSTRLEN ];
 	char	released[ PSID_MAXSTRLEN ];
 
@@ -326,10 +326,19 @@ void PSID::tryLoad ( const psidHeader& pHeader )
 	// Create the speed/clock setting table.
 	convertOldStyleSpeedToTables ( speed, clock );
 
-	// Copy info strings.
-	info.m_infoString.push_back ( std::string ( pHeader.name, PSID_MAXSTRLEN ) );
-	info.m_infoString.push_back ( std::string ( pHeader.author, PSID_MAXSTRLEN ) );
-	info.m_infoString.push_back ( std::string ( pHeader.released, PSID_MAXSTRLEN ) );
+	// Copy info strings
+	auto toStdString = [ this ] ( const char* infoStr )
+	{
+		char	tmp[ PSID_MAXSTRLEN + 1 ] = {};
+		for ( auto i = 0; infoStr[ i ] && i < PSID_MAXSTRLEN; i++ )
+			tmp[ i ] = infoStr[ i ];
+
+		info.m_infoString.emplace_back ( tmp );
+	};
+
+	toStdString ( pHeader.name );
+	toStdString ( pHeader.author );
+	toStdString ( pHeader.released );
 
 	if ( musPlayer )
 		throw loadError ( "Compute!'s Sidplayer MUS data is not supported yet" ); // TODO

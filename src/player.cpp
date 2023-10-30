@@ -296,15 +296,15 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 
 					static const std::unordered_map<std::string, double>	filterCurveMap =
 					{
-						{ "david dunn",					1.0 },
-						{ "david dunn & aidan bell",	1.0 },
-						{ "martin galway",				0.6 },
+						{ "david dunn",					1.1 },
+						{ "david dunn & aidan bell",	1.1 },
+//						{ "martin galway",				0.6 },	// Any other setting higher than 0.5 makes "Wizball" misbehave
 						{ "chris h\xFClsbeck",			0.6 },
 						{ "georg feil",					0.6 },
 						{ "jeroen tel",					0.6 },
 						{ "rob hubbard",				0.6 },
 						{ "rob hubbard & ben dagglish",	0.6 },
-						{ "fred gray",					1.0 },
+						{ "fred gray",					1.1 },	// He only used the filter in "Frankie Goes to Hollywood"
 						{ "geir tjelta",				0.6 },
 					};
 

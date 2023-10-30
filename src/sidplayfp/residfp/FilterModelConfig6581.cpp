@@ -31,7 +31,8 @@
 namespace reSIDfp
 {
 
-const unsigned int OPAMP_SIZE_6581 = 33;
+constexpr unsigned int	DAC_BITS = 11;
+constexpr unsigned int	OPAMP_SIZE_6581 = 33;
 
 /**
 * This is the SID 6581 op-amp voltage transfer function, measured on
@@ -277,7 +278,7 @@ uint16_t* FilterModelConfig6581::getDAC ( double adjustment ) const
 
 	auto    f0_dac = new uint16_t[ 1 << DAC_BITS ];
 
-	for ( unsigned int i = 0; i < ( 1 << DAC_BITS ); i++ )
+	for ( auto i = 0u; i < ( 1 << DAC_BITS ); i++ )
 		f0_dac[ i ] = getNormalizedValue ( _dac_zero + dac.getOutput ( i ) * dac_scale / ( 1 << DAC_BITS ) );
 
 	return f0_dac;
