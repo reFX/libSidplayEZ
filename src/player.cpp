@@ -28,6 +28,7 @@
 #include "sidemu.h"
 #include "psiddrv.h"
 #include "romCheck.h"
+#include "stringutils.h"
 
 namespace libsidplayfp
 {
@@ -280,6 +281,41 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 
 			// SID emulation setup (must be performed before the environment setup call)
 			sidCreate ( cfg.defaultSidModel, cfg.forceSidModel, addresses );
+
+			auto getRecommendedFilterCurve = [ tuneInfo ]
+			{
+				//
+				// Attempt to have better sounding 6581 filters by adjusting the curve per author
+				// with the assumption they worked with the same machine their entire career
+				//
+				auto	filter6581Curve = 0.5;
+
+				if ( auto ccAuthor = tuneInfo->infoString ( 1 ) )
+				{
+					const auto	author = stringutils::toLower ( ccAuthor );
+
+					static const std::unordered_map<std::string, double>	filterCurveMap =
+					{
+						{ "david dunn",					1.0 },
+						{ "david dunn & aidan bell",	1.0 },
+						{ "martin galway",				0.6 },
+						{ "chris h\xFClsbeck",			0.6 },
+						{ "georg feil",					0.6 },
+						{ "jeroen tel",					0.6 },
+						{ "rob hubbard",				0.6 },
+						{ "rob hubbard & ben dagglish",	0.6 },
+						{ "fred gray",					1.0 },
+						{ "geir tjelta",				0.6 },
+					};
+
+					if ( auto it = filterCurveMap.find ( author ); it != filterCurveMap.end () )
+						filter6581Curve = it->second;
+				}
+
+				return filter6581Curve;
+			};
+
+			set6581FilterCurve ( getRecommendedFilterCurve () );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 

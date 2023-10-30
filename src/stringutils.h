@@ -90,4 +90,14 @@ namespace stringutils
 
 		return true;
 	}
+
+	inline std::string toLower ( const std::string& input )
+	{
+		auto	newStr = input;
+
+		std::transform ( newStr.begin (), newStr.end (), newStr.begin (), [] ( unsigned char c ) { return std::tolower ( c ); } );
+
+		return newStr;
+	}
+
 }

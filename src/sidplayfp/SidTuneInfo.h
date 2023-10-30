@@ -137,7 +137,7 @@ private:
 
 	virtual unsigned int getNumberOfInfoStrings () const = 0;
 	virtual const char* getInfoString ( unsigned int i ) const = 0;
-
+	
 	virtual unsigned int getNumberOfCommentStrings () const = 0;
 	virtual const char* getCommentString ( unsigned int i ) const = 0;
 

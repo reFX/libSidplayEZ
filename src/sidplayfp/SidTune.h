@@ -58,7 +58,7 @@ public:  // ----------------------------------------------------------------
 	 * @param fileName
 	 * @param separatorIsSlash
 	 */
-	SidTune ( const char* fileName, bool separatorIsSlash = false );
+	SidTune ( const char* fileName = "", bool separatorIsSlash = false);
 
 	/**
 	 * Load a sidtune from a file, using a file access callback.
@@ -71,7 +71,7 @@ public:  // ----------------------------------------------------------------
 	 * @param fileName
 	 * @param separatorIsSlash
 	 */
-	SidTune ( LoaderFunc loader, const char* fileName, bool separatorIsSlash = false );
+	SidTune ( LoaderFunc loader, const char* fileName = "", bool separatorIsSlash = false);
 
 	/**
 	 * Load a single-file sidtune from a memory buffer.
@@ -171,7 +171,8 @@ public:  // ----------------------------------------------------------------
 
 	const uint8_t* c64Data () const;
 
-private:    // prevent copying
-	SidTune ( const SidTune& );
-	SidTune& operator=( SidTune& );
+private:
+	// prevent copying
+	SidTune ( const SidTune& ) = delete;
+	SidTune& operator=( SidTune& ) = delete;
 };
