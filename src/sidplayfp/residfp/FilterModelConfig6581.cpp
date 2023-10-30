@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include <mutex>
+#include <thread>
 
 #include "Integrator6581.h"
 #include "OpAmp.h"

@@ -23,6 +23,7 @@
 #include "FilterModelConfig8580.h"
 
 #include <mutex>
+#include <thread>
 
 #include "Integrator8580.h"
 #include "OpAmp.h"
