@@ -33,7 +33,7 @@ namespace libsidplayfp
 class c64sid : public Bank
 {
 private:
-	uint8_t lastpoke[ 0x20 ];
+	uint8_t	lastpoke[ 0x20 ] = {};
 
 protected:
 	virtual uint8_t read ( uint8_t addr ) = 0;
@@ -42,13 +42,9 @@ protected:
 public:
 	virtual void reset ( uint8_t volume ) = 0;
 
-	void reset ()
-    {
-        std::fill_n ( lastpoke, std::size ( lastpoke ), 0 );
-        reset ( 0 );
-    }
+	void reset ()	{	std::fill_n ( lastpoke, std::size ( lastpoke ), 0 );	}
 
-    // Bank functions
+	// Bank functions
 	void poke ( uint16_t address, uint8_t value ) override
 	{
 		lastpoke[ address & 0x1f ] = value;

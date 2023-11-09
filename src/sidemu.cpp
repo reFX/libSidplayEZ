@@ -39,6 +39,8 @@ sidemu::sidemu ()
 
 void sidemu::reset ( uint8_t volume )
 {
+	c64sid::reset ();
+
 	m_accessClk = 0;
 	m_sid.reset ();
 	m_sid.write ( 0x18, volume );
