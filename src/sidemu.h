@@ -122,6 +122,8 @@ public:
 	void filter6581Curve ( double filterCurve )			{	m_sid.setFilter6581Curve ( filterCurve );	}
 	void filter8580Curve ( double filterCurve )			{	m_sid.setFilter8580Curve ( filterCurve );	}
 
+	float getInternalEnvValue ( int voiceNo ) const		{	return m_sid.getEnvLevel ( voiceNo );		}
+
 	/**
 	* Get the current position in buffer.
 	*/

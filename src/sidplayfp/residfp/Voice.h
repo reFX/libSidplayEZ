@@ -45,6 +45,8 @@ private:
 	/// The DAC LUT for analog envelope output
 	float*	envDAC; //-V730_NOINIT this is initialized in the SID constructor
 
+	float	envLevel = 0.0f;
+
 public:
 	/**
 	* Amplitude modulated waveform output.
@@ -68,7 +70,8 @@ public:
 
 		// DAC imperfections are emulated by using the digital output
 		// as an index into a DAC lookup table.
-		return int ( wavDAC[ wav ] * envDAC[ env ] );
+		envLevel = envDAC[ env ];
+		return int ( wavDAC[ wav ] * envLevel );
 	}
 
 	/**
@@ -106,6 +109,8 @@ public:
 		waveformGenerator.reset ();
 		envelopeGenerator.reset ();
 	}
+
+	float getEnvLevel () const { return envLevel; }
 };
 
 } // namespace reSIDfp

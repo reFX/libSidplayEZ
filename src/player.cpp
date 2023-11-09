@@ -505,6 +505,12 @@ bool Player::getSidStatus ( unsigned int sidNum, uint8_t regs[ 32 ] )
 	if ( auto s = m_mixer.getSid ( sidNum ) )
 	{
 		s->getStatus ( regs );
+
+		// Write envelope-levels into unused SID registers
+		regs[ 0x1d ] = uint8_t ( s->getInternalEnvValue ( 0 ) * ( 255.0f / 256.0f ) );
+		regs[ 0x1e ] = uint8_t ( s->getInternalEnvValue ( 1 ) * ( 255.0f / 256.0f ) );
+		regs[ 0x1f ] = uint8_t ( s->getInternalEnvValue ( 2 ) * ( 255.0f / 256.0f ) );
+
 		return true;
 	}
 

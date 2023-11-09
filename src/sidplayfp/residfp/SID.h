@@ -308,6 +308,8 @@ public:
 	* @see Filter8580::setFilterCurve(double)
 	*/
 	void setFilter8580Curve ( double filterCurve )	{	filter8580.setFilterCurve ( filterCurve );	}
+
+	float getEnvLevel ( int voiceNo ) const	{	return voice[voiceNo].getEnvLevel();	}
 };
 //-----------------------------------------------------------------------------
 
