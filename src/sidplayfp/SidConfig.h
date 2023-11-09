@@ -69,7 +69,6 @@ struct SidConfig final
 	 * - Delays >  MAX produce random results
 	 */
 	static constexpr	uint16_t MAX_POWER_ON_DELAY = 0x1FFF;
-	static constexpr	uint16_t DEFAULT_POWER_ON_DELAY = MAX_POWER_ON_DELAY + 1;
 	static constexpr	uint32_t DEFAULT_SAMPLING_FREQ = 44100;
 
 	/**
@@ -116,11 +115,6 @@ struct SidConfig final
 	//@}
 
 	/**
-	 * Power on delay cycles.
-	 */
-	uint16_t powerOnDelay = MAX_POWER_ON_DELAY;
-
-	/**
 	 * Compare two config objects.
 	 *
 	 * @return true if different
@@ -135,7 +129,6 @@ struct SidConfig final
 				||	playback != config.playback
 				||	frequency != config.frequency
 				||	secondSidAddress != config.secondSidAddress
-				||	thirdSidAddress != config.thirdSidAddress
-				||	powerOnDelay != config.powerOnDelay;
+				||	thirdSidAddress != config.thirdSidAddress;
 	}
 };

@@ -33,7 +33,7 @@ const char sidemu::ERR_INVALID_CHIP[] = "Invalid chip model.";
 
 sidemu::sidemu ()
 {
-	reset ( 0 );
+	reset ( 0xF );
 }
 //-----------------------------------------------------------------------------
 

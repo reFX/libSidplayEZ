@@ -125,23 +125,14 @@ void Player::initialise ()
 	if ( size > 0xffff )
 		throw configError ( ERR_UNSUPPORTED_SIZE );
 
-	auto	powerOnDelay = m_cfg.powerOnDelay;
-
-	// Delays above MAX result in random delays
-	if ( powerOnDelay > SidConfig::MAX_POWER_ON_DELAY )
-	{
-		std::srand ( (unsigned int)std::time ( nullptr ) );	// use current time as seed for random generator
-		powerOnDelay = uint16_t ( ( std::rand () >> 3 ) & SidConfig::MAX_POWER_ON_DELAY );
-	}
-
 	psiddrv	driver ( m_tune->getInfo () );
-	driver.powerOnDelay ( powerOnDelay );
+	driver.powerOnDelay ( SidConfig::MAX_POWER_ON_DELAY );
 	if ( ! driver.drvReloc () )
 		throw configError ( driver.errorString () );
 
 	m_info.m_driverAddr = driver.driverAddr ();
 	m_info.m_driverLength = driver.driverLength ();
-	m_info.m_powerOnDelay = powerOnDelay;
+	m_info.m_powerOnDelay = SidConfig::MAX_POWER_ON_DELAY;
 
 	driver.install ( m_c64.getMemInterface (), videoSwitch );
 
