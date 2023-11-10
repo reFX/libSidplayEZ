@@ -474,7 +474,10 @@ void Player::sidParams ( double cpuFreq, int frequency )
 void Player::setCurveMap ( const filterCurveMap& newMap )
 {
 	for ( const auto& [ name, value ] : newMap )
-		fcMap[ stringutils::toLower ( name ) ] = value;
+	{
+		auto	exAscIIName = stringutils::utf8toExtendedASCII ( name );
+		fcMap[ stringutils::toLower ( exAscIIName ) ] = value;
+	}
 }
 //-----------------------------------------------------------------------------
 

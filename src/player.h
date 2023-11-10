@@ -44,6 +44,7 @@ namespace libsidplayfp
 
 class Player final
 {
+public:
 	using filterCurveMap = std::unordered_map<std::string, double>;
 
 private:
