@@ -26,28 +26,28 @@
 
 namespace stringutils
 {
-    /**
-     * Compare two characters in a case insensitive way.
-     */
+	/**
+	 * Compare two characters in a case insensitive way.
+	 */
 	[[ nodiscard ]] inline bool casecompare ( char c1, char c2 ) { return std::tolower ( c1 ) == std::tolower ( c2 ); }
 
-    /**
-     * Compare two strings in a case insensitive way. 
-     *
-     * @return true if strings are equal.
-     */
+	/**
+	 * Compare two strings in a case insensitive way. 
+	 *
+	 * @return true if strings are equal.
+	 */
 	[[ nodiscard ]] inline bool equal ( const std::string& s1, const std::string& s2 )
-    {
-        return std::equal ( s1.begin (), s1.end (), s2.begin (), s2.end (), casecompare );
-    }
+	{
+		return std::equal ( s1.begin (), s1.end (), s2.begin (), s2.end (), casecompare );
+	}
 
-    /**
-     * Compare two strings in a case insensitive way.
-     *
-     * @return true if strings are equal.
-     */
+	/**
+	 * Compare two strings in a case insensitive way.
+	 *
+	 * @return true if strings are equal.
+	 */
 	[[ nodiscard ]] inline bool equal ( const char* s1, const char* s2 )
-    {
+	{
 		if ( s1 == s2 )
 			return true;
 
@@ -59,18 +59,18 @@ namespace stringutils
 			if ( ! casecompare ( *s1, *s2 ) )
 				return false;
 
-            ++s1;
+			++s1;
 			++s2;
 		}
 
 		return true;
-    }
+	}
 
-    /**
-     * Compare first n characters of two strings in a case insensitive way.
-     *
-     * @return true if strings are equal.
-     */
+	/**
+	 * Compare first n characters of two strings in a case insensitive way.
+	 *
+	 * @return true if strings are equal.
+	 */
 	[[ nodiscard ]] inline bool equal ( const char* s1, const char* s2, size_t n )
 	{
 		if ( s1 == s2 || n == 0 )
@@ -100,4 +100,22 @@ namespace stringutils
 		return newStr;
 	}
 
+	[[ nodiscard ]] inline std::string utf8toExtendedASCII ( const std::string& input )
+	{
+		if ( ! input.size () )
+			return {};
+
+		auto	in = input.c_str ();
+		std::string	out;
+
+		while ( *in )
+		{
+			auto	ch = uint8_t ( *in++ );
+
+			if ( ch == 0xC2 )		out.append ( 1, *in++ );
+			else if ( ch == 0xC3 )	out.append ( 1, *in++ + 0x40 );
+			else					out.append ( 1, char ( ch ) );
+		}
+		return out;
+	}
 }
