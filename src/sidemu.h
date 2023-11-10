@@ -51,11 +51,6 @@ public:
 	};
 
 protected:
-	static const char ERR_UNSUPPORTED_FREQ[];
-	static const char ERR_INVALID_SAMPLING[];
-	static const char ERR_INVALID_CHIP[];
-
-protected:
 	EventScheduler*	eventScheduler = nullptr;
 
 	event_clock_t	m_accessClk = 0;
@@ -114,20 +109,20 @@ public:
 	/**
 	* Get a detailed error message.
 	*/
-	const char* error () const { return m_error.c_str (); }
+	[[ nodiscard ]] const char* error () const { return m_error.c_str (); }
 
-	uint8_t read ( uint8_t addr ) override				{	clock ();	return m_sid.read ( addr );	}
+	[[ nodiscard ]] uint8_t read ( uint8_t addr ) override				{	clock ();	return m_sid.read ( addr );	}
 	void write ( uint8_t addr, uint8_t data ) override	{	clock ();	m_sid.write ( addr, data );	}
 
 	void filter6581Curve ( double filterCurve )			{	m_sid.setFilter6581Curve ( filterCurve );	}
 	void filter8580Curve ( double filterCurve )			{	m_sid.setFilter8580Curve ( filterCurve );	}
 
-	float getInternalEnvValue ( int voiceNo ) const		{	return m_sid.getEnvLevel ( voiceNo );		}
+	[[ nodiscard ]] float getInternalEnvValue ( int voiceNo ) const		{	return m_sid.getEnvLevel ( voiceNo );		}
 
 	/**
 	* Get the current position in buffer.
 	*/
-	int bufferpos () const { return m_bufferpos; }
+	[[ nodiscard ]] int bufferpos () const { return m_bufferpos; }
 
 	/**
 	* Set the position in buffer.
@@ -137,7 +132,7 @@ public:
 	/**
 	* Get the buffer.
 	*/
-	int16_t* buffer () { return &m_buffer[ 0 ]; }
+	[[ nodiscard ]] int16_t* buffer () { return &m_buffer[ 0 ]; }
 };
 
 }

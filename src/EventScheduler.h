@@ -140,7 +140,7 @@ public:
 	* @param event the event
 	* @return true when pending
 	*/
-	bool isPending ( Event& event ) const;
+	[[ nodiscard ]] bool isPending ( Event& event ) const;
 
 	/**
 	* Get time with respect to a specific clock phase.
@@ -148,14 +148,14 @@ public:
 	* @param phase the phase
 	* @return the time according to specified phase.
 	*/
-	event_clock_t getTime ( event_phase_t phase ) const	{	return ( currentTime + ( phase ^ 1 ) ) >> 1;	}
+	[[ nodiscard ]] event_clock_t getTime ( event_phase_t phase ) const	{	return ( currentTime + ( phase ^ 1 ) ) >> 1;	}
 
 	/**
 	* Return current clock phase.
 	*
 	* @return The current phase
 	*/
-	event_phase_t phase () const { return static_cast<event_phase_t>( currentTime & 1 ); }
-	event_clock_t remaining ( Event& event ) const { return event.triggerTime - currentTime; }
+	[[ nodiscard ]] event_phase_t phase () const { return static_cast<event_phase_t>( currentTime & 1 ); }
+	[[ nodiscard ]] event_clock_t remaining ( Event& event ) const { return event.triggerTime - currentTime; }
 };
 }

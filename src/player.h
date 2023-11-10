@@ -44,6 +44,8 @@ namespace libsidplayfp
 
 class Player final
 {
+	using filterCurveMap = std::unordered_map<std::string, double>;
+
 private:
 	typedef enum
 	{
@@ -60,10 +62,12 @@ private:
 	SidConfig	m_cfg;				// User Configuration Settings
 	sidemu		m_sidEmu[ 3 ];		// emulation of an actual SID chip
 
-	const char*	m_errorString;
+	std::string	m_errorString = "N/A";
 
 	state_t		m_isPlaying = STOPPED;	// Playback status
 	uint8_t		videoSwitch;			// PAL/NTSC switch value
+
+	filterCurveMap	fcMap;
 
 	/**
 	* Get the C64 model for the current loaded tune.
@@ -90,28 +94,30 @@ public:
 	Player ();
 
 	bool setConfig ( const SidConfig& cfg, bool force = false );
-	const SidConfig& getConfig () const { return m_cfg; }
+	[[ nodiscard ]] const SidConfig& getConfig () const { return m_cfg; }
 
-	const SidInfo& getInfo () const { return m_info; }
+	[[ nodiscard ]] const SidInfo& getInfo () const { return m_info; }
 
 	bool loadTune ( SidTune* tune );
 	uint32_t play ( short* buffer, uint32_t samples );
 	void stop ();
-	bool isPlaying () const { return m_isPlaying != STOPPED; }
+	[[ nodiscard ]] bool isPlaying () const { return m_isPlaying != STOPPED; }
 
-	int getNumChips () const { return m_mixer.getNumChips (); }
+	[[ nodiscard ]] int getNumChips () const { return m_mixer.getNumChips (); }
+
+	void setCurveMap ( const filterCurveMap& newMap );
 	void set6581FilterCurve ( const double value );
 
-	uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds
-	uint32_t timeMs () const { return m_c64.getTimeMs (); }				// Time in milliseconds
+	[[ nodiscard ]] uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds
+	[[ nodiscard ]] uint32_t timeMs () const { return m_c64.getTimeMs (); }				// Time in milliseconds
 
-	const char* error () const { return m_errorString; }
+	[[ nodiscard ]] const char* error () const { return m_errorString.c_str (); }
 
 	void setKernal ( const uint8_t* rom );
 	void setBasic ( const uint8_t* rom );
 	void setChargen ( const uint8_t* rom );
 
-	uint16_t getCia1TimerA () const { return m_c64.getCia1TimerA (); }
+	[[ nodiscard ]] uint16_t getCia1TimerA () const { return m_c64.getCia1TimerA (); }
 
 	bool getSidStatus ( unsigned int sidNum, uint8_t regs[ 32 ] );
 };

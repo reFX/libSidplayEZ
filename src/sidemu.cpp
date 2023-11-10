@@ -25,10 +25,6 @@
 namespace libsidplayfp
 {
 
-const char sidemu::ERR_UNSUPPORTED_FREQ[] = "Unable to set desired output frequency.";
-const char sidemu::ERR_INVALID_SAMPLING[] = "Invalid sampling method.";
-const char sidemu::ERR_INVALID_CHIP[] = "Invalid chip model.";
-
 //-----------------------------------------------------------------------------
 
 sidemu::sidemu ()
@@ -83,7 +79,7 @@ void sidemu::sampling ( float systemfreq, float outputfreq )
 	catch ( reSIDfp::SIDError const& )
 	{
 		m_status = false;
-		m_error = ERR_UNSUPPORTED_FREQ;
+		m_error = "Unable to set desired output frequency.";
 		return;
 	}
 

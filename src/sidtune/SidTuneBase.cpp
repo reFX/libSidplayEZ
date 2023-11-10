@@ -53,7 +53,6 @@ const char ERR_DATA_TOO_LONG[] = "SIDTUNE ERROR: Size of music data exceeds C64 
 const char ERR_BAD_ADDR[] = "SIDTUNE ERROR: Bad address data";
 const char ERR_BAD_RELOC[] = "SIDTUNE ERROR: Bad reloc data";
 const char ERR_CORRUPT[] = "SIDTUNE ERROR: File is incomplete or corrupt";
-//const char ERR_NOT_ENOUGH_MEMORY[]   = "SIDTUNE ERROR: Not enough free memory";
 
 const char SidTuneBase::ERR_TRUNCATED[] = "SIDTUNE ERROR: File is most likely truncated";
 const char SidTuneBase::ERR_INVALID[] = "SIDTUNE ERROR: File contains invalid data";

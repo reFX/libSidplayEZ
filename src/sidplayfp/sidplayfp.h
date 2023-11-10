@@ -45,14 +45,14 @@ public:
 	 *
 	 * @return a const reference to the current configuration.
 	 */
-	const SidConfig& config () const {	return sidplayer.config ();	}
+	[[ nodiscard ]] const SidConfig& config () const {	return sidplayer.config ();	}
 
 	/**
 	 * Get the current player informations.
 	 *
 	 * @return a const reference to the current info.
 	 */
-	const SidInfo& info () const {	return sidplayer.info ();	}
+	[[ nodiscard ]] const SidInfo& info () const {	return sidplayer.info ();	}
 
 	/**
 	 * Configure the engine.
@@ -68,7 +68,7 @@ public:
 	 *
 	 * @return string error message.
 	 */
-	const char* error () const { return sidplayer.error (); }
+	[[ nodiscard ]] const char* error () const { return sidplayer.error (); }
 
 	/**
 	 * Load a tune.
@@ -96,7 +96,7 @@ public:
 	 *
 	 * @return true if playing, false otherwise.
 	 */
-	bool isPlaying () const { return sidplayer.isPlaying (); }
+	[[ nodiscard ]] bool isPlaying () const { return sidplayer.isPlaying (); }
 
 	/**
 	 * Stop the engine.
@@ -108,7 +108,7 @@ public:
 	 *
 	 * @return the current playing time measured in seconds.
 	 */
-	uint32_t time () const { return sidplayer.timeMs () / 1000; }
+	[[ nodiscard ]] uint32_t time () const { return sidplayer.timeMs () / 1000; }
 
 	/**
 	 * Get the current playing time.
@@ -116,7 +116,7 @@ public:
 	 * @return the current playing time measured in milliseconds.
 	 * @since 2.0
 	 */
-	uint32_t timeMs () const { return sidplayer.timeMs (); }
+	[[ nodiscard ]] uint32_t timeMs () const { return sidplayer.timeMs (); }
 
 	/**
 	 * Set ROM images.

@@ -34,19 +34,19 @@ struct psidHeader;
 class PSID final : public SidTuneBase
 {
 protected:
-	PSID () {}
+	PSID () = default;
 
 public:
 	/**
 	* @return pointer to a SidTune or 0 if not a PSID file
 	* @throw loadError if PSID file is corrupt
 	*/
-	static SidTuneBase* load ( buffer_t& dataBuf );
-	const char* createMD5 ( char* md5 ) override;
-	const char* createMD5New ( char* md5 ) override;
+	[[ nodiscard ]] static SidTuneBase* load ( buffer_t& dataBuf );
+	[[ nodiscard ]] const char* createMD5 ( char* md5 ) override;
+	[[ nodiscard ]] const char* createMD5New ( char* md5 ) override;
 
 private:
-	char m_md5[ SidTune::MD5_LENGTH + 1 ];
+	char	m_md5[ SidTune::MD5_LENGTH + 1 ];
 
 	/**
 	* Load PSID file.

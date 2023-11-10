@@ -34,16 +34,17 @@
 class SidInfoImpl final : public SidInfo
 {
 public:
-	const std::string	m_name = "libsidplayfp";
+	const std::string	m_name = "libsidplayEZ";
 	const std::string	m_version = "2.5.0";
 
 	std::vector<std::string>	m_credits = {
-		"libsidplayfp 2.5.0 Engine:\n",
+		"libsidplayEZ 2.5.0 Engine:\n",
 		"Copyright (C) 2000 Simon White\n",
 		"Copyright (C) 2007-2010 Antti Lankila\n",
 		"Copyright (C) 2010-2023 Leandro Nini\n",
 		"Copyright (C) 2023 Michael Hartmann\n",
-		"https://github.com/reFX/libsidplayfp/\n" };
+		"https://github.com/reFX/libsidplayEZ/\n",
+	};
 
 	std::string m_speedString;
 
@@ -68,25 +69,25 @@ private:
 public:
 	SidInfoImpl () = default;
 
-	const char* getName () const override { return m_name.c_str (); }
-	const char* getVersion () const override { return m_version.c_str (); }
+	[[ nodiscard ]] const char* getName () const override { return m_name.c_str (); }
+	[[ nodiscard ]] const char* getVersion () const override { return m_version.c_str (); }
 
-	unsigned int getNumberOfCredits () const override { return (unsigned int)m_credits.size (); }
-	const char* getCredits ( unsigned int i ) const override { return i < (unsigned int)m_credits.size () ? m_credits[ i ].c_str () : ""; }
+	[[ nodiscard ]] unsigned int getNumberOfCredits () const override { return (unsigned int)m_credits.size (); }
+	[[ nodiscard ]] const char* getCredits ( unsigned int i ) const override { return i < (unsigned int)m_credits.size () ? m_credits[ i ].c_str () : ""; }
 
-	unsigned int getMaxsids () const override { return m_maxsids; }
+	[[ nodiscard ]] unsigned int getMaxsids () const override { return m_maxsids; }
 
-	unsigned int getChannels () const override { return m_channels; }
+	[[ nodiscard ]] unsigned int getChannels () const override { return m_channels; }
 
-	uint16_t getDriverAddr () const override { return m_driverAddr; }
-	uint16_t getDriverLength () const override { return m_driverLength; }
+	[[ nodiscard ]] uint16_t getDriverAddr () const override { return m_driverAddr; }
+	[[ nodiscard ]] uint16_t getDriverLength () const override { return m_driverLength; }
 
-	uint16_t getPowerOnDelay () const override { return m_powerOnDelay; }
+	[[ nodiscard ]] uint16_t getPowerOnDelay () const override { return m_powerOnDelay; }
 
-	const char* getSpeedString () const override { return m_speedString.c_str (); }
+	[[ nodiscard ]] const char* getSpeedString () const override { return m_speedString.c_str (); }
 
-	const char* getKernalDesc () const override { return m_kernalDesc.c_str (); }
-	const char* getBasicDesc () const override { return m_basicDesc.c_str (); }
-	const char* getChargenDesc () const override { return m_chargenDesc.c_str (); }
+	[[ nodiscard ]] const char* getKernalDesc () const override { return m_kernalDesc.c_str (); }
+	[[ nodiscard ]] const char* getBasicDesc () const override { return m_basicDesc.c_str (); }
+	[[ nodiscard ]] const char* getChargenDesc () const override { return m_chargenDesc.c_str (); }
 };
 //-----------------------------------------------------------------------------

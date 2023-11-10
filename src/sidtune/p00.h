@@ -35,12 +35,10 @@ public:
 	 * @return pointer to a SidTune or 0 if not a PC64 file
 	 * @throw loadError if PC64 file is corrupt
 	 */
-	static SidTuneBase* load ( const char* fileName, buffer_t& dataBuf );
-
-	virtual ~p00 () {}
+	[[ nodiscard ]] static SidTuneBase* load ( const char* fileName, buffer_t& dataBuf );
 
 protected:
-	p00 () {}
+	p00 () = default;
 
 private:
 	void load ( const char* format, const X00Header* pHeader );

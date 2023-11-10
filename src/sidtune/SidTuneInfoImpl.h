@@ -36,13 +36,13 @@ namespace libsidplayfp
 class SidTuneInfoImpl final : public SidTuneInfo
 {
 public:
-	const char* m_formatString = "N/A";
+	std::string	m_formatString = "N/A";
 
 	unsigned int m_songs = 0;
 	unsigned int m_startSong = 0;
 	unsigned int m_currentSong = 0;
 
-	int m_songSpeed = SPEED_VBI;
+	int	m_songSpeed = SPEED_VBI;
 
 	clock_t			m_clockSpeed = CLOCK_UNKNOWN;
 	compatibility_t	m_compatibility = COMPATIBILITY_C64;
@@ -77,44 +77,44 @@ private:
 public:
 	SidTuneInfoImpl () = default;
 
-	uint16_t getLoadAddr () const override { return m_loadAddr; }
-	uint16_t getInitAddr () const override { return m_initAddr; }
-	uint16_t getPlayAddr () const override { return m_playAddr; }
+	[[ nodiscard ]] uint16_t getLoadAddr () const override { return m_loadAddr; }
+	[[ nodiscard ]] uint16_t getInitAddr () const override { return m_initAddr; }
+	[[ nodiscard ]] uint16_t getPlayAddr () const override { return m_playAddr; }
 
-	unsigned int getSongs () const override { return m_songs; }
-	unsigned int getStartSong () const override { return m_startSong; }
-	unsigned int getCurrentSong () const override { return m_currentSong; }
+	[[ nodiscard ]] unsigned int getSongs () const override { return m_songs; }
+	[[ nodiscard ]] unsigned int getStartSong () const override { return m_startSong; }
+	[[ nodiscard ]] unsigned int getCurrentSong () const override { return m_currentSong; }
 
-	uint16_t getSidChipBase ( unsigned int i ) const override	{	return i < m_sidChipAddresses.size () ? m_sidChipAddresses[ i ] : 0;	}
+	[[ nodiscard ]] uint16_t getSidChipBase ( unsigned int i ) const override	{	return i < m_sidChipAddresses.size () ? m_sidChipAddresses[ i ] : 0;	}
 
-	int getSidChips () const override { return int ( m_sidChipAddresses.size () ); }
+	[[ nodiscard ]] int getSidChips () const override { return int ( m_sidChipAddresses.size () ); }
 
-	int getSongSpeed () const override { return m_songSpeed; }
+	[[ nodiscard ]] int getSongSpeed () const override { return m_songSpeed; }
 
-	uint8_t getRelocStartPage () const override { return m_relocStartPage; }
-	uint8_t getRelocPages () const override { return m_relocPages; }
+	[[ nodiscard ]] uint8_t getRelocStartPage () const override { return m_relocStartPage; }
+	[[ nodiscard ]] uint8_t getRelocPages () const override { return m_relocPages; }
 
-	model_t getSidModel ( unsigned int i ) const override	{	return i < m_sidModels.size () ? m_sidModels[ i ] : SIDMODEL_UNKNOWN;	}
+	[[ nodiscard ]] model_t getSidModel ( unsigned int i ) const override	{	return i < m_sidModels.size () ? m_sidModels[ i ] : SIDMODEL_UNKNOWN;	}
 
-	compatibility_t getCompatibility () const override { return m_compatibility; }
+	[[ nodiscard ]] compatibility_t getCompatibility () const override { return m_compatibility; }
 
-	unsigned int getNumberOfInfoStrings () const override { return (unsigned int)m_infoString.size (); }
-	const char* getInfoString ( unsigned int i ) const override { return i < getNumberOfInfoStrings () ? m_infoString[ i ].c_str () : ""; }
+	[[ nodiscard ]] unsigned int getNumberOfInfoStrings () const override { return (unsigned int)m_infoString.size (); }
+	[[ nodiscard ]] const char* getInfoString ( unsigned int i ) const override { return i < getNumberOfInfoStrings () ? m_infoString[ i ].c_str () : ""; }
 
-	unsigned int getNumberOfCommentStrings () const override { return (unsigned int)m_commentString.size (); }
-	const char* getCommentString ( unsigned int i ) const override { return i < getNumberOfCommentStrings () ? m_commentString[ i ].c_str () : ""; }
+	[[ nodiscard ]] unsigned int getNumberOfCommentStrings () const override { return (unsigned int)m_commentString.size (); }
+	[[ nodiscard ]] const char* getCommentString ( unsigned int i ) const override { return i < getNumberOfCommentStrings () ? m_commentString[ i ].c_str () : ""; }
 
-	uint32_t getDataFileLen () const override { return m_dataFileLen; }
-	uint32_t getC64dataLen () const override { return m_c64dataLen; }
-	clock_t getClockSpeed () const override { return m_clockSpeed; }
+	[[ nodiscard ]] uint32_t getDataFileLen () const override { return m_dataFileLen; }
+	[[ nodiscard ]] uint32_t getC64dataLen () const override { return m_c64dataLen; }
+	[[ nodiscard ]] clock_t getClockSpeed () const override { return m_clockSpeed; }
 
-	const char* getFormatString () const override { return m_formatString; }
+	[[ nodiscard ]] const char* getFormatString () const override { return m_formatString.c_str (); }
 
-	bool getFixLoad () const override { return m_fixLoad; }
+	[[ nodiscard ]] bool getFixLoad () const override { return m_fixLoad; }
 
-	const char* getPath () const override { return m_path.c_str (); }
-	const char* getDataFileName () const override { return m_dataFileName.c_str (); }
-	const char* getInfoFileName () const override { return ! m_infoFileName.empty () ? m_infoFileName.c_str () : nullptr; }
+	[[ nodiscard ]] const char* getPath () const override { return m_path.c_str (); }
+	[[ nodiscard ]] const char* getDataFileName () const override { return m_dataFileName.c_str (); }
+	[[ nodiscard ]] const char* getInfoFileName () const override { return ! m_infoFileName.empty () ? m_infoFileName.c_str () : nullptr; }
 };
 
 }

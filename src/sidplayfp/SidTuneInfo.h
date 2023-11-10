@@ -58,13 +58,13 @@ public:
 	static constexpr int SPEED_VBI = 0;		// Vertical-Blanking-Interrupt
 	static constexpr int SPEED_CIA_1A = 60;	// CIA 1 Timer A
 
-	uint16_t loadAddr () const { return getLoadAddr (); }
-	uint16_t initAddr () const { return getInitAddr (); }
-	uint16_t playAddr () const { return getPlayAddr (); }
+	[[ nodiscard ]] uint16_t loadAddr () const { return getLoadAddr (); }
+	[[ nodiscard ]] uint16_t initAddr () const { return getInitAddr (); }
+	[[ nodiscard ]] uint16_t playAddr () const { return getPlayAddr (); }
 
-	unsigned int songs () const { return getSongs (); }				// Number of songs
-	unsigned int startSong () const { return getStartSong (); }		// The default starting song
-	unsigned int currentSong () const { return getCurrentSong (); }
+	[[ nodiscard ]] unsigned int songs () const { return getSongs (); }				// Number of songs
+	[[ nodiscard ]] unsigned int startSong () const { return getStartSong (); }		// The default starting song
+	[[ nodiscard ]] unsigned int currentSong () const { return getCurrentSong (); }
 
 	/**
 	 * @name Base addresses
@@ -72,16 +72,16 @@ public:
 	 * - 0xD400 for the 1st SID
 	 * - 0 if the nth SID is not required
 	 */
-	uint16_t sidChipBase ( unsigned int i ) const { return getSidChipBase ( i ); }
-	int sidChips () const { return getSidChips (); }		// The number of SID chips required by the tune
+	[[ nodiscard ]] uint16_t sidChipBase ( unsigned int i ) const { return getSidChipBase ( i ); }
+	[[ nodiscard ]] int sidChips () const { return getSidChips (); }		// The number of SID chips required by the tune
 
-	int songSpeed () const { return getSongSpeed (); }
+	[[ nodiscard ]] int songSpeed () const { return getSongSpeed (); }
 
-	uint8_t relocStartPage () const { return getRelocStartPage (); }	// First available page for relocation
-	uint8_t relocPages () const { return getRelocPages (); }			// Number of pages available for relocation
+	[[ nodiscard ]] uint8_t relocStartPage () const { return getRelocStartPage (); }	// First available page for relocation
+	[[ nodiscard ]] uint8_t relocPages () const { return getRelocPages (); }			// Number of pages available for relocation
 
-	SidTuneInfo::model_t sidModel ( unsigned int i ) const { return getSidModel ( i ); }	// The SID chip model(s) requested by the sidtune
-	SidTuneInfo::compatibility_t compatibility () const { return getCompatibility (); }		// Compatibility requirements
+	[[ nodiscard ]] SidTuneInfo::model_t sidModel ( unsigned int i ) const { return getSidModel ( i ); }	// The SID chip model(s) requested by the sidtune
+	[[ nodiscard ]] SidTuneInfo::compatibility_t compatibility () const { return getCompatibility (); }		// Compatibility requirements
 
 	/**
 	 * Song title, credits, ...
@@ -89,68 +89,68 @@ public:
 	 * - 1 = Author
 	 * - 2 = Released
 	 */
-	unsigned int numberOfInfoStrings () const { return getNumberOfInfoStrings (); }
-	const char* infoString ( unsigned int i ) const { return getInfoString ( i ); }
+	[[ nodiscard ]] unsigned int numberOfInfoStrings () const { return getNumberOfInfoStrings (); }
+	[[ nodiscard ]] const char* infoString ( unsigned int i ) const { return getInfoString ( i ); }
 
 	//
 	// MUS comments
 	//
-	unsigned int numberOfCommentStrings () const { return getNumberOfCommentStrings (); }
-	const char* commentString ( unsigned int i ) const { return getCommentString ( i ); }
+	[[ nodiscard ]] unsigned int numberOfCommentStrings () const { return getNumberOfCommentStrings (); }
+	[[ nodiscard ]] const char* commentString ( unsigned int i ) const { return getCommentString ( i ); }
 
-	uint32_t dataFileLen () const { return getDataFileLen (); }		// Length of single-file sidtune file
-	uint32_t c64dataLen () const { return getC64dataLen (); }		// Length of raw C64 data without load address
+	[[ nodiscard ]] uint32_t dataFileLen () const { return getDataFileLen (); }		// Length of single-file sidtune file
+	[[ nodiscard ]] uint32_t c64dataLen () const { return getC64dataLen (); }		// Length of raw C64 data without load address
 
-	SidTuneInfo::clock_t clockSpeed () const { return getClockSpeed (); }	// The tune clock speed
+	[[ nodiscard ]] SidTuneInfo::clock_t clockSpeed () const { return getClockSpeed (); }	// The tune clock speed
 
-	const char* formatString () const { return getFormatString (); }		// The name of the identified file format
+	[[ nodiscard ]] const char* formatString () const { return getFormatString (); }		// The name of the identified file format
 
-	bool fixLoad () const { return getFixLoad (); }					// Whether load address might be duplicate
+	[[ nodiscard ]] bool fixLoad () const { return getFixLoad (); }					// Whether load address might be duplicate
 
-	const char* path () const { return getPath (); }					// Path to sidtune file
-	const char* dataFileName () const { return getDataFileName (); }	// A first file: e.g. "foo.sid" or "foo.mus"
+	[[ nodiscard ]] const char* path () const { return getPath (); }					// Path to sidtune file
+	[[ nodiscard ]] const char* dataFileName () const { return getDataFileName (); }	// A first file: e.g. "foo.sid" or "foo.mus"
 	/**
 	 * A second file: e.g. "foo.str".
 	 * Returns 0 if none.
 	 */
-	const char* infoFileName () const { return getInfoFileName (); }
+	[[ nodiscard ]] const char* infoFileName () const { return getInfoFileName (); }
 
 private:
-	virtual uint16_t getLoadAddr () const = 0;
-	virtual uint16_t getInitAddr () const = 0;
-	virtual uint16_t getPlayAddr () const = 0;
+	[[ nodiscard ]] virtual uint16_t getLoadAddr () const = 0;
+	[[ nodiscard ]] virtual uint16_t getInitAddr () const = 0;
+	[[ nodiscard ]] virtual uint16_t getPlayAddr () const = 0;
 
-	virtual unsigned int getSongs () const = 0;
-	virtual unsigned int getStartSong () const = 0;
-	virtual unsigned int getCurrentSong () const = 0;
+	[[ nodiscard ]] virtual unsigned int getSongs () const = 0;
+	[[ nodiscard ]] virtual unsigned int getStartSong () const = 0;
+	[[ nodiscard ]] virtual unsigned int getCurrentSong () const = 0;
 
-	virtual uint16_t getSidChipBase ( unsigned int i ) const = 0;
-	virtual int getSidChips () const = 0;
+	[[ nodiscard ]] virtual uint16_t getSidChipBase ( unsigned int i ) const = 0;
+	[[ nodiscard ]] virtual int getSidChips () const = 0;
 
-	virtual int getSongSpeed () const = 0;
+	[[ nodiscard ]] virtual int getSongSpeed () const = 0;
 
-	virtual uint8_t getRelocStartPage () const = 0;
-	virtual uint8_t getRelocPages () const = 0;
+	[[ nodiscard ]] virtual uint8_t getRelocStartPage () const = 0;
+	[[ nodiscard ]] virtual uint8_t getRelocPages () const = 0;
 
-	virtual model_t getSidModel ( unsigned int i ) const = 0;
-	virtual compatibility_t getCompatibility () const = 0;
+	[[ nodiscard ]] virtual model_t getSidModel ( unsigned int i ) const = 0;
+	[[ nodiscard ]] virtual compatibility_t getCompatibility () const = 0;
 
-	virtual unsigned int getNumberOfInfoStrings () const = 0;
-	virtual const char* getInfoString ( unsigned int i ) const = 0;
+	[[ nodiscard ]] virtual unsigned int getNumberOfInfoStrings () const = 0;
+	[[ nodiscard ]] virtual const char* getInfoString ( unsigned int i ) const = 0;
 	
-	virtual unsigned int getNumberOfCommentStrings () const = 0;
-	virtual const char* getCommentString ( unsigned int i ) const = 0;
+	[[ nodiscard ]] virtual unsigned int getNumberOfCommentStrings () const = 0;
+	[[ nodiscard ]] virtual const char* getCommentString ( unsigned int i ) const = 0;
 
-	virtual uint32_t getDataFileLen () const = 0;
-	virtual uint32_t getC64dataLen () const = 0;
+	[[ nodiscard ]] virtual uint32_t getDataFileLen () const = 0;
+	[[ nodiscard ]] virtual uint32_t getC64dataLen () const = 0;
 
-	virtual clock_t getClockSpeed () const = 0;
+	[[ nodiscard ]] virtual clock_t getClockSpeed () const = 0;
 
-	virtual const char* getFormatString () const = 0;
+	[[ nodiscard ]] virtual const char* getFormatString () const = 0;
 
-	virtual bool getFixLoad () const = 0;
+	[[ nodiscard ]] virtual bool getFixLoad () const = 0;
 
-	virtual const char* getPath () const = 0;
-	virtual const char* getDataFileName () const = 0;
-	virtual const char* getInfoFileName () const = 0;
+	[[ nodiscard ]] virtual const char* getPath () const = 0;
+	[[ nodiscard ]] virtual const char* getDataFileName () const = 0;
+	[[ nodiscard ]] virtual const char* getInfoFileName () const = 0;
 };

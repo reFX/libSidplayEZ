@@ -4,7 +4,7 @@ libSidPlayEZ
 https://github.com/reFX/libSidPlayEZ
 
 libSidPlayEZ is a C64 music player library which integrates
-the reSID SID chip emulation into a cycle-based emulator
+the reSIDfp SID chip emulation into a cycle-based emulator
 environment, constantly aiming to improve emulation of the
 C64 system and the SID chips.
 

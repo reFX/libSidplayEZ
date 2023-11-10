@@ -37,10 +37,6 @@
 namespace libsidplayfp
 {
 
-// Error Strings
-const char ERR_PSIDDRV_NO_SPACE[] = "ERROR: No space to install psid driver in C64 ram";
-const char ERR_PSIDDRV_RELOC[] = "ERROR: Failed whilst relocating psid driver";
-
 uint8_t psid_driver[] =
 {
 	#include "psiddrv.bin"
@@ -175,7 +171,7 @@ bool psiddrv::drvReloc ()
 
 	if ( relocPages < 1 )
 	{
-		m_errorString = ERR_PSIDDRV_NO_SPACE;
+		m_errorString = "ERROR: No space to install psid driver in C64 ram";
 		return false;
 	}
 
@@ -188,7 +184,7 @@ bool psiddrv::drvReloc ()
 	reloc65	relocator ( relocAddr - 10 );
 	if ( ! relocator.reloc ( &reloc_driver, &reloc_size ) )
 	{
-		m_errorString = ERR_PSIDDRV_RELOC;
+		m_errorString = "ERROR: Failed whilst relocating psid driver";
 		return false;
 	}
 

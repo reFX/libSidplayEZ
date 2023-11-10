@@ -122,7 +122,7 @@ public:  // ----------------------------------------------------------------
 	 *
 	 * @return a pointer to #SidTuneInfo, 0 if no tune is loaded. The pointer must not be deleted.
 	 */
-	const SidTuneInfo* getInfo () const;
+	[[ nodiscard ]] const SidTuneInfo* getInfo () const;
 
 	/**
 	 * Select sub-song and retrieve information.
@@ -130,7 +130,7 @@ public:  // ----------------------------------------------------------------
 	 * @param songNum the selected song (0 = default starting song)
 	 * @return a pointer to #SidTuneInfo, 0 if no tune is loaded. The pointer must not be deleted.
 	 */
-	const SidTuneInfo* getInfo ( unsigned int songNum );
+	[[ nodiscard ]] const SidTuneInfo* getInfo ( unsigned int songNum );
 
 	/**
 	 * Determine current state of object.
@@ -139,12 +139,12 @@ public:  // ----------------------------------------------------------------
 	 *
 	 * @return current state (true = okay, false = error)
 	 */
-	bool getStatus () const	{	return m_status;	}
+	[[ nodiscard ]] bool getStatus () const	{	return m_status;	}
 
 	/**
 	 * Error/status message of last operation.
 	 */
-	const char* statusString () const { return m_statusString; }
+	[[ nodiscard ]] const char* statusString () const { return m_statusString; }
 
 	/**
 	 * Copy sidtune into C64 memory (64 KB).
@@ -169,7 +169,7 @@ public:  // ----------------------------------------------------------------
 	 */
 	const char* createMD5New ( char* md5 = 0 );
 
-	const uint8_t* c64Data () const;
+	[[ nodiscard ]] const uint8_t* c64Data () const;
 
 private:
 	// prevent copying

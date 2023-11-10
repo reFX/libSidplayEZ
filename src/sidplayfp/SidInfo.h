@@ -30,64 +30,64 @@ class SidInfo
 {
 public:
 	/// Library name
-	const char* name () const { return getName (); }
+	[[ nodiscard ]] const char* name () const { return getName (); }
 
 	/// Library version
-	const char* version () const { return getVersion (); }
+	[[ nodiscard ]] const char* version () const { return getVersion (); }
 
 	/// Library credits
 	//@{
-	unsigned int numberOfCredits () const { return getNumberOfCredits (); }
-	const char* credits ( unsigned int i ) const { return getCredits ( i ); }
+	[[ nodiscard ]] unsigned int numberOfCredits () const { return getNumberOfCredits (); }
+	[[ nodiscard ]] const char* credits ( unsigned int i ) const { return getCredits ( i ); }
 	//@}
 
 	/// Number of SIDs supported by this library
-	unsigned int maxsids () const { return getMaxsids (); }
+	[[ nodiscard ]] unsigned int maxsids () const { return getMaxsids (); }
 
 	/// Number of output channels (1-mono, 2-stereo)
-	unsigned int channels () const { return getChannels (); }
+	[[ nodiscard ]] unsigned int channels () const { return getChannels (); }
 
 	/// Address of the driver
-	uint16_t driverAddr () const { return getDriverAddr (); }
+	[[ nodiscard ]] uint16_t driverAddr () const { return getDriverAddr (); }
 
 	/// Size of the driver in bytes
-	uint16_t driverLength () const { return getDriverLength (); }
+	[[ nodiscard ]] uint16_t driverLength () const { return getDriverLength (); }
 
 	/// Power on delay
-	uint16_t powerOnDelay () const { return getPowerOnDelay (); }
+	[[ nodiscard ]] uint16_t powerOnDelay () const { return getPowerOnDelay (); }
 
 	/// Describes the speed current song is running at
-	const char* speedString () const { return getSpeedString (); }
+	[[ nodiscard ]] const char* speedString () const { return getSpeedString (); }
 
 	/// Description of the loaded ROM images
 	//@{
-	const char* kernalDesc () const { return getKernalDesc (); }
-	const char* basicDesc () const { return getBasicDesc (); }
-	const char* chargenDesc () const { return getChargenDesc (); }
+	[[ nodiscard ]] const char* kernalDesc () const { return getKernalDesc (); }
+	[[ nodiscard ]] const char* basicDesc () const { return getBasicDesc (); }
+	[[ nodiscard ]] const char* chargenDesc () const { return getChargenDesc (); }
 	//@}
 
 private:
-	virtual const char* getName () const = 0;
+	[[ nodiscard ]] virtual const char* getName () const = 0;
 
-	virtual const char* getVersion () const = 0;
+	[[ nodiscard ]] virtual const char* getVersion () const = 0;
 
-	virtual unsigned int getNumberOfCredits () const = 0;
-	virtual const char* getCredits ( unsigned int i ) const = 0;
+	[[ nodiscard ]] virtual unsigned int getNumberOfCredits () const = 0;
+	[[ nodiscard ]] virtual const char* getCredits ( unsigned int i ) const = 0;
 
-	virtual unsigned int getMaxsids () const = 0;
+	[[ nodiscard ]] virtual unsigned int getMaxsids () const = 0;
 
-	virtual unsigned int getChannels () const = 0;
+	[[ nodiscard ]] virtual unsigned int getChannels () const = 0;
 
-	virtual uint16_t getDriverAddr () const = 0;
+	[[ nodiscard ]] virtual uint16_t getDriverAddr () const = 0;
 
-	virtual uint16_t getDriverLength () const = 0;
+	[[ nodiscard ]] virtual uint16_t getDriverLength () const = 0;
 
-	virtual uint16_t getPowerOnDelay () const = 0;
+	[[ nodiscard ]] virtual uint16_t getPowerOnDelay () const = 0;
 
-	virtual const char* getSpeedString () const = 0;
+	[[ nodiscard ]] virtual const char* getSpeedString () const = 0;
 
-	virtual const char* getKernalDesc () const = 0;
-	virtual const char* getBasicDesc () const = 0;
-	virtual const char* getChargenDesc () const = 0;
+	[[ nodiscard ]] virtual const char* getKernalDesc () const = 0;
+	[[ nodiscard ]] virtual const char* getBasicDesc () const = 0;
+	[[ nodiscard ]] virtual const char* getChargenDesc () const = 0;
 };
 //-----------------------------------------------------------------------------

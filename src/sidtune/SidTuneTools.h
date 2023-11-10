@@ -29,19 +29,19 @@ namespace SidTuneTools
 	/**
 	* Return pointer to file name position in complete path.
 	*/
-	size_t fileNameWithoutPath ( const char* s );
+	[[ nodiscard ]] size_t fileNameWithoutPath ( const char* s );
 
 	/**
 	* Return pointer to file name position in complete path.
 	* Special version: file separator = forward slash.
 	*/
-	size_t slashedFileNameWithoutPath ( const char* s );
+	[[ nodiscard ]] size_t slashedFileNameWithoutPath ( const char* s );
 
 	/**
 	* Return pointer to file name extension in path.
 	* Searching backwards until first dot is found.
 	*/
-	const char* fileExtOfPath ( const char* s );
+	[[ nodiscard ]] const char* fileExtOfPath ( const char* s );
 }
 
 }

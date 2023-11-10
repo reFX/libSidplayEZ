@@ -119,7 +119,7 @@ struct SidConfig final
 	 *
 	 * @return true if different
 	 */
-	bool compare ( const SidConfig& config ) const
+	[[ nodiscard ]] bool compare ( const SidConfig& config ) const
 	{
 		return		defaultC64Model != config.defaultC64Model
 				||	forceC64Model != config.forceC64Model

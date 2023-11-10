@@ -140,7 +140,7 @@ public:
 	* @param i the number of the SID to get
 	* @return a pointer to the requested sid emu or 0 if not found
 	*/
-	inline sidemu* getSid ( unsigned int i ) const { return ( i < m_chips.size () ) ? m_chips[ i ] : nullptr; }
+	[[ nodiscard ]] inline sidemu* getSid ( unsigned int i ) const { return ( i < m_chips.size () ) ? m_chips[ i ] : nullptr; }
 
 	/**
 	* Set mixing mode.
@@ -159,14 +159,14 @@ public:
 	/**
 	* Check if the buffer have been filled
 	*/
-	inline bool notFinished () const { return m_sampleIndex != m_sampleCount; }
+	[[ nodiscard ]] inline bool notFinished () const { return m_sampleIndex != m_sampleCount; }
 
 	/**
 	* Get the number of samples generated up to now
 	*/
-	inline uint32_t samplesGenerated () const { return m_sampleIndex; }
+	[[ nodiscard ]] inline uint32_t samplesGenerated () const { return m_sampleIndex; }
 
-	int getNumChips () const { return int ( m_chips.size () ); }
+	[[ nodiscard ]] int getNumChips () const { return int ( m_chips.size () ); }
 };
 
 }

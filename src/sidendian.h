@@ -30,7 +30,7 @@ inline void endian_set16_lo8 ( uint16_t& word, uint8_t byte )
 //-----------------------------------------------------------------------------
 
 // Get the lo byte (8 bit) in a word (16 bit)
-inline uint8_t endian_get16_lo8 ( uint16_t word )
+[[ nodiscard ]] inline uint8_t endian_get16_lo8 ( uint16_t word )
 {
 	return uint8_t ( word );
 }
@@ -44,21 +44,21 @@ inline void endian_set16_hi8 ( uint16_t& word, uint8_t byte )
 //-----------------------------------------------------------------------------
 
 // Get the hi byte (8 bit) in a word (16 bit)
-inline uint8_t endian_get16_hi8 ( uint16_t word )
+[[ nodiscard ]] inline uint8_t endian_get16_hi8 ( uint16_t word )
 {
 	return word >> 8;
 }
 //-----------------------------------------------------------------------------
 
 // Convert high-byte and low-byte to 16-bit word
-inline uint16_t endian_get16 ( uint8_t hi, uint8_t lo )
+[[ nodiscard ]] inline uint16_t endian_get16 ( uint8_t hi, uint8_t lo )
 {
 	return uint16_t ( ( hi << 8 ) | lo );
 }
 //-----------------------------------------------------------------------------
 
 // Convert high-byte and low-byte to 16-bit little endian word
-inline uint16_t endian_getLittle16 ( const uint8_t ptr[ 2 ] )
+[[ nodiscard ]] inline uint16_t endian_getLittle16 ( const uint8_t ptr[ 2 ] )
 {
 	return uint16_t ( ( ptr[ 1 ] << 8 ) | ptr[ 0 ] );
 }
@@ -73,14 +73,14 @@ inline void endian_setLittle16 ( uint8_t ptr[ 2 ], uint16_t word )
 //-----------------------------------------------------------------------------
 
 // Convert high-byte and low-byte to 16-bit big endian word
-inline uint16_t endian_getBig16 ( const uint8_t ptr[ 2 ] )
+[[ nodiscard ]] inline uint16_t endian_getBig16 ( const uint8_t ptr[ 2 ] )
 {
 	return uint16_t ( ( ptr[ 0 ] << 8 ) | ptr[ 1 ] );
 }
 //-----------------------------------------------------------------------------
 
 // Get 32-bit big endian int from memory
-inline uint32_t endian_getBig32 ( const uint8_t ptr[ 4 ] )
+[[ nodiscard ]] inline uint32_t endian_getBig32 ( const uint8_t ptr[ 4 ] )
 {
 	return ( ptr[ 0 ] << 24 ) | ( ptr[ 1 ] << 16 ) | ( ptr[ 2 ] << 8 ) | ptr[ 3 ];
 }

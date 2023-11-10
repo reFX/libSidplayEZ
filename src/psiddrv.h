@@ -32,7 +32,7 @@ class psiddrv
 {
 private:
 	const SidTuneInfo* m_tuneInfo;
-	const char* m_errorString;
+	std::string	m_errorString;
 
 	uint8_t* reloc_driver;
 	int      reloc_size;
@@ -49,7 +49,7 @@ private:
 	* @param addr a 16-bit effective address
 	* @return a default bank-select value for $01
 	*/
-	uint8_t iomap ( uint16_t addr ) const;
+	[[ nodiscard ]] uint8_t iomap ( uint16_t addr ) const;
 
 public:
 	psiddrv ( const SidTuneInfo* tuneInfo )
@@ -69,7 +69,7 @@ public:
 	*
 	* @return false if something is wrong, check #errorString for error details
 	*/
-	bool drvReloc ();
+	[[ nodiscard ]] bool drvReloc ();
 
 	/**
 	* Install the driver
@@ -85,10 +85,10 @@ public:
 	*
 	* @return a pointer to the string
 	*/
-	const char* errorString () const { return m_errorString; }
+	[[ nodiscard ]] const char* errorString () const { return m_errorString.c_str (); }
 
-	uint16_t driverAddr () const { return m_driverAddr; }
-	uint16_t driverLength () const { return m_driverLength; }
+	[[ nodiscard ]] uint16_t driverAddr () const { return m_driverAddr; }
+	[[ nodiscard ]] uint16_t driverLength () const { return m_driverLength; }
 };
 
 }

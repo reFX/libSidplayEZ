@@ -50,7 +50,7 @@ private:
 	 * @param rtab relocation table
 	 * @return a pointer to the next section
 	 */
-	unsigned char* reloc_seg ( unsigned char* buf, int len, unsigned char* rtab );
+	[[ nodiscard ]] unsigned char* reloc_seg ( unsigned char* buf, int len, unsigned char* rtab );
 
 	/**
 	 * Relocate exported globals list.
@@ -72,5 +72,5 @@ public:
 	 * @param buf beffer containing o65 data
 	 * @param fsize size of the data
 	 */
-	bool reloc ( unsigned char** buf, int* fsize );
+	[[ nodiscard ]] bool reloc ( unsigned char** buf, int* fsize );
 };

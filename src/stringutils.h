@@ -29,14 +29,14 @@ namespace stringutils
     /**
      * Compare two characters in a case insensitive way.
      */
-    inline bool casecompare ( char c1, char c2 ) { return std::tolower ( c1 ) == std::tolower ( c2 ); }
+	[[ nodiscard ]] inline bool casecompare ( char c1, char c2 ) { return std::tolower ( c1 ) == std::tolower ( c2 ); }
 
     /**
      * Compare two strings in a case insensitive way. 
      *
      * @return true if strings are equal.
      */
-	inline bool equal ( const std::string& s1, const std::string& s2 )
+	[[ nodiscard ]] inline bool equal ( const std::string& s1, const std::string& s2 )
     {
         return std::equal ( s1.begin (), s1.end (), s2.begin (), s2.end (), casecompare );
     }
@@ -46,7 +46,7 @@ namespace stringutils
      *
      * @return true if strings are equal.
      */
-    inline bool equal ( const char* s1, const char* s2 )
+	[[ nodiscard ]] inline bool equal ( const char* s1, const char* s2 )
     {
 		if ( s1 == s2 )
 			return true;
@@ -71,7 +71,7 @@ namespace stringutils
      *
      * @return true if strings are equal.
      */
-	inline bool equal ( const char* s1, const char* s2, size_t n )
+	[[ nodiscard ]] inline bool equal ( const char* s1, const char* s2, size_t n )
 	{
 		if ( s1 == s2 || n == 0 )
 			return true;
@@ -91,7 +91,7 @@ namespace stringutils
 		return true;
 	}
 
-	inline std::string toLower ( const std::string& input )
+	[[ nodiscard ]] inline std::string toLower ( const std::string& input )
 	{
 		auto	newStr = input;
 

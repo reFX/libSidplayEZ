@@ -60,7 +60,7 @@ private:
 	/**
 	* Calculate the md5 digest.
 	*/
-	std::string checksum () const
+	[[ nodiscard ]] std::string checksum () const
 	{
 		MD5 md5;
 
@@ -94,7 +94,7 @@ public:
 	*
 	* @return the ROM description or "Unknown Rom".
 	*/
-	const char* info () const
+	[[ nodiscard ]] const char* info () const
 	{
 		auto	res = m_checksums.find ( checksum () );
 		return res != m_checksums.end () ? res->second : "Unknown Rom";

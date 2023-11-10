@@ -74,7 +74,7 @@ public:
 	* @return the sid tune
 	* @throw loadError
 	*/
-	static SidTuneBase* load ( const char* fileName, bool separatorIsSlash );
+	[[ nodiscard ]] static SidTuneBase* load ( const char* fileName, bool separatorIsSlash );
 
 	/**
 	* Load a sidtune from a file, using a file access callback.
@@ -90,7 +90,7 @@ public:
 	* @return the sid tune
 	* @throw loadError
 	*/
-	static SidTuneBase* load ( LoaderFunc loader, const char* fileName, bool separatorIsSlash );
+	[[ nodiscard ]] static SidTuneBase* load ( LoaderFunc loader, const char* fileName, bool separatorIsSlash );
 
 	/**
 	* Load a single-file sidtune from a memory buffer.
@@ -101,7 +101,7 @@ public:
 	* @return the sid tune
 	* @throw loadError
 	*/
-	static SidTuneBase* read ( const uint8_t* sourceBuffer, uint32_t bufferLen );
+	[[ nodiscard ]] static SidTuneBase* read ( const uint8_t* sourceBuffer, uint32_t bufferLen );
 
 	/**
 	* Select sub-song (0 = default starting song)
@@ -115,7 +115,7 @@ public:
 	/**
 	* Retrieve sub-song specific information.
 	*/
-	const SidTuneInfo* getInfo () const;
+	[[ nodiscard ]] const SidTuneInfo* getInfo () const;
 
 	/**
 	* Select sub-song (0 = default starting song)
@@ -123,7 +123,7 @@ public:
 	*
 	* @param songNum
 	*/
-	const SidTuneInfo* getInfo ( unsigned int songNum );
+	[[ nodiscard ]] const SidTuneInfo* getInfo ( unsigned int songNum );
 
 	/**
 	* Copy sidtune into C64 memory (64 KB).
@@ -139,7 +139,7 @@ public:
 	*
 	* @return a pointer to the buffer containing the md5 string.
 	*/
-	virtual const char* createMD5 ( char* ) { return nullptr; }
+	[[ nodiscard ]] virtual const char* createMD5 ( char* ) { return nullptr; }
 
 	/**
 	* Calculates the MD5 hash of the tune.
@@ -148,12 +148,12 @@ public:
 	*
 	* @return a pointer to the buffer containing the md5 string.
 	*/
-	virtual const char* createMD5New ( char* ) { return nullptr; }
+	[[ nodiscard ]] virtual const char* createMD5New ( char* ) { return nullptr; }
 
 	/**
 	* Get the pointer to the tune data.
 	*/
-	const uint8_t* c64Data () const { return &cache[ fileOffset ]; }
+	[[ nodiscard ]] const uint8_t* c64Data () const { return &cache[ fileOffset ]; }
 
 	virtual ~SidTuneBase () = default;
 
@@ -165,10 +165,10 @@ protected:
 	static const char ERR_TRUNCATED[];
 	static const char ERR_INVALID[];
 
-	SidTuneInfoImpl	info;
+	SidTuneInfoImpl			info;
 
-	uint8_t	songSpeed[ MAX_SONGS ];
-	SidTuneInfo::clock_t clockSpeed[ MAX_SONGS ];
+	uint8_t					songSpeed[ MAX_SONGS ];
+	SidTuneInfo::clock_t	clockSpeed[ MAX_SONGS ];
 
 	/// For files with header: offset to real data
 	uint32_t fileOffset = 0;

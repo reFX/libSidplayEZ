@@ -33,23 +33,6 @@
 namespace libsidplayfp
 {
 
-// Speed strings
-const char TXT_PAL_VBI[] = "50 Hz VBI (PAL)";
-const char TXT_PAL_VBI_FIXED[] = "60 Hz VBI (PAL FIXED)";
-const char TXT_PAL_CIA[] = "CIA (PAL)";
-const char TXT_PAL_UNKNOWN[] = "UNKNOWN (PAL)";
-const char TXT_NTSC_VBI[] = "60 Hz VBI (NTSC)";
-const char TXT_NTSC_VBI_FIXED[] = "50 Hz VBI (NTSC FIXED)";
-const char TXT_NTSC_CIA[] = "CIA (NTSC)";
-const char TXT_NTSC_UNKNOWN[] = "UNKNOWN (NTSC)";
-
-// Error Strings
-const char ERR_NA[] = "NA";
-const char ERR_UNSUPPORTED_FREQ[] = "SIDPLAYER ERROR: Unsupported sampling frequency.";
-const char ERR_UNSUPPORTED_SID_ADDR[] = "SIDPLAYER ERROR: Unsupported SID address.";
-const char ERR_UNSUPPORTED_SIZE[] = "SIDPLAYER ERROR: Size of music data exceeds C64 memory.";
-const char ERR_INVALID_PERCENTAGE[] = "SIDPLAYER ERROR: Percentage value out of range.";
-
 /**
 * Configuration error exception.
 */
@@ -65,12 +48,27 @@ public:
 //-----------------------------------------------------------------------------
 
 Player::Player ()
-	: m_errorString ( ERR_NA )
 {
 	// We need at least some minimal interrupt handling
 	m_c64.getMemInterface ().setKernal ( nullptr );
 
 	setConfig ( m_cfg );
+
+	//
+	// Default filter-curve map
+	//
+	fcMap = {
+		{ "david dunn",					1.1 },
+		{ "david dunn & aidan bell",	1.1 },
+//		{ "martin galway",				0.6 },	// Any other setting higher than 0.5 makes "Wizball" misbehave
+		{ "chris h\xFClsbeck",			0.6 },
+		{ "georg feil",					0.6 },
+		{ "jeroen tel",					0.6 },
+		{ "rob hubbard",				0.6 },
+		{ "rob hubbard & ben dagglish",	0.6 },
+		{ "fred gray",					1.1 },	// He only used the filter in "Frankie Goes to Hollywood"
+		{ "geir tjelta",				0.6 },
+	};
 
 	// Get component credits
 	m_info.m_credits.push_back ( m_c64.cpuCredits () );
@@ -123,10 +121,10 @@ void Player::initialise ()
 
 	const auto	size = uint32_t ( tuneInfo->loadAddr () ) + tuneInfo->c64dataLen () - 1;
 	if ( size > 0xffff )
-		throw configError ( ERR_UNSUPPORTED_SIZE );
+		throw configError ( "SIDPLAYER ERROR: Size of music data exceeds C64 memory." );
 
 	psiddrv	driver ( m_tune->getInfo () );
-	driver.powerOnDelay ( SidConfig::MAX_POWER_ON_DELAY );
+	driver.powerOnDelay ( 32767 );// SidConfig::MAX_POWER_ON_DELAY );
 	if ( ! driver.drvReloc () )
 		throw configError ( driver.errorString () );
 
@@ -240,7 +238,7 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 	// Check for base sampling frequency
 	if ( cfg.frequency < 8000 )
 	{
-		m_errorString = ERR_UNSUPPORTED_FREQ;
+		m_errorString = "SIDPLAYER ERROR: Unsupported sampling frequency.";
 		return false;
 	}
 
@@ -273,40 +271,21 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 			// SID emulation setup (must be performed before the environment setup call)
 			sidCreate ( cfg.defaultSidModel, cfg.forceSidModel, addresses );
 
-			auto getRecommendedFilterCurve = [ tuneInfo ]
+			//
+			// Attempt to have better sounding 6581 filters by adjusting the curve per author
+			// with the assumption they worked with the same machine their entire career
+			//
+			auto	filter6581Curve = 0.5;
+
+			if ( auto ccAuthor = tuneInfo->infoString ( 1 ) )
 			{
-				//
-				// Attempt to have better sounding 6581 filters by adjusting the curve per author
-				// with the assumption they worked with the same machine their entire career
-				//
-				auto	filter6581Curve = 0.5;
+				const auto	author = stringutils::toLower ( ccAuthor );
 
-				if ( auto ccAuthor = tuneInfo->infoString ( 1 ) )
-				{
-					const auto	author = stringutils::toLower ( ccAuthor );
+				if ( auto it = fcMap.find ( author ); it != fcMap.end () )
+					filter6581Curve = it->second;
+			}
 
-					static const std::unordered_map<std::string, double>	filterCurveMap =
-					{
-						{ "david dunn",					1.1 },
-						{ "david dunn & aidan bell",	1.1 },
-//						{ "martin galway",				0.6 },	// Any other setting higher than 0.5 makes "Wizball" misbehave
-						{ "chris h\xFClsbeck",			0.6 },
-						{ "georg feil",					0.6 },
-						{ "jeroen tel",					0.6 },
-						{ "rob hubbard",				0.6 },
-						{ "rob hubbard & ben dagglish",	0.6 },
-						{ "fred gray",					1.1 },	// He only used the filter in "Frankie Goes to Hollywood"
-						{ "geir tjelta",				0.6 },
-					};
-
-					if ( auto it = filterCurveMap.find ( author ); it != filterCurveMap.end () )
-						filter6581Curve = it->second;
-				}
-
-				return filter6581Curve;
-			};
-
-			set6581FilterCurve ( getRecommendedFilterCurve () );
+			set6581FilterCurve ( filter6581Curve );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
@@ -417,20 +396,20 @@ c64::model_t Player::c64model ( SidConfig::c64_model_t defaultModel, bool forced
 	{
 		case SidTuneInfo::CLOCK_PAL:
 			if ( tuneInfo->songSpeed () == SidTuneInfo::SPEED_CIA_1A )
-				m_info.m_speedString = TXT_PAL_CIA;
+				m_info.m_speedString = "CIA (PAL)";
 			else if ( tuneInfo->clockSpeed () == SidTuneInfo::CLOCK_NTSC )
-				m_info.m_speedString = TXT_PAL_VBI_FIXED;
+				m_info.m_speedString = "60 Hz VBI (PAL FIXED)";
 			else
-				m_info.m_speedString = TXT_PAL_VBI;
+				m_info.m_speedString = "50 Hz VBI (PAL)";
 			break;
 
 		case SidTuneInfo::CLOCK_NTSC:
 			if ( tuneInfo->songSpeed () == SidTuneInfo::SPEED_CIA_1A )
-				m_info.m_speedString = TXT_NTSC_CIA;
+				m_info.m_speedString = "CIA (NTSC)";
 			else if ( tuneInfo->clockSpeed () == SidTuneInfo::CLOCK_PAL )
-				m_info.m_speedString = TXT_NTSC_VBI_FIXED;
+				m_info.m_speedString = "50 Hz VBI (NTSC FIXED)";
 			else
-				m_info.m_speedString = TXT_NTSC_VBI;
+				m_info.m_speedString = "60 Hz VBI (NTSC)";
 			break;
 
 		default:
@@ -477,7 +456,7 @@ void Player::sidCreate ( SidConfig::sid_model_t defaultModel, bool forced, const
 		if ( i++ == 0 )
 			m_c64.setBaseSid ( s );
 		else if ( ! m_c64.addExtraSid ( s, extraAddr ) )
-			throw configError ( ERR_UNSUPPORTED_SID_ADDR );
+			throw configError ( "SIDPLAYER ERROR: Unsupported SID address." );
 
 		m_mixer.addSid ( s );
 	}
@@ -489,6 +468,13 @@ void Player::sidParams ( double cpuFreq, int frequency )
 	for ( auto i = 0u; i < 3 ; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->sampling ( (float)cpuFreq, frequency );
+}
+//-----------------------------------------------------------------------------
+
+void Player::setCurveMap ( const filterCurveMap& newMap )
+{
+	for ( const auto& [ name, value ] : newMap )
+		fcMap[ stringutils::toLower ( name ) ] = value;
 }
 //-----------------------------------------------------------------------------
 
