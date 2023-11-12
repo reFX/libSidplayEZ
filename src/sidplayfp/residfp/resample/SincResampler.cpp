@@ -30,17 +30,6 @@
 constexpr auto	M_PI = 3.14159265358979323846;
 #endif
 
-//
-// SSE2 detection
-//
-#if (defined(_M_AMD64) || defined(_M_X64)) || __SSE2__
-	#define HAVE_SSE2
-	#include <emmintrin.h>
-#elif (defined(__arm64__) && defined(__APPLE__)) || defined (__aarch64__)
-	#define HAVE_NEON
-	#include <arm_neon.h>
-#endif
-
 namespace reSIDfp
 {
 /**
@@ -51,119 +40,20 @@ namespace reSIDfp
 * @param bLength length of the sinc buffer
 * @return convolved result
 */
-static int convolve ( const int16_t* a, const int16_t* b, int bLength )
-{
-	#ifdef HAVE_SSE2
-	//
-	// SSE2 version
-	//
-	auto    out = 0;
-
-	const auto  offset = (uintptr_t)( a ) & 0x0f;
-
-	// check for aligned accesses
-	if ( offset == ( (uintptr_t)( b ) & 0x0f ) )
-	{
-		if ( offset )
-		{
-			const auto  l = int ( ( 0x10 - offset ) / 2 );
-
-			for ( auto i = 0; i < l; i++ )
-				out += *a++ * *b++;
-
-			bLength -= offset;
-		}
-
-		auto    acc = _mm_setzero_si128 ();
-
-		const auto  n = bLength / 8;
-
-		for ( auto i = 0; i < n; i++ )
-		{
-			const auto  tmp = _mm_madd_epi16 ( *( __m128i* )a, *( __m128i* )b );
-			acc = _mm_add_epi16 ( acc, tmp );
-			a += 8;
-			b += 8;
-		}
-
-		auto    vsum = _mm_add_epi32 ( acc, _mm_srli_si128 ( acc, 8 ) );
-		vsum = _mm_add_epi32 ( vsum, _mm_srli_si128 ( vsum, 4 ) );
-		out += _mm_cvtsi128_si32 ( vsum );
-
-		bLength &= 7;
-	}
-	#elif defined(HAVE_NEON)
-	//
-	// NEON version
-	//
-	int32x4_t acc1Low = vdupq_n_s32 ( 0 );
-	int32x4_t acc1High = vdupq_n_s32 ( 0 );
-	int32x4_t acc2Low = vdupq_n_s32 ( 0 );
-	int32x4_t acc2High = vdupq_n_s32 ( 0 );
-
-	const int n = bLength / 16;
-
-	for ( int i = 0; i < n; i++ )
-	{
-		int16x8_t v11 = vld1q_s16 ( a );
-		int16x8_t v12 = vld1q_s16 ( a + 8 );
-		int16x8_t v21 = vld1q_s16 ( b );
-		int16x8_t v22 = vld1q_s16 ( b + 8 );
-
-		acc1Low = vmlal_s16 ( acc1Low, vget_low_s16 ( v11 ), vget_low_s16 ( v21 ) );
-		acc1High = vmlal_high_s16 ( acc1High, v11, v21 );
-		acc2Low = vmlal_s16 ( acc2Low, vget_low_s16 ( v12 ), vget_low_s16 ( v22 ) );
-		acc2High = vmlal_high_s16 ( acc2High, v12, v22 );
-
-		a += 16;
-		b += 16;
-	}
-
-	bLength &= 15;
-
-	if ( bLength >= 8 )
-	{
-		int16x8_t v1 = vld1q_s16 ( a );
-		int16x8_t v2 = vld1q_s16 ( b );
-
-		acc1Low = vmlal_s16 ( acc1Low, vget_low_s16 ( v1 ), vget_low_s16 ( v2 ) );
-		acc1High = vmlal_high_s16 ( acc1High, v1, v2 );
-
-		a += 8;
-		b += 8;
-	}
-
-	bLength &= 7;
-
-	if ( bLength >= 4 )
-	{
-		int16x4_t v1 = vld1_s16 ( a );
-		int16x4_t v2 = vld1_s16 ( b );
-
-		acc1Low = vmlal_s16 ( acc1Low, v1, v2 );
-
-		a += 4;
-		b += 4;
-	}
-
-	int32x4_t accSumsNeon = vaddq_s32 ( acc1Low, acc1High );
-	accSumsNeon = vaddq_s32 ( accSumsNeon, acc2Low );
-	accSumsNeon = vaddq_s32 ( accSumsNeon, acc2High );
-
-	int out = vaddvq_s32 ( accSumsNeon );
-
-	bLength &= 3;
-	#endif
-
-	for ( auto i = 0; i < bLength; i++ )
-		out += *a++ * *b++;
-
-	return ( out + ( 1 << 14 ) ) >> 15;
-}
 //-----------------------------------------------------------------------------
 
 int SincResampler::fir ( int subcycle )
 {
+	auto convolve = [] ( const int16_t* a, const int16_t* b, int bLength )
+	{
+		auto    out = 0;
+
+		for ( auto i = 0; i < bLength; i++ )
+			out += *a++ * *b++;
+
+		return ( out + ( 1 << 14 ) ) >> 15;
+	};
+
 	// Find the first of the nearest fir tables close to the phase
 	auto		firTableFirst = subcycle * firRES >> 10;
 	const auto	firTableOffset = ( subcycle * firRES ) & 0x3FF;
