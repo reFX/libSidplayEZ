@@ -337,20 +337,7 @@ protected:
 	void updateResonance ( uint8_t res ) override { currentResonance = gain_res[ res ]; }
 
 public:
-	Filter6581 ()
-		: f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
-		, hpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
-		, bpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
-	{
-		mixer = FilterModelConfig6581::getInstance ()->getMixer ();
-		summer = FilterModelConfig6581::getInstance ()->getSummer ();
-		gain_res = FilterModelConfig6581::getInstance ()->getGainRes ();
-		gain_vol = FilterModelConfig6581::getInstance ()->getGainVol ();
-		voiceScaleS11 = FilterModelConfig6581::getInstance ()->getVoiceScaleS11 ();
-		voiceDC = FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ();
-
-		ve = mixer[ 0 ][ 0 ];
-	}
+	Filter6581 ();
 
 	~Filter6581 () override
 	{

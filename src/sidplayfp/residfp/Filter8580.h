@@ -295,21 +295,7 @@ protected:
 	void updateResonance ( uint8_t res ) override { currentResonance = gain_res[ res ]; }
 
 public:
-	Filter8580 ()
-		: hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
-		, bpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
-	{
-		voiceScaleS11 = FilterModelConfig8580::getInstance ()->getVoiceScaleS11 ();
-		voiceDC = FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC ();
-
-		mixer = FilterModelConfig8580::getInstance ()->getMixer ();
-		summer = FilterModelConfig8580::getInstance ()->getSummer ();
-		gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();
-		gain_vol = FilterModelConfig8580::getInstance ()->getGainVol ();
-
-		setFilterCurve ( cp );
-		ve = mixer[ 0 ][ 0 ];
-	}
+	Filter8580 ();
 
 	inline uint16_t clock ( int voice1, int voice2, int voice3 ) override
 	{

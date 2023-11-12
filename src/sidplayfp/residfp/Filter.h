@@ -83,8 +83,10 @@ protected:
 	uint8_t	vol = 0;
 
 private:
-	// Selects which inputs to route through filter.
-	uint8_t	filt;
+	uint8_t	filt = 0;		// Selects which inputs to route through filter
+	uint8_t	filtMode = 0;	// Selects which filter types are used
+
+	uint8_t	sumFltResults[ 256 ];
 
 protected:
 	/**
@@ -100,9 +102,18 @@ protected:
 	/**
 	* Mixing configuration modified (offsets change)
 	*/
-	void updatedMixing ();
+	inline void updatedMixing ()
+	{
+		currentGain = gain_vol[ vol ];
+
+		const auto	ni_no = sumFltResults[ filtMode | filt ];
+
+		currentSummer = summer[ ni_no >> 4 ];
+		currentMixer = mixer[ ni_no & 0xF ];
+	}
 
 public:
+	Filter ();
 	virtual ~Filter () = default;
 
 	/**

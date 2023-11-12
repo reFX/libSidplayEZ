@@ -27,13 +27,28 @@ namespace reSIDfp
 {
 
 /**
-	* W/L ratio of frequency DAC bit 0,
-	* other bit are proportional.
-	* When no bit are selected a resistance with half
-	* W/L ratio is selected.
-	*/
+* W/L ratio of frequency DAC bit 0, other bits are proportional.
+* When no bits are selected a resistance with half W/L ratio is selected.
+*/
 constexpr auto	DAC_WL0 = 0.00615;
 
+//-----------------------------------------------------------------------------
+
+Filter8580::Filter8580 ()
+	: hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
+	, bpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
+{
+	voiceScaleS11 = FilterModelConfig8580::getInstance ()->getVoiceScaleS11 ();
+	voiceDC = FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC ();
+
+	mixer = FilterModelConfig8580::getInstance ()->getMixer ();
+	summer = FilterModelConfig8580::getInstance ()->getSummer ();
+	gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();
+	gain_vol = FilterModelConfig8580::getInstance ()->getGainVol ();
+
+	setFilterCurve ( cp );
+	ve = mixer[ 0 ][ 0 ];
+}
 //-----------------------------------------------------------------------------
 
 void Filter8580::updatedCenterFrequency ()

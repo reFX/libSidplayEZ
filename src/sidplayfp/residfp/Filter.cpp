@@ -27,6 +27,28 @@ namespace reSIDfp
 
 //-----------------------------------------------------------------------------
 
+Filter::Filter ()
+{
+	// Pre-calculate all possible summer/mixer combinations
+	for ( auto i = 0u; i < std::size ( sumFltResults ); ++i )
+	{
+		auto	ni = 0;
+		auto	no = 0;
+
+		if ( i & 1 )	{ ni++; } else { no++; }
+	 	if ( i & 2 )	{ ni++; } else { no++; }
+	 	if ( i & 4 )	{ ni++; } else if ( ! ( i & 0x80 ) )	{ no++; }
+	 	if ( i & 8 )	{ ni++; } else { no++; }
+
+		if ( i & 0x10 )	no++;
+		if ( i & 0x20 )	no++;
+		if ( i & 0x40 )	no++;
+
+		sumFltResults[ i ] = uint8_t ( ( ni << 4 ) | no );
+	}
+}
+//-----------------------------------------------------------------------------
+
 void Filter::reset ()
 {
 	writeFC_LO ( 0 );
@@ -39,6 +61,7 @@ void Filter::reset ()
 void Filter::writeFC_LO ( uint8_t fc_lo )
 {
 	fc = ( fc & 0x7F8 ) | ( fc_lo & 0x007 );
+
 	updatedCenterFrequency ();
 }
 //-----------------------------------------------------------------------------
@@ -53,7 +76,7 @@ void Filter::writeFC_HI ( uint8_t fc_hi )
 
 void Filter::writeRES_FILT ( uint8_t res_filt )
 {
-	filt = res_filt;
+	filt = res_filt & 0xF;
 
 	updateResonance ( ( res_filt >> 4 ) & 0x0F );
 
@@ -68,7 +91,9 @@ void Filter::writeRES_FILT ( uint8_t res_filt )
 
 void Filter::writeMODE_VOL ( uint8_t mode_vol )
 {
-	vol = mode_vol & 0x0f;
+	filtMode = mode_vol & 0xF0;
+
+	vol = mode_vol & 0x0F;
 
 	lp = mode_vol & 0x10;
 	bp = mode_vol & 0x20;
@@ -77,28 +102,6 @@ void Filter::writeMODE_VOL ( uint8_t mode_vol )
 	voice3off = mode_vol & 0x80;
 
 	updatedMixing ();
-}
-//-----------------------------------------------------------------------------
-
-void Filter::updatedMixing ()
-{
-	currentGain = gain_vol[ vol ];
-
-	auto	ni = 0u;
-	auto	no = 0u;
-
-	if ( filt1 ) { ni++; } else { no++; }
-	if ( filt2 ) { ni++; } else { no++; }
-	if ( filt3 ) { ni++; } else if ( ! voice3off ) { no++; }
-	if ( filtE ) { ni++; } else { no++; }
-
-	currentSummer = summer[ ni ];
-
-	if ( lp ) no++;
-	if ( bp ) no++;
-	if ( hp ) no++;
-
-	currentMixer = mixer[ no ];
 }
 //-----------------------------------------------------------------------------
 
