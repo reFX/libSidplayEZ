@@ -107,7 +107,7 @@ public:
 		{
 			constexpr auto	threshold = 28000;
 			if ( x < threshold )
-				return short ( x );
+				return int16_t ( x );
 
 			constexpr auto	t = threshold / 32768.0;
 			constexpr auto	a = 1.0 - t;

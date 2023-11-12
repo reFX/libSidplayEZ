@@ -30,58 +30,61 @@ namespace reSIDfp
 class Filter
 {
 protected:
-	unsigned short** mixer = nullptr;
-	unsigned short** summer = nullptr;
-	unsigned short** gain_res = nullptr;
-	unsigned short** gain_vol = nullptr;
+	uint16_t**	mixer = nullptr;
+	uint16_t**	summer = nullptr;
+	uint16_t**	gain_res = nullptr;
+	uint16_t**	gain_vol = nullptr;
 
-	/// Current volume amplifier setting.
-	unsigned short* currentGain = nullptr;
+	int voiceScaleS11;
+	int voiceDC;
 
-	/// Current filter/voice mixer setting.
-	unsigned short* currentMixer = nullptr;
+	// Current volume amplifier setting.
+	uint16_t*	currentGain = nullptr;
 
-	/// Filter input summer setting.
-	unsigned short* currentSummer = nullptr;
+	// Current filter/voice mixer setting.
+	uint16_t*	currentMixer = nullptr;
 
-	/// Filter resonance value.
-	unsigned short* currentResonance = nullptr;
+	// Filter input summer setting.
+	uint16_t*	currentSummer = nullptr;
 
-	/// Filter highpass state
+	// Filter resonance value.
+	uint16_t*	currentResonance = nullptr;
+
+	// Filter highpass state
 	int Vhp = 0;
 
-	/// Filter bandpass state
+	// Filter bandpass state
 	int Vbp = 0;
 
-	/// Filter lowpass state
+	// Filter lowpass state
 	int Vlp = 0;
 
-	/// Filter external input
+	// Filter external input
 	int ve = 0;
 
-	/// Filter cutoff frequency
+	// Filter cutoff frequency
 	unsigned int fc = 0;
 
-	/// Routing to filter or outside filter
+	// Routing to filter or outside filter
 	bool	filt1 = false;
 	bool	filt2 = false;
 	bool	filt3 = false;
 	bool	filtE = false;
 
-	/// Switch voice 3 off
+	// Switch voice 3 off
 	bool	voice3off = false;
 
-	/// Highpass, bandpass, and lowpass filter modes
+	// Highpass, bandpass, and lowpass filter modes
 	bool	hp = false;
 	bool	bp = false;
 	bool	lp = false;
 
-	/// Current volume.
-	unsigned char vol = 0;
+	// Current volume.
+	uint8_t	vol = 0;
 
 private:
-	/// Selects which inputs to route through filter.
-	unsigned char filt;
+	// Selects which inputs to route through filter.
+	uint8_t	filt;
 
 protected:
 	/**
@@ -92,7 +95,7 @@ protected:
 	/**
 	* Set filter resonance.
 	*/
-	virtual void updateResonance ( unsigned char res ) = 0;
+	virtual void updateResonance ( uint8_t res ) = 0;
 
 	/**
 	* Mixing configuration modified (offsets change)
@@ -100,7 +103,7 @@ protected:
 	void updatedMixing ();
 
 public:
-	virtual ~Filter () {}
+	virtual ~Filter () = default;
 
 	/**
 	* SID clocking - 1 cycle
@@ -110,7 +113,7 @@ public:
 	* @param v3 voice 3 in
 	* @return filtered output
 	*/
-	virtual unsigned short clock ( int v1, int v2, int v3 ) = 0;
+	virtual uint16_t clock ( int v1, int v2, int v3 ) = 0;
 
 	/**
 	* SID reset.
@@ -122,28 +125,28 @@ public:
 	*
 	* @param fc_lo Frequency Cutoff Low-Byte
 	*/
-	void writeFC_LO ( unsigned char fc_lo );
+	void writeFC_LO ( uint8_t fc_lo );
 
 	/**
 	* Write Frequency Cutoff High register.
 	*
 	* @param fc_hi Frequency Cutoff High-Byte
 	*/
-	void writeFC_HI ( unsigned char fc_hi );
+	void writeFC_HI ( uint8_t fc_hi );
 
 	/**
 	* Write Resonance/Filter register.
 	*
 	* @param res_filt Resonance/Filter
 	*/
-	void writeRES_FILT ( unsigned char res_filt );
+	void writeRES_FILT ( uint8_t res_filt );
 
 	/**
 	* Write filter Mode/Volume register.
 	*
 	* @param mode_vol Filter Mode/Volume
 	*/
-	void writeMODE_VOL ( unsigned char mode_vol );
+	void writeMODE_VOL ( uint8_t mode_vol );
 };
 
 } // namespace reSIDfp

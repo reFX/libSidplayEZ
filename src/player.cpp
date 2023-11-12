@@ -158,7 +158,7 @@ bool Player::loadTune ( SidTune* tune )
 }
 //-----------------------------------------------------------------------------
 
-uint32_t Player::play ( short* buffer, uint32_t count )
+uint32_t Player::play ( int16_t* buffer, uint32_t count )
 {
 	// Make sure a tune is loaded
 	if ( ! m_tune )
@@ -489,7 +489,7 @@ void Player::set6581FilterCurve ( const double value )
 }
 //-----------------------------------------------------------------------------
 
-bool Player::getSidStatus ( unsigned int sidNum, uint8_t regs[ 32 ] )
+bool Player::getSidStatus ( int sidNum, uint8_t regs[ 32 ] )
 {
 	if ( auto s = m_mixer.getSid ( sidNum ) )
 	{

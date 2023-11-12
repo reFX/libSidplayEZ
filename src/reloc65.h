@@ -40,7 +40,7 @@ private:
 	int			m_tdiff;
 
 private:
-	int reldiff ( unsigned char s );
+	[[ nodiscard ]] int reldiff ( uint8_t s );
 
 	/**
 	 * Relocate segment.
@@ -50,7 +50,7 @@ private:
 	 * @param rtab relocation table
 	 * @return a pointer to the next section
 	 */
-	[[ nodiscard ]] unsigned char* reloc_seg ( unsigned char* buf, int len, unsigned char* rtab );
+	[[ nodiscard ]] uint8_t* reloc_seg ( uint8_t* buf, int len, uint8_t* rtab );
 
 	/**
 	 * Relocate exported globals list.
@@ -58,7 +58,7 @@ private:
 	 * @param buf exported globals list
 	 * @return a pointer to the next section
 	 */
-	unsigned char* reloc_globals ( unsigned char* buf );
+	uint8_t* reloc_globals ( uint8_t* buf );
 
 public:
 	/**
@@ -72,5 +72,5 @@ public:
 	 * @param buf beffer containing o65 data
 	 * @param fsize size of the data
 	 */
-	[[ nodiscard ]] bool reloc ( unsigned char** buf, int* fsize );
+	[[ nodiscard ]] bool reloc ( uint8_t** buf, int* fsize );
 };

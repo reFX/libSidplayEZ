@@ -101,7 +101,7 @@ private:
 	ChipModel model;
 
 	// Last written value
-	unsigned char busValue;
+	uint8_t	busValue;
 
 	/**
 	* Emulated nonlinearity of the envelope DAC.
@@ -191,7 +191,7 @@ public:
 	/**
 	* Read registers
 	*
-	* Reading a write only register returns the last char written to any SID register.
+	* Reading a write only register returns the last uint8_t written to any SID register.
 	* The individual bits in this value start to fade down towards zero after a few cycles.
 	* All bits reach zero within approximately $2000 - $4000 cycles.
 	* It has been claimed that this fading happens in an orderly fashion,
@@ -208,7 +208,7 @@ public:
 	* @param offset SID register to read
 	* @return value read from chip
 	*/
-	unsigned char read ( int offset );
+	uint8_t read ( int offset );
 
 	/**
 	* Write registers.
@@ -216,7 +216,7 @@ public:
 	* @param offset chip register to write
 	* @param value value to write
 	*/
-	void write ( int offset, unsigned char value );
+	void write ( int offset, uint8_t value );
 
 	/**
 	* Setting of SID sampling parameters.

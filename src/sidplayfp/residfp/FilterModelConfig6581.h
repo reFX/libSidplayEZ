@@ -38,8 +38,6 @@ class Integrator6581;
 class FilterModelConfig6581 final : public FilterModelConfig
 {
 private:
-
-private:
 	static std::unique_ptr<FilterModelConfig6581> instance;
 	// This allows access to the private constructor
 	friend std::unique_ptr<FilterModelConfig6581>::deleter_type;
@@ -66,7 +64,6 @@ private:
 	//@}
 
 private:
-//	double getDacZero ( double adjustment ) const {	return dac_zero - ( adjustment - 0.5 ) * 2.0;	}
 	double getDacZero ( double adjustment ) const {	return dac_zero + ( 1.0 - adjustment );			}
 
 	FilterModelConfig6581 ();
@@ -83,17 +80,17 @@ public:
 	* @param adjustment
 	* @return the DAC table
 	*/
-	unsigned short* getDAC ( double adjustment ) const;
+	uint16_t* getDAC ( double adjustment ) const;
 
 	/**
 	* Construct an integrator solver.
 	*
 	* @return the integrator
 	*/
-	std::unique_ptr<Integrator6581> buildIntegrator ();
+	std::unique_ptr<Integrator6581> buildIntegrator ()	{	return std::make_unique<Integrator6581> ( this, WL_snake );		}
 
-	inline unsigned short getVcr_nVg ( int i ) const { return vcr_nVg[ i ]; }
-	inline unsigned short getVcr_n_Ids_term ( int i ) const { return vcr_n_Ids_term[ i ]; }
+	inline uint16_t getVcr_nVg ( int i ) const { return vcr_nVg[ i ]; }
+	inline uint16_t getVcr_n_Ids_term ( int i ) const { return vcr_n_Ids_term[ i ]; }
 	// only used if SLOPE_FACTOR is defined
 	inline double getUt () const { return Ut; }
 	inline double getN16 () const { return N16; }

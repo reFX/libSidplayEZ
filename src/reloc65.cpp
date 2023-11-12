@@ -29,7 +29,7 @@
 constexpr auto	HEADER_SIZE = 8 + 9 * 2;
 
 // Magic number
-const unsigned char o65hdr[] = { 1, 0, 'o', '6', '5' };
+const uint8_t o65hdr[] = { 1, 0, 'o', '6', '5' };
 
 /**
  * Read a 16 bit word from a buffer at specific location.
@@ -37,7 +37,7 @@ const unsigned char o65hdr[] = { 1, 0, 'o', '6', '5' };
  * @param buffer
  * @param idx
  */
-inline int getWord ( unsigned char* buffer, int idx )
+inline int getWord ( uint8_t* buffer, int idx )
 {
 	return buffer[ idx ] | ( buffer[ idx + 1 ] << 8 );
 }
@@ -49,7 +49,7 @@ inline int getWord ( unsigned char* buffer, int idx )
  * @param idx
  * @param value
  */
-inline void setWord ( unsigned char* buffer, int idx, int value )
+inline void setWord ( uint8_t* buffer, int idx, int value )
 {
 	buffer[ idx ] = value & 0xff;
 	buffer[ idx + 1 ] = ( value >> 8 ) & 0xff;
@@ -60,7 +60,7 @@ inline void setWord ( unsigned char* buffer, int idx, int value )
  *
  * @param buf
  */
-inline int read_options ( unsigned char* buf )
+inline int read_options ( uint8_t* buf )
 {
 	auto	l = 0;
 
@@ -78,7 +78,7 @@ inline int read_options ( unsigned char* buf )
  *
  * @param buf
  */
-inline int read_undef ( unsigned char* buf )
+inline int read_undef ( uint8_t* buf )
 {
 	auto	l = 2;
 
@@ -98,7 +98,7 @@ reloc65::reloc65 ( int addr )
 }
 //-----------------------------------------------------------------------------
 
-bool reloc65::reloc ( unsigned char** buf, int* fsize )
+bool reloc65::reloc ( uint8_t** buf, int* fsize )
 {
 	auto	tmpBuf = *buf;
 
@@ -139,13 +139,13 @@ bool reloc65::reloc ( unsigned char** buf, int* fsize )
 }
 //-----------------------------------------------------------------------------
 
-int reloc65::reldiff ( unsigned char s )
+int reloc65::reldiff ( uint8_t s )
 {
 	return s == 2 ? m_tdiff : 0;
 }
 //-----------------------------------------------------------------------------
 
-unsigned char* reloc65::reloc_seg ( unsigned char* buf, int len, unsigned char* rtab )
+unsigned char* reloc65::reloc_seg ( uint8_t* buf, int len, uint8_t* rtab )
 {
 	auto	adr = -1;
 	while ( *rtab )
@@ -159,8 +159,8 @@ unsigned char* reloc65::reloc_seg ( unsigned char* buf, int len, unsigned char* 
 		{
 			adr += *rtab & 255;
 			rtab++;
-			const auto	type = (unsigned char)( *rtab & 0xe0 );
-			const auto	seg = (unsigned char)( *rtab & 0x07 );
+			const auto	type = uint8_t ( *rtab & 0xe0 );
+			const auto	seg = uint8_t ( *rtab & 0x07 );
 			rtab++;
 			switch ( type )
 			{
@@ -206,7 +206,7 @@ unsigned char* reloc65::reloc_seg ( unsigned char* buf, int len, unsigned char* 
 }
 //-----------------------------------------------------------------------------
 
-unsigned char* reloc65::reloc_globals ( unsigned char* buf )
+uint8_t* reloc65::reloc_globals ( uint8_t* buf )
 {
 	auto	n = getWord ( buf, 0 );
 	buf += 2;

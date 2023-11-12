@@ -273,9 +273,6 @@ namespace reSIDfp
 class Filter8580 final : public Filter
 {
 private:
-	const int voiceScaleS11;
-	const int voiceDC;
-
 	double cp = 0.5;
 
 	/// VCR + associated capacitor connected to highpass output.
@@ -295,15 +292,16 @@ protected:
 	*
 	* @param res the new resonance value
 	*/
-	void updateResonance ( unsigned char res ) override { currentResonance = gain_res[ res ]; }
+	void updateResonance ( uint8_t res ) override { currentResonance = gain_res[ res ]; }
 
 public:
 	Filter8580 ()
-		: voiceScaleS11 ( FilterModelConfig8580::getInstance ()->getVoiceScaleS11 () )
-		, voiceDC ( FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC () )
-		, hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
+		: hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
 		, bpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
 	{
+		voiceScaleS11 = FilterModelConfig8580::getInstance ()->getVoiceScaleS11 ();
+		voiceDC = FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC ();
+
 		mixer = FilterModelConfig8580::getInstance ()->getMixer ();
 		summer = FilterModelConfig8580::getInstance ()->getSummer ();
 		gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();
@@ -313,12 +311,12 @@ public:
 		ve = mixer[ 0 ][ 0 ];
 	}
 
-	inline unsigned short clock ( int voice1, int voice2, int voice3 ) override
+	inline uint16_t clock ( int voice1, int voice2, int voice3 ) override
 	{
 		voice1 = ( voice1 * voiceScaleS11 >> 15 ) + voiceDC;
 		voice2 = ( voice2 * voiceScaleS11 >> 15 ) + voiceDC;
 		// Voice 3 is silenced by voice3off if it is not routed through the filter
-		voice3 = ( filt3 || !voice3off ) ? ( voice3 * voiceScaleS11 >> 15 ) + voiceDC : 0;
+		voice3 = ( filt3 || ! voice3off ) ? ( voice3 * voiceScaleS11 >> 15 ) + voiceDC : 0;
 
 		auto	Vi = 0;
 		auto	Vo = 0;
@@ -326,7 +324,7 @@ public:
 		( filt1 ? Vi : Vo ) += voice1;
 		( filt2 ? Vi : Vo ) += voice2;
 		( filt3 ? Vi : Vo ) += voice3;
-		Vo += ve;
+		( filtE ? Vi : Vo ) += ve;
 
 		Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vi ];
 		Vbp = hpIntegrator->solve ( Vhp );

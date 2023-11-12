@@ -174,10 +174,10 @@ private:
 		double n = 1.4;
 	#endif
 
-	const unsigned short nVddt;
-	const unsigned short nVt;
-	const unsigned short nVmin;
-	const unsigned short nSnake;
+	const uint16_t	nVddt;
+	const uint16_t	nVt;
+	const uint16_t	nVmin;
+	const uint16_t	nSnake;
 
 	const FilterModelConfig6581* fmc;
 
@@ -191,7 +191,7 @@ public:
 	{
 	}
 
-	void setVw ( unsigned short Vw ) { nVddt_Vw_2 = ( ( nVddt - Vw ) * ( nVddt - Vw ) ) >> 1; }
+	void setVw ( uint16_t Vw ) { nVddt_Vw_2 = ( ( nVddt - Vw ) * ( nVddt - Vw ) ) >> 1; }
 
 	inline int solve ( int vi )
 	{
@@ -251,7 +251,7 @@ public:
 		vc += n_I_snake + n_I_vcr;
 
 		// vx = g(vc)
-		const int tmp = ( vc >> 15 ) + ( 1 << 15 );
+		const auto	tmp = ( vc >> 15 ) + ( 1 << 15 );
 		assert ( tmp < ( 1 << 16 ) );
 		vx = fmc->getOpampRev ( tmp );
 

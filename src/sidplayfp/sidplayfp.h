@@ -84,12 +84,11 @@ public:
 	 *
 	 * @param buffer pointer to the buffer to fill with samples.
 	 * @param count the size of the buffer measured in 16 bit samples
-	 *              or 0 if no output is needed (e.g. Hardsid)
 	 * @return the number of produced samples. If less than requested
 	 *         or #isPlaying() is false an error occurred, use #error()
 	 *         to get a detailed message.
 	 */
-	uint32_t play ( short* buffer, uint32_t count ) {	return sidplayer.play ( buffer, count );	}
+	uint32_t play ( int16_t* buffer, uint32_t count ) {	return sidplayer.play ( buffer, count );	}
 
 	/**
 	 * Check if the engine is playing or stopped.
@@ -157,6 +156,6 @@ public:
 	 * @return false if the requested chip doesn't exist.
 	 * @since 2.2
 	 */
-	bool getSidStatus ( unsigned int sidNum, uint8_t regs[ 32 ] ) {	return sidplayer.getSidStatus ( sidNum, regs );	}
+	bool getSidStatus ( int sidNum, uint8_t regs[ 32 ] ) {	return sidplayer.getSidStatus ( sidNum, regs );	}
 };
 //-----------------------------------------------------------------------------

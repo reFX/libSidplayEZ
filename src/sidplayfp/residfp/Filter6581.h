@@ -317,9 +317,6 @@ class Filter6581 final : public Filter
 private:
 	const uint16_t* f0_dac;
 
-	const int voiceScaleS11;
-	const int voiceDC;
-
 	/// VCR + associated capacitor connected to highpass output.
 	std::unique_ptr<Integrator6581> const hpIntegrator;
 
@@ -337,13 +334,11 @@ protected:
 	*
 	* In the MOS 6581, 1/Q is controlled linearly by res.
 	*/
-	void updateResonance ( unsigned char res ) override { currentResonance = gain_res[ res ]; }
+	void updateResonance ( uint8_t res ) override { currentResonance = gain_res[ res ]; }
 
 public:
 	Filter6581 ()
 		: f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
-		, voiceScaleS11 ( FilterModelConfig6581::getInstance ()->getVoiceScaleS11 () )
-		, voiceDC ( FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC () )
 		, hpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
 		, bpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
 	{
@@ -351,6 +346,8 @@ public:
 		summer = FilterModelConfig6581::getInstance ()->getSummer ();
 		gain_res = FilterModelConfig6581::getInstance ()->getGainRes ();
 		gain_vol = FilterModelConfig6581::getInstance ()->getGainVol ();
+		voiceScaleS11 = FilterModelConfig6581::getInstance ()->getVoiceScaleS11 ();
+		voiceDC = FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ();
 
 		ve = mixer[ 0 ][ 0 ];
 	}
@@ -360,12 +357,12 @@ public:
 		delete[] f0_dac;
 	}
 
-	inline unsigned short clock ( int voice1, int voice2, int voice3 ) override
+	inline uint16_t clock ( int voice1, int voice2, int voice3 ) override
 	{
 		voice1 = ( voice1 * voiceScaleS11 >> 15 ) + voiceDC;
 		voice2 = ( voice2 * voiceScaleS11 >> 15 ) + voiceDC;
 		// Voice 3 is silenced by voice3off if it is not routed through the filter
-		voice3 = ( filt3 || !voice3off ) ? ( voice3 * voiceScaleS11 >> 15 ) + voiceDC : 0;
+		voice3 = ( filt3 || ! voice3off ) ? ( voice3 * voiceScaleS11 >> 15 ) + voiceDC : 0;
 
 		auto	Vi = 0;
 		auto	Vo = 0;
@@ -373,8 +370,7 @@ public:
 		( filt1 ? Vi : Vo ) += voice1;
 		( filt2 ? Vi : Vo ) += voice2;
 		( filt3 ? Vi : Vo ) += voice3;
-		Vo += ve;
-		//	( filtE ? Vi : Vo ) += ve;
+		( filtE ? Vi : Vo ) += ve;
 
 		Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vi ];
 		Vbp = hpIntegrator->solve ( Vhp );

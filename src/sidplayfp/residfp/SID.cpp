@@ -204,7 +204,7 @@ void SID::reset ()
 }
 //-----------------------------------------------------------------------------
 
-unsigned char SID::read ( int offset )
+uint8_t SID::read ( int offset )
 {
 	switch ( offset )
 	{
@@ -240,7 +240,7 @@ unsigned char SID::read ( int offset )
 }
 //-----------------------------------------------------------------------------
 
-void SID::write ( int offset, unsigned char value )
+void SID::write ( int offset, uint8_t value )
 {
 	busValue = value;
 	busValueTtl = modelTTL;

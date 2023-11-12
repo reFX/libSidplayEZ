@@ -50,11 +50,11 @@ namespace reSIDfp
 class Integrator8580 final
 {
 private:
-	mutable int vx = 0;
-	mutable int vc = 0;
+	int	vx = 0;
+	int	vc = 0;
 
-	unsigned short nVgt;
-	unsigned short n_dac;
+	uint16_t	nVgt;
+	uint16_t	n_dac;
 
 	const FilterModelConfig8580* fmc;
 
@@ -83,15 +83,15 @@ public:
 		// Gate voltage is controlled by the switched capacitor voltage divider
 		// Ua = Ue * v = 4.76v  1<v<2
 		assert ( v > 1.0 && v < 2.0 );
-		const double Vg = 4.76 * v;
-		const double Vgt = Vg - fmc->getVth ();
+		const auto	Vg = 4.76 * v;
+		const auto	Vgt = Vg - fmc->getVth ();
 
 		// Vg - Vth, normalized so that translated values can be subtracted:
 		// Vgt - x = (Vgt - t) - (x - t)
 		nVgt = fmc->getNormalizedValue ( Vgt );
 	}
 
-	inline int solve ( int vi ) const
+	inline int solve ( int vi )
 	{
 		// Make sure we're not in subthreshold mode
 		assert ( vx < nVgt );
@@ -110,7 +110,7 @@ public:
 		vc += n_I_dac;
 
 		// vx = g(vc)
-		const int tmp = ( vc >> 15 ) + ( 1 << 15 );
+		const auto	tmp = ( vc >> 15 ) + ( 1 << 15 );
 		assert ( tmp < ( 1 << 16 ) );
 		vx = fmc->getOpampRev ( tmp );
 

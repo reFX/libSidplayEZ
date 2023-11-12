@@ -137,7 +137,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 
 			opampModel.reset ();
 
-			summer[ i ] = new unsigned short[ size ];
+			summer[ i ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
@@ -161,7 +161,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			const auto  size = std::max ( 1, i << 16 );
 			const auto  n = i * 8.0 / 6.0;
 			opampModel.reset ();
-			mixer[ i ] = new unsigned short[ size ];
+			mixer[ i ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
@@ -184,7 +184,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			const auto  size = 1 << 16;
 			const auto  n = n8 / 12.0;
 			opampModel.reset ();
-			gain_vol[ n8 ] = new unsigned short[ size ];
+			gain_vol[ n8 ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
@@ -207,7 +207,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			const auto  size = 1 << 16;
 			const auto  n = ( ~n8 & 0xF ) / 8.0;
 			opampModel.reset ();
-			gain_res[ n8 ] = new unsigned short[ size ];
+			gain_res[ n8 ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
@@ -283,12 +283,6 @@ uint16_t* FilterModelConfig6581::getDAC ( double adjustment ) const
 		f0_dac[ i ] = getNormalizedValue ( _dac_zero + dac.getOutput ( i ) * dac_scale / ( 1 << DAC_BITS ) );
 
 	return f0_dac;
-}
-//-----------------------------------------------------------------------------
-
-std::unique_ptr<Integrator6581> FilterModelConfig6581::buildIntegrator ()
-{
-	return std::make_unique<Integrator6581> ( this, WL_snake );
 }
 //-----------------------------------------------------------------------------
 

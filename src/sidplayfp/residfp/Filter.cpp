@@ -36,26 +36,26 @@ void Filter::reset ()
 }
 //-----------------------------------------------------------------------------
 
-void Filter::writeFC_LO ( unsigned char fc_lo )
+void Filter::writeFC_LO ( uint8_t fc_lo )
 {
-	fc = ( fc & 0x7f8 ) | ( fc_lo & 0x007 );
+	fc = ( fc & 0x7F8 ) | ( fc_lo & 0x007 );
 	updatedCenterFrequency ();
 }
 //-----------------------------------------------------------------------------
 
-void Filter::writeFC_HI ( unsigned char fc_hi )
+void Filter::writeFC_HI ( uint8_t fc_hi )
 {
-	fc = ( fc_hi << 3 & 0x7f8 ) | ( fc & 0x007 );
+	fc = ( ( fc_hi << 3 ) & 0x7F8 ) | ( fc & 0x007 );
 
 	updatedCenterFrequency ();
 }
 //-----------------------------------------------------------------------------
 
-void Filter::writeRES_FILT ( unsigned char res_filt )
+void Filter::writeRES_FILT ( uint8_t res_filt )
 {
 	filt = res_filt;
 
-	updateResonance ( ( res_filt >> 4 ) & 0x0f );
+	updateResonance ( ( res_filt >> 4 ) & 0x0F );
 
 	filt1 = filt & 0x01;
 	filt2 = filt & 0x02;
@@ -66,7 +66,7 @@ void Filter::writeRES_FILT ( unsigned char res_filt )
 }
 //-----------------------------------------------------------------------------
 
-void Filter::writeMODE_VOL ( unsigned char mode_vol )
+void Filter::writeMODE_VOL ( uint8_t mode_vol )
 {
 	vol = mode_vol & 0x0f;
 
@@ -90,9 +90,7 @@ void Filter::updatedMixing ()
 	if ( filt1 ) { ni++; } else { no++; }
 	if ( filt2 ) { ni++; } else { no++; }
 	if ( filt3 ) { ni++; } else if ( ! voice3off ) { no++; }
-
-	no++;
-//	if ( filtE ) { ni++; } else { no++; }
+	if ( filtE ) { ni++; } else { no++; }
 
 	currentSummer = summer[ ni ];
 

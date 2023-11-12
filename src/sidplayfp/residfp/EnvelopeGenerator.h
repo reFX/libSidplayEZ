@@ -88,22 +88,22 @@ private:
 	bool resetLfsr = false;
 
 	/// The current digital value of envelope output
-	unsigned char envelope_counter = 0xaa;
+	uint8_t envelope_counter = 0xaa;
 
 	/// Attack register
-	unsigned char attack = 0;
+	uint8_t attack = 0;
 
 	/// Decay register
-	unsigned char decay = 0;
+	uint8_t decay = 0;
 
 	/// Sustain register
-	unsigned char sustain = 0;
+	uint8_t sustain = 0;
 
 	/// Release register
-	unsigned char release = 0;
+	uint8_t release = 0;
 
 	/// The ENV3 value, sampled at the first phase of the clock
-	unsigned char env3 = 0;
+	uint8_t env3 = 0;
 
 private:
 	/**
@@ -164,7 +164,7 @@ public:
 	* @param control
 	*            control register value
 	*/
-	void writeCONTROL_REG ( unsigned char control );
+	void writeCONTROL_REG ( uint8_t control );
 
 	/**
 	* Write Attack/Decay register.
@@ -172,7 +172,7 @@ public:
 	* @param attack_decay
 	*            attack/decay value
 	*/
-	void writeATTACK_DECAY ( unsigned char attack_decay );
+	void writeATTACK_DECAY ( uint8_t attack_decay );
 
 	/**
 	* Write Sustain/Release register.
@@ -180,14 +180,14 @@ public:
 	* @param sustain_release
 	*            sustain/release value
 	*/
-	void writeSUSTAIN_RELEASE ( unsigned char sustain_release );
+	void writeSUSTAIN_RELEASE ( uint8_t sustain_release );
 
 	/**
 	* Return the envelope current value.
 	*
 	* @return envelope counter value
 	*/
-	unsigned char readENV () const { return env3; }
+	uint8_t readENV () const { return env3; }
 };
 //-----------------------------------------------------------------------------
 

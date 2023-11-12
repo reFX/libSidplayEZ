@@ -76,7 +76,7 @@ public:
 	*
 	* @param input
 	*/
-	inline int clock ( unsigned short input )
+	inline int clock ( uint16_t input )
 	{
 		const auto	Vi = int ( ( (unsigned int)input << 11 ) - ( 1 << ( 11 + 15 ) ) );
 		const auto	dVlp = ( w0lp_1_s7 * ( Vi - Vlp ) ) >> 7;
