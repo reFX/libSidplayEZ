@@ -40,21 +40,21 @@ namespace libsidplayfp
 class c64vic final : public MOS656X, public Bank
 {
 private:
-	c64env& m_env;
+	c64env&	m_env;
 
 protected:
-	void interrupt ( bool state ) override	{	m_env.interruptIRQ ( state );	}
-	void setBA ( bool state ) override		{	m_env.setBA ( state );			}
+	void interrupt ( bool state ) override		{		m_env.interruptIRQ ( state );	}
+	void setBA ( bool state ) override			{		m_env.setBA ( state );			}
 
 public:
 	c64vic ( c64env& env )
-	: MOS656X ( env.scheduler () )
-	, m_env ( env )
+		: MOS656X ( env.scheduler () )
+		, m_env ( env )
 	{
 	}
 
-	void poke ( uint16_t address, uint8_t value ) override	{	write ( endian_get16_lo8 ( address ), value );	}
-	uint8_t peek ( uint16_t address ) override				{	return read ( endian_get16_lo8 ( address ) );	}
+	void poke ( uint16_t address, uint8_t value ) override	{	write ( uint8_t ( address ), value );	}
+	uint8_t peek ( uint16_t address ) override				{	return read ( uint8_t ( address ) );	}
 };
 
 }

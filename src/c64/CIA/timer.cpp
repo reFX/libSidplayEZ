@@ -33,14 +33,13 @@ void Timer::setControlRegister ( uint8_t cr )
 	state |= ( cr & CIAT_CR_MASK ) ^ CIAT_PHI2IN;
 	lastControlValue = cr;
 }
-//-----------------------------------------------------------------------------
 
 void Timer::syncWithCpu ()
 {
 	if ( ciaEventPauseTime > 0 )
 	{
 		eventScheduler.cancel ( m_cycleSkippingEvent );
-		const auto	elapsed = eventScheduler.getTime ( EVENT_CLOCK_PHI2 ) - ciaEventPauseTime;
+		const event_clock_t elapsed = eventScheduler.getTime ( EVENT_CLOCK_PHI2 ) - ciaEventPauseTime;
 
 		// It's possible for CIA to determine that it wants to go to sleep starting from the next
 		// cycle, and then have its plans aborted by CPU. Thus, we must avoid modifying
@@ -51,27 +50,24 @@ void Timer::syncWithCpu ()
 			clock ();
 		}
 	}
-
 	if ( ciaEventPauseTime == 0 )
+	{
 		eventScheduler.cancel ( *this );
-
+	}
 	ciaEventPauseTime = -1;
 }
-//-----------------------------------------------------------------------------
 
 void Timer::wakeUpAfterSyncWithCpu ()
 {
 	ciaEventPauseTime = 0;
 	eventScheduler.schedule ( *this, 0, EVENT_CLOCK_PHI1 );
 }
-//-----------------------------------------------------------------------------
 
 void Timer::event ()
 {
 	clock ();
 	reschedule ();
 }
-//-----------------------------------------------------------------------------
 
 void Timer::cycleSkippingEvent ()
 {
@@ -80,55 +76,53 @@ void Timer::cycleSkippingEvent ()
 	timer -= elapsed;
 	event ();
 }
-//-----------------------------------------------------------------------------
 
 void Timer::clock ()
 {
-	if ( state & CIAT_COUNT3 )
+	if ( ( state & CIAT_COUNT3 ) != 0 )
 		timer--;
 
-	// ciatimer.c block start
-	auto	adj = state & ( CIAT_CR_START | CIAT_CR_ONESHOT | CIAT_PHI2IN );
-
+	/* ciatimer.c block start */
+	int32_t adj = state & ( CIAT_CR_START | CIAT_CR_ONESHOT | CIAT_PHI2IN );
 	if ( ( state & ( CIAT_CR_START | CIAT_PHI2IN ) ) == ( CIAT_CR_START | CIAT_PHI2IN ) )
 	{
 		adj |= CIAT_COUNT2;
 	}
-
-	if (	( state & CIAT_COUNT2 ) != 0
-		||	( state & ( CIAT_STEP | CIAT_CR_START ) ) == ( CIAT_STEP | CIAT_CR_START ) )
+	if ( ( state & CIAT_COUNT2 ) != 0
+			|| ( state & ( CIAT_STEP | CIAT_CR_START ) ) == ( CIAT_STEP | CIAT_CR_START ) )
 	{
 		adj |= CIAT_COUNT3;
 	}
-
 	// CR_FLOAD -> LOAD1, CR_ONESHOT -> ONESHOT0, LOAD1 -> LOAD, ONESHOT0 -> ONESHOT
 	adj |= ( state & ( CIAT_CR_FLOAD | CIAT_CR_ONESHOT | CIAT_LOAD1 | CIAT_ONESHOT0 ) ) << 8;
 	state = adj;
-	// ciatimer.c block end
+	/* ciatimer.c block end */
 
-	if ( timer == 0 && state & CIAT_COUNT3 )
+	if ( ( timer == 0 ) && ( ( state & CIAT_COUNT3 ) != 0 ) )
 	{
 		state |= CIAT_LOAD | CIAT_OUT;
 
-		if ( state & ( CIAT_ONESHOT | CIAT_ONESHOT0 ) )
+		if ( ( state & ( CIAT_ONESHOT | CIAT_ONESHOT0 ) ) != 0 )
 			state &= ~( CIAT_CR_START | CIAT_COUNT2 );
 
-		// By setting bits 2 and 3 of the control register,
+		// By setting bits 2&3 of the control register,
 		// PB6/PB7 will be toggled between high and low at each underflow.
-		const auto	toggle = ( lastControlValue & 0x06 ) == 6;
-		pbToggle = toggle && ! pbToggle;
+		const bool toggle = ( lastControlValue & 0x06 ) == 6;
+		pbToggle = toggle && !pbToggle;
+
+		// Implementation of the serial port
+		serialPort ();
 
 		// Timer A signals underflow handling: IRQ/B-count
 		underFlow ();
 	}
 
-	if ( state & CIAT_LOAD )
+	if ( ( state & CIAT_LOAD ) != 0 )
 	{
 		timer = latch;
 		state &= ~CIAT_COUNT3;
 	}
 }
-//-----------------------------------------------------------------------------
 
 void Timer::reset ()
 {
@@ -140,28 +134,22 @@ void Timer::reset ()
 	ciaEventPauseTime = 0;
 	eventScheduler.schedule ( *this, 1, EVENT_CLOCK_PHI1 );
 }
-//-----------------------------------------------------------------------------
 
 void Timer::latchLo ( uint8_t data )
 {
-	endian_set16_lo8 ( latch, data );
-
+	endian_16lo8 ( latch, data );
 	if ( ( state & CIAT_LOAD ) != 0 )
 		timer = latch;
 }
-//-----------------------------------------------------------------------------
 
 void Timer::latchHi ( uint8_t data )
 {
-	endian_set16_hi8 ( latch, data );
-
-	if ( state & CIAT_LOAD )
+	endian_16hi8 ( latch, data );
+	if ( ( state & CIAT_LOAD ) != 0 )
 		timer = latch;
-
 	// Reload timer if stopped
-	else if ( ! ( state & CIAT_CR_START ) )
+	else if ( ( state & CIAT_CR_START ) == 0 )
 		state |= CIAT_LOAD1;
 }
-//-----------------------------------------------------------------------------
 
 }

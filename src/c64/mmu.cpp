@@ -28,9 +28,11 @@
 namespace libsidplayfp
 {
 
-MMU::MMU ( EventScheduler& scheduler, IOBank* ioBank )
+//-----------------------------------------------------------------------------
+
+MMU::MMU ( EventScheduler& scheduler, IOBank* _ioBank )
 	: eventScheduler ( scheduler )
-	, ioBank ( ioBank )
+	, ioBank ( _ioBank )
 	, zeroRAMBank ( *this, ramBank )
 {
 	std::fill_n ( cpuReadMap, std::size ( cpuReadMap ), &ramBank );
@@ -92,6 +94,7 @@ void MMU::reset ()
 */
 uint8_t MMU::getLastReadByte () const
 {
+	// LCG
 	seed = seed * 1664525 + 1013904223;
 	return uint8_t ( seed );
 }

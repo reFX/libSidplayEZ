@@ -23,7 +23,6 @@
 */
 
 #include <stdint.h>
-#include <array>
 
 #include "EventScheduler.h"
 
@@ -35,7 +34,7 @@ class MOS652X;
 /**
 * TOD implementation taken from Vice.
 */
-class Tod : private Event
+class Tod final : private Event
 {
 private:
 	enum
@@ -47,26 +46,26 @@ private:
 	};
 
 private:
-	// Event scheduler.
-	EventScheduler&	eventScheduler;
+	/// Event scheduler.
+	EventScheduler& eventScheduler;
 
-	// Reference to the MOS6526 which this Timer belongs to
-	MOS652X&	parent;
+	/// Pointer to the MOS6526 which this Timer belongs to.
+	MOS652X& parent;
 
-	const uint8_t&	cra;
-	const uint8_t&	crb;
+	const uint8_t& cra;
+	const uint8_t& crb;
 
-	event_clock_t	cycles;
-	event_clock_t	period = ~0;	// Dummy
+	event_clock_t cycles;
+	event_clock_t period;
 
-	unsigned int	todtickcounter = 0;
+	unsigned int todtickcounter;
 
-	bool	isLatched;
-	bool	isStopped;
+	bool isLatched;
+	bool isStopped;
 
-	std::array<uint8_t, 4>	clock;
-	std::array<uint8_t, 4>	latch;
-	std::array<uint8_t, 4>	alarm;
+	uint8_t clock[ 4 ];
+	uint8_t latch[ 4 ];
+	uint8_t alarm[ 4 ];
 
 private:
 	inline void checkAlarm ();
@@ -75,14 +74,15 @@ private:
 	void event () override;
 
 public:
-	Tod ( EventScheduler& scheduler, MOS652X& _parent, uint8_t regs[ 0x10 ] )
+	Tod ( EventScheduler& scheduler, MOS652X& parent, uint8_t regs[ 0x10 ] )
 		: Event ( "CIA Time of Day" )
 		, eventScheduler ( scheduler )
-		, parent ( _parent )
+		, parent ( parent )
 		, cra ( regs[ 0x0e ] )
 		, crb ( regs[ 0x0f ] )
-	{
-	}
+		, period ( ~0 )			// Dummy
+		, todtickcounter ( 0 )
+	{}
 
 	/**
 	* Reset TOD.

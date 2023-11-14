@@ -212,7 +212,7 @@ void psiddrv::install ( sidmemory& mem, uint8_t video ) const
 	// Set PAL/NTSC switch
 	mem.writeMemByte ( 0x02a6, video );
 
-	mem.installResetHook ( endian_getLittle16 ( reloc_driver ) );
+	mem.installResetHook ( endian_little16 ( reloc_driver ) );
 
 	// If not a basic tune then the psiddrv must install
 	// interrupt hooks and trap programs trying to restart basic
@@ -228,7 +228,7 @@ void psiddrv::install ( sidmemory& mem, uint8_t video ) const
 		mem.fillRam ( 0x0314, &reloc_driver[ 2 ], m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_R64 ? 2 : 6 );
 
 		// Experimental restart basic trap
-		const auto	addr = endian_getLittle16 ( &reloc_driver[ 8 ] );
+		const auto	addr = endian_little16 ( &reloc_driver[ 8 ] );
 		mem.installBasicTrap ( 0xffe1 );
 		mem.writeMemWord ( 0x0328, addr );
 	}

@@ -51,6 +51,14 @@ protected:
 		m_env.interruptIRQ ( state );
 	}
 
+	void portB () override
+	{
+		const uint8_t	pb = prb | ~ddrb;
+		// We should call adjustDataPort here
+		// but we're only interested in bit 4
+		m_env.lightpen ( pb & 0x10 );
+	}
+
 public:
 	c64cia1 ( c64env& env )
 		: MOS652X ( env.scheduler () )
@@ -60,7 +68,7 @@ public:
 
 	void poke ( uint16_t address, uint8_t value ) override
 	{
-		const auto  addr = endian_get16_lo8 ( address );
+		const	uint8_t addr = endian_16lo8 ( address );
 		write ( addr, value );
 
 		// Save the value written to Timer A
@@ -69,10 +77,7 @@ public:
 				last_ta = timerA.getTimer ();
 	}
 
-	uint8_t peek ( uint16_t address ) override
-	{
-		return read ( endian_get16_lo8 ( address ) );
-	}
+	uint8_t peek ( uint16_t address ) override		{		return read ( endian_16lo8 ( address ) );	}
 
 	void reset () override
 	{
@@ -90,7 +95,7 @@ public:
 *
 * Located at $DD00-$DDFF
 */
-class c64cia2 : public MOS652X, public Bank
+class c64cia2 final : public MOS652X, public Bank
 {
 private:
 	c64env&	m_env;
@@ -109,15 +114,8 @@ public:
 	{
 	}
 
-	void poke ( uint16_t address, uint8_t value ) override
-	{
-		write ( endian_get16_lo8 ( address ), value );
-	}
-
-	uint8_t peek ( uint16_t address ) override
-	{
-		return read ( endian_get16_lo8 ( address ) );
-	}
+	void poke ( uint16_t address, uint8_t value ) override	{	write ( endian_16lo8 ( address ), value );	}
+	uint8_t peek ( uint16_t address ) override				{	return read ( endian_16lo8 ( address ) );	}
 };
 
 }

@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <vector>
+#include <unordered_map>
 
 class SidTune;
 class SidInfo;

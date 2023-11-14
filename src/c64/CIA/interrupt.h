@@ -51,29 +51,29 @@ public:
 	};
 
 private:
-	// Pointer to the MOS6526 which this Interrupt belongs to.
+	/// Pointer to the MOS6526 which this Interrupt belongs to.
 	MOS652X& parent;
 
 protected:
-	// Event scheduler.
+	/// Event scheduler.
 	EventScheduler& eventScheduler;
 
-	// Clock when clear was called last
+	/// Clock when clear was called last
 	event_clock_t last_clear = 0;
 	event_clock_t last_set = 0;
 
-	// Interrupt control register
+	/// Interrupt control register
 	uint8_t icr = 0;
 
-	// Interrupt data register
+	/// Interrupt data register
 	uint8_t idr = 0;
 
 	uint8_t idrTemp;
 
-	// Have we already scheduled CIA->CPU interrupt transition?
+	/// Have we already scheduled CIA->CPU interrupt transition?
 	bool scheduled = false;
 
-	// is the irq pin asserted?
+	/// is the irq pin asserted?
 	bool asserted = false;
 
 private:
@@ -116,26 +116,26 @@ protected:
 	* @param scheduler event scheduler
 	* @param parent the CIA chip which this Interrupt belongs to
 	*/
-	InterruptSource ( EventScheduler& scheduler, MOS652X& parent ) :
-		parent ( parent ),
-		eventScheduler ( scheduler ),
-		interruptEvent ( "CIA Interrupt", *this, &InterruptSource::interrupt ),
-		updateIdrEvent ( "CIA update ICR", *this, &InterruptSource::updateIdr ),
-		setIrqEvent ( "CIA set IRQ", *this, &InterruptSource::setIrq ),
-		clearIrqEvent ( "CIA clear IRQ", *this, &InterruptSource::clearIrq )
+	InterruptSource ( EventScheduler& scheduler, MOS652X& _parent )
+		: parent ( _parent )
+		, eventScheduler ( scheduler )
+		, interruptEvent ( "CIA Interrupt", *this, &InterruptSource::interrupt )
+		, updateIdrEvent ( "CIA update ICR", *this, &InterruptSource::updateIdr )
+		, setIrqEvent ( "CIA set IRQ", *this, &InterruptSource::setIrq )
+		, clearIrqEvent ( "CIA clear IRQ", *this, &InterruptSource::clearIrq )
 	{
 	}
 
 	/**
-	* Schedules an IRQ asserting state transition for next cycle.
-	*/
+		* Schedules an IRQ asserting state transition for next cycle.
+		*/
 	void schedule ( int delay )
 	{
-		if ( scheduled )
-			return;
-
-		eventScheduler.schedule ( interruptEvent, delay, EVENT_CLOCK_PHI1 );
-		scheduled = true;
+		if ( ! scheduled )
+		{
+			eventScheduler.schedule ( interruptEvent, delay, EVENT_CLOCK_PHI1 );
+			scheduled = true;
+		}
 	}
 
 	void scheduleIrq ()
@@ -146,6 +146,8 @@ protected:
 	bool isTriggered ( uint8_t interruptMask );
 
 public:
+	virtual ~InterruptSource () {}
+
 	/**
 	* Trigger an interrupt.
 	*
@@ -182,12 +184,11 @@ public:
 	}
 
 	/**
-	* Set interrupt control mask bits.
-	*
-	* @param interruptMask control mask bits
-	*/
+		* Set interrupt control mask bits.
+		*
+		* @param interruptMask control mask bits
+		*/
 	void set ( uint8_t interruptMask );
 };
-//-----------------------------------------------------------------------------
 
 }

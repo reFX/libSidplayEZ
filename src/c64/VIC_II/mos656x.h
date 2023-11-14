@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+
+#include "lightpen.h"
 #include "sprites.h"
 #include "Event.h"
 #include "EventCallback.h"
@@ -34,22 +36,22 @@ namespace libsidplayfp
 
 /**
 * MOS 6567/6569/6572/6573 emulation.
-* Not cycle exact but good enough for SID playback
+* Not cycle exact but good enough for SID playback.
 */
 class MOS656X : private Event
 {
 public:
 	typedef enum
 	{
-		MOS6567R56A,	// OLD NTSC CHIP
-		MOS6567R8,      // NTSC-M
-		MOS6569,        // PAL-B
-		MOS6572,        // PAL-N
-		MOS6573,        // PAL-M
+		MOS6567R56A = 0,  ///< OLD NTSC CHIP
+		MOS6567R8,       ///< NTSC-M
+		MOS6569,         ///< PAL-B
+		MOS6572,         ///< PAL-N
+		MOS6573,         ///< PAL-M
 	} model_t;
 
 private:
-	typedef event_clock_t ( MOS656X::* ClockFunc ) ();
+	typedef event_clock_t ( MOS656X::* ClockFunc )( );
 
 	typedef struct
 	{
@@ -59,7 +61,7 @@ private:
 	} model_data_t;
 
 private:
-	model_data_t modelData[ 5 ];
+	static const model_data_t modelData[];
 
 	/// raster IRQ flag
 	static const int IRQ_RASTER = 1 << 0;
@@ -110,11 +112,17 @@ private:
 	/// Set when new frame starts.
 	bool vblanking;
 
+	/// Is CIA asserting lightpen?
+	bool lpAsserted;
+
 	/// internal IRQ flags
 	uint8_t irqFlags;
 
 	/// masks for the IRQ flags
 	uint8_t irqMask;
+
+	/// Light pen
+	Lightpen lp;
 
 	/// the 8 sprites data
 	Sprites sprites;
@@ -123,7 +131,10 @@ private:
 	uint8_t regs[ 0x40 ];
 
 	EventCallback<MOS656X> badLineStateChangeEvent;
+
 	EventCallback<MOS656X> rasterYIRQEdgeDetectorEvent;
+
+	EventCallback<MOS656X> lightpenTriggerEvent;
 
 private:
 	event_clock_t clockPAL ();
@@ -138,28 +149,27 @@ private:
 	/**
 	* AEC state was updated.
 	*/
-	void badLineStateChange () { setBA ( ! isBadLine ); }
+	void badLineStateChange () { setBA ( !isBadLine ); }
 
 	/**
 	* RasterY IRQ edge detector.
 	*/
 	void rasterYIRQEdgeDetector ()
 	{
-		const auto	oldRasterYIRQCondition = rasterYIRQCondition;
+		const bool oldRasterYIRQCondition = rasterYIRQCondition;
 		rasterYIRQCondition = rasterY == readRasterLineIRQ ();
-		if ( ! oldRasterYIRQCondition && rasterYIRQCondition )
+		if ( !oldRasterYIRQCondition && rasterYIRQCondition )
 			activateIRQFlag ( IRQ_RASTER );
 	}
 
-/*	void lightpenTrigger ()
+	void lightpenTrigger ()
 	{
- 		// Synchronize simulation
- 		sync ();
- 
- 		if ( lp.trigger ( lineCycle, rasterY ) )
- 			activateIRQFlag ( IRQ_LIGHTPEN );
+		// Synchronise simulation
+		sync ();
+
+		if ( lp.trigger ( lineCycle, rasterY ) )
+			activateIRQFlag ( IRQ_LIGHTPEN );
 	}
-*/
 
 	/**
 	* Set an IRQ flag and trigger an IRQ if the corresponding IRQ mask is set.
@@ -176,10 +186,7 @@ private:
 	*
 	* @return raster line when to trigger an IRQ
 	*/
-	unsigned int readRasterLineIRQ () const
-	{
-		return regs[ 0x12 ] + ( ( regs[ 0x11 ] & 0x80 ) << 1 );
-	}
+	unsigned int readRasterLineIRQ () const	{	return regs[ 0x12 ] + ( ( regs[ 0x11 ] & 0x80 ) << 1 );	}
 
 	/**
 	* Read the DEN flag which tells whether the display is enabled
@@ -199,10 +206,7 @@ private:
 	/**
 	* Get previous value of Y raster
 	*/
-	inline unsigned int oldRasterY () const
-	{
-		return ( rasterY > 0 ? rasterY : maxRasters ) - 1;
-	}
+	inline unsigned int oldRasterY () const		{	return ( rasterY > 0 ? rasterY : maxRasters ) - 1;	}
 
 	inline void sync ()
 	{
@@ -220,12 +224,8 @@ private:
 			vblanking = true;
 
 		// Check DEN bit on first cycle of the line following the first DMA line
-		if (	rasterY == FIRST_DMA_LINE
-			&&	! areBadLinesEnabled
-			&&	readDEN () )
-		{
+		if ( rasterY == FIRST_DMA_LINE && ! areBadLinesEnabled && readDEN () )
 			areBadLinesEnabled = true;
-		}
 
 		// Disallow bad lines after the last possible one has passed
 		if ( rasterY == LAST_DMA_LINE )
@@ -255,10 +255,10 @@ private:
 			vblanking = false;
 			rasterY = 0;
 			rasterYIRQEdgeDetector ();
+			lp.untrigger ();
 
-//			lp.untrigger ();
-// 			if ( lpAsserted && lp.retrigger () )
-// 				activateIRQFlag ( IRQ_LIGHTPEN );
+			if ( lpAsserted && lp.retrigger () )
+				activateIRQFlag ( IRQ_LIGHTPEN );
 		}
 	}
 
@@ -326,6 +326,16 @@ public:
 	void chip ( model_t model );
 
 	/**
+	* Trigger the lightpen. Sets the lightpen usage flag.
+	*/
+	void triggerLightpen ();
+
+	/**
+	* Clears the lightpen usage flag.
+	*/
+	void clearLightpen ();
+
+	/**
 	* Reset VIC II.
 	*/
 	void reset ();
@@ -341,12 +351,12 @@ public:
 template<>
 inline void MOS656X::startDma<0> ()
 {
-	setBA ( !sprites.isDma ( 0x01 ) );
+	setBA ( ! sprites.isDma ( 0x01 ) );
 }
 
 /**
-	* End DMA for sprite 7.
-	*/
+* End DMA for sprite 7.
+*/
 template<>
 inline void MOS656X::endDma<7> ()
 {

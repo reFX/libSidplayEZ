@@ -24,34 +24,36 @@
 #include "tod.h"
 
 #include <cstring>
+
 #include "mos652x.h"
 
 namespace libsidplayfp
 {
-
-//-----------------------------------------------------------------------------
 
 void Tod::reset ()
 {
 	cycles = 0;
 	todtickcounter = 0;
 
-	latch = clock = { 0, 0, 0, 1 };
-	alarm = {};
+	memset ( clock, 0, sizeof ( clock ) );
+	clock[ HOURS ] = 1; // the most common value
+	memcpy ( latch, clock, sizeof ( latch ) );
+	memset ( alarm, 0, sizeof ( alarm ) );
 
 	isLatched = false;
 	isStopped = true;
 
 	eventScheduler.schedule ( *this, 0, EVENT_CLOCK_PHI1 );
 }
-//-----------------------------------------------------------------------------
 
 uint8_t Tod::read ( uint8_t reg )
 {
-	// TOD clock is latched by reading Hours, and released upon reading Tenths of Seconds. The counter itself keeps ticking all the time
-	// Also note that this latching is different from the input one
+	// TOD clock is latched by reading Hours, and released
+	// upon reading Tenths of Seconds. The counter itself
+	// keeps ticking all the time.
+	// Also note that this latching is different from the input one.
 	if ( ! isLatched )
-		latch = clock;
+		memcpy ( latch, clock, sizeof ( latch ) );
 
 	if ( reg == TENTHS )
 		isLatched = false;
@@ -60,7 +62,6 @@ uint8_t Tod::read ( uint8_t reg )
 
 	return latch[ reg ];
 }
-//-----------------------------------------------------------------------------
 
 void Tod::write ( uint8_t reg, uint8_t data )
 {
@@ -69,12 +70,10 @@ void Tod::write ( uint8_t reg, uint8_t data )
 		case TENTHS: // Time Of Day clock 1/10 s
 			data &= 0x0f;
 			break;
-
 		case SECONDS: // Time Of Day clock sec
 		case MINUTES: // Time Of Day clock min
 			data &= 0x7f;
 			break;
-
 		case HOURS:  // Time Of Day clock hour
 			data &= 0x9f; // force bits 6-5 = 0
 			break;
@@ -112,7 +111,7 @@ void Tod::write ( uint8_t reg, uint8_t data )
 		if ( clock[ reg ] != data )
 		{
 			// Flip AM/PM on hour 12 on the rising edge of the comparator
-			if ( reg == HOURS && ( data & 0x1f ) == 0x12 )
+			if ( ( reg == HOURS ) && ( ( data & 0x1f ) == 0x12 ) )
 				data ^= 0x80;
 
 			changed = true;
@@ -124,7 +123,6 @@ void Tod::write ( uint8_t reg, uint8_t data )
 	if ( changed )
 		checkAlarm ();
 }
-//-----------------------------------------------------------------------------
 
 void Tod::event ()
 {
@@ -137,17 +135,17 @@ void Tod::event ()
 	if ( ! isStopped )
 	{
 		/*
-		* The divider which divides the 50 or 60 Hz power supply ticks into
-		* 10 Hz uses a 3-bit ring counter, which goes 000, 001, 011, 111, 110,
-		* 100.
-		* For 50 Hz: matches at 110 (like "4")
-		* For 60 Hz: matches at 100 (like "5")
-		* (the middle bit of the match value is CRA7)
-		* After a match there is a 1 tick delay (until the next power supply
-		* tick) and then the 1/10 seconds counter increases, and the ring
-		* resets to 000.
-		*/
-		// todtickcounter bits are mirrored to save an ANDing
+			* The divider which divides the 50 or 60 Hz power supply ticks into
+			* 10 Hz uses a 3-bit ring counter, which goes 000, 001, 011, 111, 110,
+			* 100.
+			* For 50 Hz: matches at 110 (like "4")
+			* For 60 Hz: matches at 100 (like "5")
+			* (the middle bit of the match value is CRA7)
+			* After a match there is a 1 tick delay (until the next power supply
+			* tick) and then the 1/10 seconds counter increases, and the ring
+			* resets to 000.
+			*/
+			// todtickcounter bits are mirrored to save an ANDing
 		if ( todtickcounter == ( 0x1 | ( ( cra & 0x80 ) >> 6 ) ) )
 		{
 			// reset the counter and update the timer
@@ -161,28 +159,20 @@ void Tod::event ()
 		}
 	}
 }
-//-----------------------------------------------------------------------------
 
-inline void Tod::checkAlarm ()
-{
-	if ( alarm == clock )
-		parent.todInterrupt ();
-}
-//-----------------------------------------------------------------------------
-
-inline void Tod::updateCounters ()
+void Tod::updateCounters ()
 {
 	// advance the counters.
 	// - individual counters are 4 bit
 	//   except for sh and mh which are 3 bits
-	auto	ts = clock[ TENTHS ] & 0x0f;
-	auto	sl = clock[ SECONDS ] & 0x0f;
-	auto	sh = ( clock[ SECONDS ] >> 4 ) & 0x07;
-	auto	ml = clock[ MINUTES ] & 0x0f;
-	auto	mh = ( clock[ MINUTES ] >> 4 ) & 0x07;
-	auto	hl = clock[ HOURS ] & 0x0f;
-	auto	hh = ( clock[ HOURS ] >> 4 ) & 0x01;
-	auto	pm = clock[ HOURS ] & 0x80;
+	uint8_t	ts = clock[ TENTHS ] & 0x0f;
+	uint8_t	sl = clock[ SECONDS ] & 0x0f;
+	uint8_t	sh = ( clock[ SECONDS ] >> 4 ) & 0x07;
+	uint8_t	ml = clock[ MINUTES ] & 0x0f;
+	uint8_t	mh = ( clock[ MINUTES ] >> 4 ) & 0x07;
+	uint8_t	hl = clock[ HOURS ] & 0x0f;
+	uint8_t	hh = ( clock[ HOURS ] >> 4 ) & 0x01;
+	uint8_t	pm = clock[ HOURS ] & 0x80;
 
 	// tenth seconds (0-9)
 	ts = ( ts + 1 ) & 0x0f;
@@ -210,8 +200,8 @@ inline void Tod::updateCounters ()
 						// hours (1-12)
 						// flip from 09:59:59 to 10:00:00
 						// or from 12:59:59 to 01:00:00
-						if (	( hl == 2 && hh == 1 )
-							||	( hl == 9 && hh == 0 ) )
+						if ( ( ( hl == 2 ) && ( hh == 1 ) )
+								|| ( ( hl == 9 ) && ( hh == 0 ) ) )
 						{
 							hl = hh;
 							hh ^= 1;
@@ -219,10 +209,11 @@ inline void Tod::updateCounters ()
 						else
 						{
 							hl = ( hl + 1 ) & 0x0f;
-
 							// toggle the am/pm flag when reaching 12
-							if ( hl == 2 && hh == 1 )
+							if ( ( hl == 2 ) && ( hh == 1 ) )
+							{
 								pm ^= 0x80;
+							}
 						}
 					}
 				}
@@ -230,13 +221,18 @@ inline void Tod::updateCounters ()
 		}
 	}
 
-	clock[ TENTHS ]		= uint8_t ( ts );
-	clock[ SECONDS ]	= uint8_t ( sl | ( sh << 4 ) );
-	clock[ MINUTES ]	= uint8_t ( ml | ( mh << 4 ) );
-	clock[ HOURS ]		= uint8_t ( hl | ( hh << 4 ) | pm );
+	clock[ TENTHS ] = ts;
+	clock[ SECONDS ] = uint8_t ( sl | ( sh << 4 ) );
+	clock[ MINUTES ] = uint8_t ( ml | ( mh << 4 ) );
+	clock[ HOURS ] = uint8_t ( hl | ( hh << 4 ) | pm );
 
 	checkAlarm ();
 }
-//-----------------------------------------------------------------------------
+
+void Tod::checkAlarm ()
+{
+	if ( ! memcmp ( alarm, clock, sizeof ( alarm ) ) )
+		parent.todInterrupt ();
+}
 
 }

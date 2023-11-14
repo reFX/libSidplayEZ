@@ -127,7 +127,7 @@ SidTuneBase* PSID::load ( buffer_t& dataBuf )
 	if ( dataBuf.size () < 4 )
 		return nullptr;
 
-	const auto	magic = endian_getBig32 ( &dataBuf[ 0 ] );
+	const auto	magic = endian_big32 ( &dataBuf[ 0 ] );
 	if ( magic != PSID_ID && magic != RSID_ID )
 		return nullptr;
 
@@ -150,15 +150,15 @@ void PSID::readHeader ( const buffer_t& dataBuf, psidHeader& hdr )
 		throw loadError ( ERR_TRUNCATED );
 
 	// Read v1 fields
-	hdr.id = endian_getBig32 ( &dataBuf[ 0 ] );
-	hdr.version = endian_getBig16 ( &dataBuf[ 4 ] );
-	hdr.data = endian_getBig16 ( &dataBuf[ 6 ] );
-	hdr.load = endian_getBig16 ( &dataBuf[ 8 ] );
-	hdr.init = endian_getBig16 ( &dataBuf[ 10 ] );
-	hdr.play = endian_getBig16 ( &dataBuf[ 12 ] );
-	hdr.songs = endian_getBig16 ( &dataBuf[ 14 ] );
-	hdr.start = endian_getBig16 ( &dataBuf[ 16 ] );
-	hdr.speed = endian_getBig32 ( &dataBuf[ 18 ] );
+	hdr.id = endian_big32 ( &dataBuf[ 0 ] );
+	hdr.version = endian_big16 ( &dataBuf[ 4 ] );
+	hdr.data = endian_big16 ( &dataBuf[ 6 ] );
+	hdr.load = endian_big16 ( &dataBuf[ 8 ] );
+	hdr.init = endian_big16 ( &dataBuf[ 10 ] );
+	hdr.play = endian_big16 ( &dataBuf[ 12 ] );
+	hdr.songs = endian_big16 ( &dataBuf[ 14 ] );
+	hdr.start = endian_big16 ( &dataBuf[ 16 ] );
+	hdr.speed = endian_big32 ( &dataBuf[ 18 ] );
 	memcpy ( hdr.name, &dataBuf[ 22 ], PSID_MAXSTRLEN );
 	memcpy ( hdr.author, &dataBuf[ 54 ], PSID_MAXSTRLEN );
 	memcpy ( hdr.released, &dataBuf[ 86 ], PSID_MAXSTRLEN );
@@ -169,7 +169,7 @@ void PSID::readHeader ( const buffer_t& dataBuf, psidHeader& hdr )
 			throw loadError ( ERR_TRUNCATED );
 
 		// Read v2/3/4 fields
-		hdr.flags = endian_getBig16 ( &dataBuf[ 118 ] );
+		hdr.flags = endian_big16 ( &dataBuf[ 118 ] );
 		hdr.relocStartPage = dataBuf[ 120 ];
 		hdr.relocPages = dataBuf[ 121 ];
 		hdr.sidChipBase2 = dataBuf[ 122 ];
@@ -359,15 +359,15 @@ const char* PSID::createMD5 ( char* md5 )
 	uint8_t tmp[ 2 ];
 
 	// Include INIT address
-	endian_setLittle16 ( tmp, info.m_initAddr );
+	endian_little16 ( tmp, info.m_initAddr );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	// Include PLAY address
-	endian_setLittle16 ( tmp, info.m_playAddr );
+	endian_little16 ( tmp, info.m_playAddr );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	// Include number of songs
-	endian_setLittle16 ( tmp, uint16_t ( info.m_songs ) );
+	endian_little16 ( tmp, uint16_t ( info.m_songs ) );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	{

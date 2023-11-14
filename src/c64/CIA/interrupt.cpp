@@ -37,7 +37,6 @@ void InterruptSource::interrupt ()
 
 	scheduled = false;
 }
-//-----------------------------------------------------------------------------
 
 void InterruptSource::updateIdr ()
 {
@@ -49,7 +48,6 @@ void InterruptSource::updateIdr ()
 		idrTemp = 0;
 	}
 }
-//-----------------------------------------------------------------------------
 
 void InterruptSource::setIrq ()
 {
@@ -62,7 +60,6 @@ void InterruptSource::setIrq ()
 		}
 	}
 }
-//-----------------------------------------------------------------------------
 
 void InterruptSource::clearIrq ()
 {
@@ -72,7 +69,6 @@ void InterruptSource::clearIrq ()
 		asserted = false;
 	}
 }
-//-----------------------------------------------------------------------------
 
 bool InterruptSource::isTriggered ( uint8_t interruptMask )
 {
@@ -82,7 +78,7 @@ bool InterruptSource::isTriggered ( uint8_t interruptMask )
 	if ( interruptMasked ( interruptMask ) )
 		return true;
 
-	if ( interruptMask == INTERRUPT_NONE && write0 () )
+	if ( ( interruptMask == INTERRUPT_NONE ) && write0 () )
 	{
 		// cancel pending interrupts
 		if ( scheduled )
@@ -93,21 +89,23 @@ bool InterruptSource::isTriggered ( uint8_t interruptMask )
 	}
 	return false;
 }
-//-----------------------------------------------------------------------------
 
 void InterruptSource::set ( uint8_t interruptMask )
 {
 	if ( interruptMask & INTERRUPT_REQUEST )
+	{
 		icr |= interruptMask & ~INTERRUPT_REQUEST;
+	}
 	else
+	{
 		icr &= ~interruptMask;
+	}
 
 	if ( ! ack0 () )
 		trigger ( INTERRUPT_NONE );
 
 	last_set = eventScheduler.getTime ( EVENT_CLOCK_PHI2 );
 }
-//-----------------------------------------------------------------------------
 
 uint8_t InterruptSource::clear ()
 {
@@ -123,6 +121,5 @@ uint8_t InterruptSource::clear ()
 
 	return idr;
 }
-//-----------------------------------------------------------------------------
 
 }

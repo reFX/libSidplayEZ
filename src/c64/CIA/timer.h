@@ -71,23 +71,23 @@ private:
 	*/
 	event_clock_t ciaEventPauseTime;
 
-	// PB6/PB7 Flipflop to signal underflows.
+	/// PB6/PB7 Flipflop to signal underflows.
 	bool pbToggle = false;
 
-	// Current timer value.
+	/// Current timer value.
 	uint16_t timer = 0;
 
-	// Timer start value (Latch).
+	/// Timer start value (Latch).
 	uint16_t latch = 0;
 
-	// Copy of regs[CRA/B]
+	/// Copy of regs[CRA/B]
 	uint8_t lastControlValue = 0;
 
 protected:
-	// Pointer to the MOS6526 which this Timer belongs to.
+	/// Pointer to the MOS6526 which this Timer belongs to.
 	MOS652X& parent;
 
-	// CRA/CRB control register / state.
+	/// CRA/CRB control register / state.
 	int32_t state = 0;
 
 private:
@@ -117,6 +117,11 @@ private:
 	* Signal timer underflow.
 	*/
 	virtual void underFlow () = 0;
+
+	/**
+	* Handle the serial port.
+	*/
+	virtual void serialPort () {}
 
 protected:
 	/**
@@ -207,30 +212,29 @@ public:
 	*/
 	inline bool getPb ( uint8_t reg ) const { return ( reg & 0x04 ) ? pbToggle : ( state & CIAT_OUT ); }
 };
-//-----------------------------------------------------------------------------
 
-inline void Timer::reschedule ()
+void Timer::reschedule ()
 {
-	// There are only two subcases to consider
+	// There are only two subcases to consider.
 	//
 	// - are we counting, and if so, are we going to continue counting?
 	// - have we stopped, and are there no conditions to force a new beginning?
 	//
 	// Additionally, there are numerous flags that are present only in passing manner,
 	// but which we need to let cycle through the CIA state machine.
-	const auto	unwanted = CIAT_OUT | CIAT_CR_FLOAD | CIAT_LOAD1 | CIAT_LOAD;
-	if ( state & unwanted )
+	const int32_t unwanted = CIAT_OUT | CIAT_CR_FLOAD | CIAT_LOAD1 | CIAT_LOAD;
+	if ( ( state & unwanted ) != 0 )
 	{
 		eventScheduler.schedule ( *this, 1 );
 		return;
 	}
 
-	if ( state & CIAT_COUNT3 )
+	if ( ( state & CIAT_COUNT3 ) != 0 )
 	{
 		// Test the conditions that keep COUNT2 and thus COUNT3 alive, and also
 		// ensure that all of them are set indicating steady state operation.
 
-		const auto	wanted = CIAT_CR_START | CIAT_PHI2IN | CIAT_COUNT2 | CIAT_COUNT3;
+		const int32_t wanted = CIAT_CR_START | CIAT_PHI2IN | CIAT_COUNT2 | CIAT_COUNT3;
 		if ( timer > 2 && ( state & wanted ) == wanted )
 		{
 			// we executed this cycle, therefore the pauseTime is +1. If we are called
@@ -249,8 +253,8 @@ inline void Timer::reschedule ()
 	{
 		// Test conditions that result in CIA activity in next clocks.
 		// If none, stop.
-		const auto	unwanted1 = CIAT_CR_START | CIAT_PHI2IN;
-		const auto	unwanted2 = CIAT_CR_START | CIAT_STEP;
+		const int32_t unwanted1 = CIAT_CR_START | CIAT_PHI2IN;
+		const int32_t unwanted2 = CIAT_CR_START | CIAT_STEP;
 
 		if (	( state & unwanted1 ) == unwanted1
 			||	( state & unwanted2 ) == unwanted2 )
@@ -262,6 +266,5 @@ inline void Timer::reschedule ()
 		ciaEventPauseTime = -1;
 	}
 }
-//-----------------------------------------------------------------------------
 
 }

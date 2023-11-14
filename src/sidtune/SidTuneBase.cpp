@@ -294,7 +294,7 @@ void SidTuneBase::acceptSidTune ( const char* dataFileName, const char* infoFile
 		// We only detect an offset of two. Some position independent
 		// sidtunes contain a load address of 0xE000, but are loaded
 		// to 0x0FFE and call player at 0x1000.
-		info.m_fixLoad = endian_getLittle16 ( &buf[ fileOffset ] ) == ( info.m_loadAddr + 2 );
+		info.m_fixLoad = endian_little16 ( &buf[ fileOffset ] ) == ( info.m_loadAddr + 2 );
 	}
 
 	// Check the size of the data.
@@ -416,7 +416,7 @@ void SidTuneBase::resolveAddrs ( const uint8_t* c64data )
 		if ( info.m_c64dataLen < 2 )
 			throw loadError ( ERR_CORRUPT );
 
-		info.m_loadAddr = endian_getLittle16 ( c64data );
+		info.m_loadAddr = endian_little16 ( c64data );
 		fileOffset += 2;
 		info.m_c64dataLen -= 2;
 	}

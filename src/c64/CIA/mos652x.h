@@ -29,6 +29,7 @@
 #include "interrupt.h"
 #include "timer.h"
 #include "tod.h"
+#include "SerialPort.h"
 #include "EventScheduler.h"
 
 class EventContext;
@@ -52,16 +53,14 @@ private:
 	*/
 	void underFlow () override;
 
+	void serialPort () override;
+
 public:
 	/**
 	* Create timer A.
 	*/
-	TimerA ( EventScheduler& scheduler, MOS652X& _parent )
-		: Timer ( "CIA Timer A", scheduler, _parent )
-	{
-	}
+	TimerA ( EventScheduler& scheduler, MOS652X& _parent ) : Timer ( "CIA Timer A", scheduler, _parent ) {}
 };
-//-----------------------------------------------------------------------------
 
 /**
 * This is the timer B of this CIA.
@@ -78,10 +77,7 @@ public:
 	/**
 	* Create timer B.
 	*/
-	TimerB ( EventScheduler& scheduler, MOS652X& _parent )
-		: Timer ( "CIA Timer B", scheduler, _parent )
-	{
-	}
+	TimerB ( EventScheduler& scheduler, MOS652X& _parent ) : Timer ( "CIA Timer B", scheduler, _parent ) {}
 
 	/**
 	* Receive an underflow from Timer A.
@@ -101,7 +97,6 @@ public:
 	*/
 	bool started () const { return ( state & CIAT_CR_START ) != 0; }
 };
-//-----------------------------------------------------------------------------
 
 /**
 * InterruptSource that acts like new CIA
@@ -119,14 +114,10 @@ protected:
 	}
 
 public:
-	InterruptSource8521 ( EventScheduler& scheduler, MOS652X& parent )
-		: InterruptSource ( scheduler, parent )
-	{
-	}
+	InterruptSource8521 ( EventScheduler& scheduler, MOS652X& parent ) : InterruptSource ( scheduler, parent )	{}
 
 	void trigger ( uint8_t interruptMask ) override;
 };
-//-----------------------------------------------------------------------------
 
 /**
 * InterruptSource that acts like old CIA
@@ -137,24 +128,22 @@ protected:
 	void triggerInterrupt () override { idr |= INTERRUPT_REQUEST; }
 
 public:
-	InterruptSource6526 ( EventScheduler& scheduler, MOS652X& parent )
-		: InterruptSource ( scheduler, parent )
-	{
-	}
+	InterruptSource6526 ( EventScheduler& scheduler, MOS652X& parent ) : InterruptSource ( scheduler, parent )	{}
 
 	void trigger ( uint8_t interruptMask ) override;
 
 	uint8_t clear () override;
 };
-//-----------------------------------------------------------------------------
 
 /**
 * This class is heavily based on the ciacore/ciatimer source code from VICE.
 * The CIA state machine is lifted as-is. Big thanks to VICE project!
+* The Serial Port emulation is based on Denise emu code.
 */
 class MOS652X
 {
 	friend class InterruptSource;
+	friend class SerialPort;
 	friend class TimerA;
 	friend class TimerB;
 	friend class Tod;
@@ -162,30 +151,40 @@ class MOS652X
 public:
 	typedef enum
 	{
-		MOS6526,		// Old CIA model, interrupts are delayed by 1 clock
-		MOS8521,        // New CIA model
+		MOS6526 = 0,     ///< Old CIA model, interrupts are delayed by 1 clock
+		MOS8521,        ///< New CIA model
+		MOS6526W4485,   ///< A batch of old CIA model with unique serial port behavior
 	} model_t;
 
 private:
-	InterruptSource6526		interruptSource6526;
-	InterruptSource8521		interruptSource8521;
+	static const char* credit;
 
 protected:
-	// Event context.
-	EventScheduler&	eventScheduler;
+	/// Event context.
+	EventScheduler& eventScheduler;
+
+	/// Ports
+	//@{
+	uint8_t& pra, & prb, & ddra, & ddrb;
+	//@}
 
 	/// These are all CIA registers.
-	uint8_t	regs[ 0x10 ];
+	uint8_t regs[ 0x10 ];
 
 	/// Timers A and B.
-	TimerA	timerA;
-	TimerB	timerB;
+	//@{
+	TimerA timerA;
+	TimerB timerB;
+	//@}
 
 	/// Interrupt Source
-	InterruptSource*	interruptSource;
+	std::unique_ptr<InterruptSource> interruptSource;
 
 	/// TOD
 	Tod tod;
+
+	/// Serial Data Registers
+	SerialPort serialPort;
 
 	/// Events
 	//@{
@@ -225,6 +224,11 @@ private:
 	/** Timer B underflow. */
 	void underflowB ();
 
+	/**
+	* Handle the serial port.
+	*/
+	void handleSerialPort ();
+
 protected:
 	/**
 	* Create a new CIA.
@@ -241,6 +245,8 @@ protected:
 	*/
 	virtual void interrupt ( bool state ) = 0;
 
+	virtual void portA () {}
+	virtual void portB () {}
 
 	/**
 	* Timers can appear on the port.
@@ -286,7 +292,7 @@ public:
 	static const char* credits ();
 
 	/**
-	* Set day-of-time event occurrence of rate.
+	* Set day-of-time event occurence of rate.
 	*
 	* @param clock
 	*/

@@ -52,9 +52,10 @@ public:
 	virtual void interruptRST () = 0;
 
 	virtual void setBA ( bool state ) = 0;
+	virtual void lightpen ( bool state ) = 0;
 
 protected:
-	~c64env () {}
+	~c64env () = default;
 };
 
 }

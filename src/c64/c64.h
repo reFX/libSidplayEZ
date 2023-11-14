@@ -66,19 +66,22 @@ class c64 final : private c64env
 public:
 	typedef enum
 	{
-		PAL_B,		// PAL C64
-		NTSC_M,		// NTSC C64
-		OLD_NTSC_M,	// Old NTSC C64
-		PAL_N,		// C64 Drean
-		PAL_M,		// C64 Brasil
+		PAL_B = 0     ///< PAL C64
+		, NTSC_M       ///< NTSC C64
+		, OLD_NTSC_M   ///< Old NTSC C64
+		, PAL_N        ///< C64 Drean
+		, PAL_M        ///< C64 Brasil
 	} model_t;
 
 	typedef enum
 	{
-		OLD,		// Old CIA
-		NEW,        // New CIA
-		OLD_4485,	// Old CIA, special batch labeled 4485
+		OLD = 0     ///< Old CIA
+		, NEW        ///< New CIA
+		, OLD_4485   ///< Old CIA, special batch labeled 4485
 	} cia_model_t;
+
+private:
+	typedef std::unordered_map<int, ExtraSidBank*> sidBankMap_t;
 
 private:
 	/// System clock frequency
@@ -112,7 +115,7 @@ private:
 	SidBank sidBank;
 
 	/// Extra SIDs
-	std::unordered_map<int, ExtraSidBank*>    extraSidBanks;
+	sidBankMap_t extraSidBanks;
 
 	/// I/O Area #1 and #2
 	DisconnectedBusBank disconnectedBusBank;
@@ -128,50 +131,55 @@ private:
 
 private:
 	/**
-	* Access memory as seen by CPU.
-	*
-	* @param addr the address where to read from
-	* @return value at address
-	*/
+		* Access memory as seen by CPU.
+		*
+		* @param addr the address where to read from
+		* @return value at address
+		*/
 	uint8_t cpuRead ( uint16_t addr ) override { return mmu.cpuRead ( addr ); }
 
 	/**
-	* Access memory as seen by CPU.
-	*
-	* @param addr the address where to write to
-	* @param data the value to write
-	*/
+		* Access memory as seen by CPU.
+		*
+		* @param addr the address where to write to
+		* @param data the value to write
+		*/
 	void cpuWrite ( uint16_t addr, uint8_t data ) override { mmu.cpuWrite ( addr, data ); }
 
 	/**
-	* IRQ trigger signal.
-	*
-	* Calls permitted any time, but normally originated by chips at PHI1.
-	*
-	* @param state
-	*/
+		* IRQ trigger signal.
+		*
+		* Calls permitted any time, but normally originated by chips at PHI1.
+		*
+		* @param state
+		*/
 	inline void interruptIRQ ( bool state ) override;
 
 	/**
-	* NMI trigger signal.
-	*
-	* Calls permitted any time, but normally originated by chips at PHI1.
-	*/
+		* NMI trigger signal.
+		*
+		* Calls permitted any time, but normally originated by chips at PHI1.
+		*/
 	inline void interruptNMI () override { cpu.triggerNMI (); }
 
 	/**
-	* Reset signal.
-	*/
+		* Reset signal.
+		*/
 	inline void interruptRST () override { cpu.triggerRST (); }
 
 	/**
-	* BA signal.
-	*
-	* Calls permitted during PHI1.
-	*
-	* @param state
-	*/
+		* BA signal.
+		*
+		* Calls permitted during PHI1.
+		*
+		* @param state
+		*/
 	inline void setBA ( bool state ) override;
+
+	/**
+		* @param state fire pressed, active low
+		*/
+	inline void lightpen ( bool state ) override;
 
 	void resetIoBank ();
 
@@ -180,15 +188,15 @@ public:
 	~c64 ();
 
 	/**
-	* Get C64's event scheduler
-	*
-	* @return the scheduler
-	*/
+		* Get C64's event scheduler
+		*
+		* @return the scheduler
+		*/
 	EventScheduler* getEventScheduler () { return &eventScheduler; }
 
 	uint32_t getTimeMs () const
 	{
-		return uint32_t ( ( eventScheduler.getTime ( EVENT_CLOCK_PHI1 ) * 1000 ) / cpuFrequency );
+		return static_cast<uint32_t>( ( eventScheduler.getTime ( EVENT_CLOCK_PHI1 ) * 1000 ) / cpuFrequency );
 	}
 
 	/**
@@ -284,6 +292,15 @@ void c64::setBA ( bool state )
 
 	// Signal changes in BA to interested parties
 	cpu.setRDY ( state );
+}
+//-----------------------------------------------------------------------------
+
+void c64::lightpen ( bool state )
+{
+	if ( ! state )
+		vic.triggerLightpen ();
+	else
+		vic.clearLightpen ();
 }
 //-----------------------------------------------------------------------------
 

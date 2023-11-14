@@ -41,32 +41,46 @@ class Bank;
 class IOBank;
 
 /**
-* The C64 MMU chip.
-*/
+	* The C64 MMU chip.
+	*/
 class MMU final : public PLA, public sidmemory
 {
 private:
 	EventScheduler& eventScheduler;
 
-	// CPU port signals
-	bool    loram = false;
-	bool    hiram = false;
-	bool    charen = false;
+	/// CPU port signals
+	bool	loram = false;
+	bool	hiram = false;
+	bool	charen = false;
 
-	Bank*	cpuReadMap[ 16 ];		// CPU read memory mapping in 4k chunks
-	Bank*	cpuWriteMap[ 16 ];		// CPU write memory mapping in 4k chunks
-	IOBank*	ioBank;					// IO region handler
+	/// CPU read memory mapping in 4k chunks
+	Bank* cpuReadMap[ 16 ];
 
-	KernalRomBank		kernalRomBank;		// Kernal ROM
-	BasicRomBank		basicRomBank;		// BASIC ROM
-	CharacterRomBank	characterRomBank;	// Character ROM
+	/// CPU write memory mapping in 4k chunks
+	Bank* cpuWriteMap[ 16 ];
 
-	SystemRAMBank	ramBank;				// RAM
-	ZeroRAMBank		zeroRAMBank;			// RAM bank 0
+	/// IO region handler
+	IOBank* ioBank;
 
-	// random seed
+	/// Kernal ROM
+	KernalRomBank kernalRomBank;
+
+	/// BASIC ROM
+	BasicRomBank basicRomBank;
+
+	/// Character ROM
+	CharacterRomBank characterRomBank;
+
+	/// RAM
+	SystemRAMBank ramBank;
+
+	/// RAM bank 0
+	ZeroRAMBank zeroRAMBank;
+
+	/// random seed
 	mutable unsigned int seed = 3686734;
 
+private:
 	void setCpuPort ( uint8_t state ) override;
 	uint8_t getLastReadByte () const override;
 	event_clock_t getPhi2Time () const override { return eventScheduler.getTime ( EVENT_CLOCK_PHI2 ); }
@@ -85,33 +99,41 @@ public:
 
 	// RAM access methods
 	uint8_t readMemByte ( uint16_t addr ) override { return ramBank.peek ( addr ); }
-	uint16_t readMemWord ( uint16_t addr ) override { return endian_getLittle16 ( ramBank.ram + addr ); }
+	uint16_t readMemWord ( uint16_t addr ) override { return endian_little16 ( ramBank.ram + addr ); }
 
 	void writeMemByte ( uint16_t addr, uint8_t value ) override { ramBank.poke ( addr, value ); }
-	void writeMemWord ( uint16_t addr, uint16_t value ) override { endian_setLittle16 ( ramBank.ram + addr, value ); }
+	void writeMemWord ( uint16_t addr, uint16_t value ) override { endian_little16 ( ramBank.ram + addr, value ); }
 
-	void fillRam ( uint16_t start, uint8_t value, unsigned int size ) override	{	std::fill_n ( ramBank.ram + start, size, value );	}
-	void fillRam ( uint16_t start, const uint8_t* source, unsigned int size ) override	{	std::copy_n ( source, size, ramBank.ram + start );	}
+	void fillRam ( uint16_t start, uint8_t value, unsigned int size ) override
+	{
+		memset ( ramBank.ram + start, value, size );
+	}
+	void fillRam ( uint16_t start, const uint8_t* source, unsigned int size ) override
+	{
+		memcpy ( ramBank.ram + start, source, size );
+	}
 
 	// SID specific hacks
-	void installResetHook ( uint16_t addr ) override	{	kernalRomBank.installResetHook ( addr );	}
-	void installBasicTrap ( uint16_t addr ) override	{	basicRomBank.installTrap ( addr );			}
-	void setBasicSubtune ( uint8_t tune ) override		{	basicRomBank.setSubtune ( tune );			}
+	void installResetHook ( uint16_t addr ) override { kernalRomBank.installResetHook ( addr ); }
+
+	void installBasicTrap ( uint16_t addr ) override { basicRomBank.installTrap ( addr ); }
+
+	void setBasicSubtune ( uint8_t tune ) override { basicRomBank.setSubtune ( tune ); }
 
 	/**
-	* Access memory as seen by CPU.
-	*
-	* @param addr the address where to read from
-	* @return value at address
-	*/
+		* Access memory as seen by CPU.
+		*
+		* @param addr the address where to read from
+		* @return value at address
+		*/
 	uint8_t cpuRead ( uint16_t addr ) const { return cpuReadMap[ addr >> 12 ]->peek ( addr ); }
 
 	/**
-	* Access memory as seen by CPU.
-	*
-	* @param addr the address where to write
-	* @param data the value to write
-	*/
+		* Access memory as seen by CPU.
+		*
+		* @param addr the address where to write
+		* @param data the value to write
+		*/
 	void cpuWrite ( uint16_t addr, uint8_t data ) { cpuWriteMap[ addr >> 12 ]->poke ( addr, data ); }
 };
 

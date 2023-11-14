@@ -20,8 +20,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <algorithm>
-
 #include <stdint.h>
 #include <cstring>
 
@@ -63,7 +61,7 @@ public:
 	/**
 	* Copy content from source buffer.
 	*/
-	void set ( const uint8_t* source ) { if ( source )	std::copy_n ( source, N, rom ); }
+	void set ( const uint8_t* source ) { if ( source != nullptr ) memcpy ( rom, source, N ); }
 
 	/**
 	* Writing to ROM is a no-op.
@@ -129,14 +127,14 @@ public:
 	}
 
 	/**
-	* Change the RESET vector.
-	*
-	* @param addr the new address to point to
-	*/
+		* Change the RESET vector.
+		*
+		* @param addr the new addres to point to
+		*/
 	void installResetHook ( uint16_t addr )
 	{
-		setVal ( 0xfffc, endian_get16_lo8 ( addr ) );
-		setVal ( 0xfffd, endian_get16_hi8 ( addr ) );
+		setVal ( 0xfffc, endian_16lo8 ( addr ) );
+		setVal ( 0xfffd, endian_16hi8 ( addr ) );
 	}
 };
 
@@ -148,8 +146,8 @@ public:
 class BasicRomBank final : public romBank<0x2000>
 {
 private:
-	uint8_t	trap[ 3 ];
-	uint8_t	subTune[ 11 ];
+	uint8_t trap[ 3 ];
+	uint8_t subTune[ 11 ];
 
 public:
 	void set ( const uint8_t* basic )
@@ -157,15 +155,15 @@ public:
 		romBank<0x2000>::set ( basic );
 
 		// Backup BASIC Warm Start
-		std::copy_n ( (uint8_t*)getPtr ( 0xa7ae ), sizeof ( trap ),		trap );
-		std::copy_n ( (uint8_t*)getPtr ( 0xbf53 ), sizeof ( subTune ),	subTune );
+		memcpy ( trap, getPtr ( 0xa7ae ), sizeof ( trap ) );
+		memcpy ( subTune, getPtr ( 0xbf53 ), sizeof ( subTune ) );
 	}
 
 	void reset ()
 	{
 		// Restore original BASIC Warm Start
-		std::copy_n ( trap,		sizeof ( trap ),	(uint8_t*)getPtr ( 0xa7ae ) );
-		std::copy_n ( subTune,	sizeof ( subTune ), (uint8_t*)getPtr ( 0xbf53 ) );
+		memcpy ( getPtr ( 0xa7ae ), trap, sizeof ( trap ) );
+		memcpy ( getPtr ( 0xbf53 ), subTune, sizeof ( subTune ) );
 	}
 
 	/**
@@ -176,8 +174,8 @@ public:
 	void installTrap ( uint16_t addr )
 	{
 		setVal ( 0xa7ae, JMPw );
-		setVal ( 0xa7af, endian_get16_lo8 ( addr ) );
-		setVal ( 0xa7b0, endian_get16_hi8 ( addr ) );
+		setVal ( 0xa7af, endian_16lo8 ( addr ) );
+		setVal ( 0xa7b0, endian_16hi8 ( addr ) );
 	}
 
 	void setSubtune ( uint8_t tune )
@@ -201,8 +199,6 @@ public:
 *
 * Located at $D000-$DFFF
 */
-class CharacterRomBank final : public romBank<0x1000>
-{
-};
+class CharacterRomBank final : public romBank<0x1000> {};
 
 }

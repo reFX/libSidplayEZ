@@ -38,17 +38,28 @@
 namespace libsidplayfp
 {
 
-// Cycle # at which the VIC takes the bus in a bad line (BA goes low).
-constexpr auto	VICII_FETCH_CYCLE = 11u;
-constexpr auto	VICII_SCREEN_TEXTCOLS = 40u;
+/// Cycle # at which the VIC takes the bus in a bad line (BA goes low).
+const unsigned int VICII_FETCH_CYCLE = 11;
+
+const unsigned int VICII_SCREEN_TEXTCOLS = 40;
+
+const MOS656X::model_data_t MOS656X::modelData[] =
+{
+	{262, 64, &MOS656X::clockOldNTSC},  // Old NTSC (MOS6567R56A)
+	{263, 65, &MOS656X::clockNTSC},     // NTSC-M   (MOS6567R8)
+	{312, 63, &MOS656X::clockPAL},      // PAL-B    (MOS6569R1, MOS6569R3)
+	{312, 65, &MOS656X::clockNTSC},     // PAL-N    (MOS6572)
+	{263, 65, &MOS656X::clockNTSC},     // PAL-M    (MOS6573)
+};
 
 const char* MOS656X::credits ()
 {
-	return	"MOS6567/6569/6572/6573 (VIC II) Emulation:\n"
-			"\tCopyright (C) 2001 Simon White\n"
-			"\tCopyright (C) 2007-2010 Antti Lankila\n"
-			"\tCopyright (C) 2009-2014 VICE Project\n"
-			"\tCopyright (C) 2011-2021 Leandro Nini\n";
+	return
+		"MOS6567/6569/6572/6573 (VIC II) Emulation:\n"
+		"\tCopyright (C) 2001 Simon White\n"
+		"\tCopyright (C) 2007-2010 Antti Lankila\n"
+		"\tCopyright (C) 2009-2014 VICE Project\n"
+		"\tCopyright (C) 2011-2021 Leandro Nini\n";
 }
 //-----------------------------------------------------------------------------
 
@@ -58,13 +69,8 @@ MOS656X::MOS656X ( EventScheduler& scheduler )
 	, sprites ( regs )
 	, badLineStateChangeEvent ( "Update AEC signal", *this, &MOS656X::badLineStateChange )
 	, rasterYIRQEdgeDetectorEvent ( "RasterY changed", *this, &MOS656X::rasterYIRQEdgeDetector )
+	, lightpenTriggerEvent ( "Trigger lightpen", *this, &MOS656X::lightpenTrigger )
 {
-	modelData[ MOS6567R56A ]	= { 262, 64, &MOS656X::clockOldNTSC };	// Old NTSC (MOS6567R56A)
-	modelData[ MOS6567R8 ]		= { 263, 65, &MOS656X::clockNTSC };		// NTSC-M   (MOS6567R8)
-	modelData[ MOS6569 ]		= { 312, 63, &MOS656X::clockPAL };		// PAL-B    (MOS6569R1, MOS6569R3)
-	modelData[ MOS6572 ]		= { 312, 65, &MOS656X::clockNTSC };		// PAL-N    (MOS6572)
-	modelData[ MOS6573 ]		= { 263, 65, &MOS656X::clockNTSC };		// PAL-M    (MOS6573)
-
 	chip ( MOS6569 );
 }
 //-----------------------------------------------------------------------------
@@ -81,11 +87,11 @@ void MOS656X::reset ()
 	rasterYIRQCondition = false;
 	rasterClk = 0;
 	vblanking = false;
-//	lpAsserted = false;
+	lpAsserted = false;
 
-	std::fill_n ( regs, std::size ( regs ), 0 );
+	memset ( regs, 0, sizeof ( regs ) );
 
-//	lp.reset ();
+	lp.reset ();
 	sprites.reset ();
 
 	eventScheduler.cancel ( *this );
@@ -99,7 +105,7 @@ void MOS656X::chip ( model_t model )
 	cyclesPerLine = modelData[ model ].cyclesPerLine;
 	clock = modelData[ model ].clock;
 
-//	lp.setScreenSize ( maxRasters, cyclesPerLine );
+	lp.setScreenSize ( maxRasters, cyclesPerLine );
 
 	reset ();
 }
@@ -114,22 +120,29 @@ uint8_t MOS656X::read ( uint8_t addr )
 
 	switch ( addr )
 	{
-		case 0x11:		return ( regs[ addr ] & 0x7f ) | ( ( rasterY & 0x100 ) >> 1 );  // Control register 1
-		case 0x12:      return rasterY & 0xff;                                          // Raster counter
-		case 0x13:      return 0;
-		case 0x14:      return 0;
-		case 0x19:  	return irqFlags | 0x70;                                         // Interrupt Pending Register
-		case 0x1a:      return irqMask | 0xf0;                                          // Interrupt Mask Register
-
+		case 0x11:
+			// Control register 1
+			return ( regs[ addr ] & 0x7f ) | ( ( rasterY & 0x100 ) >> 1 );
+		case 0x12:
+			// Raster counter
+			return rasterY & 0xff;
+		case 0x13:
+			return lp.getX ();
+		case 0x14:
+			return lp.getY ();
+		case 0x19:
+			// Interrupt Pending Register
+			return irqFlags | 0x70;
+		case 0x1a:
+			// Interrupt Mask Register
+			return irqMask | 0xf0;
 		default:
 			// for addresses < $20 read from register directly
 			if ( addr < 0x20 )
 				return regs[ addr ];
-
 			// for addresses < $2f set bits of high nibble to 1
 			if ( addr < 0x2f )
 				return regs[ addr ] | 0xf0;
-
 			// for addresses >= $2f return $ff
 			return 0xff;
 	}
@@ -149,34 +162,36 @@ void MOS656X::write ( uint8_t addr, uint8_t data )
 	{
 		case 0x11: // Control register 1
 		{
-			const auto	oldYscroll = yscroll;
+			const unsigned int oldYscroll = yscroll;
 			yscroll = data & 0x7;
 
 			// This is the funniest part... handle bad line tricks.
-			const auto	wasBadLinesEnabled = areBadLinesEnabled;
+			const bool wasBadLinesEnabled = areBadLinesEnabled;
 
 			if ( rasterY == FIRST_DMA_LINE && lineCycle == 0 )
 				areBadLinesEnabled = readDEN ();
 
-			if ( ( oldRasterY () == FIRST_DMA_LINE ) && readDEN () )
+			if ( oldRasterY () == FIRST_DMA_LINE && readDEN () )
 				areBadLinesEnabled = true;
 
-			if (		( ( oldYscroll != yscroll ) || ( areBadLinesEnabled != wasBadLinesEnabled ) )
-					&&	rasterY >= FIRST_DMA_LINE
-					&&	rasterY <= LAST_DMA_LINE )
+			if (	( oldYscroll != yscroll || areBadLinesEnabled != wasBadLinesEnabled )
+				&&	( rasterY >= FIRST_DMA_LINE )
+				&&	( rasterY <= LAST_DMA_LINE ) )
 			{
 				// Check whether bad line state has changed.
-				const auto	wasBadLine = ( wasBadLinesEnabled && ( oldYscroll == ( rasterY & 7 ) ) );
-				const auto	nowBadLine = ( areBadLinesEnabled && ( yscroll == ( rasterY & 7 ) ) );
+				const bool	wasBadLine = wasBadLinesEnabled && ( oldYscroll == ( rasterY & 7 ) );
+				const bool	nowBadLine = areBadLinesEnabled && ( yscroll == ( rasterY & 7 ) );
 
 				if ( nowBadLine != wasBadLine )
 				{
-					const auto	oldBadLine = isBadLine;
+					const bool oldBadLine = isBadLine;
 
 					if ( wasBadLine )
 					{
 						if ( lineCycle < VICII_FETCH_CYCLE )
+						{
 							isBadLine = false;
+						}
 					}
 					else
 					{
@@ -185,7 +200,9 @@ void MOS656X::write ( uint8_t addr, uint8_t data )
 						// or outside the fetch interval but before raster ycounter is incremented
 						//   (lineCycle <= VICII_FETCH_CYCLE + VICII_SCREEN_TEXTCOLS + 6)
 						if ( lineCycle <= VICII_FETCH_CYCLE + VICII_SCREEN_TEXTCOLS + 6 )
+						{
 							isBadLine = true;
+						}
 					}
 
 					if ( isBadLine != oldBadLine )
@@ -243,7 +260,7 @@ void MOS656X::handleIrqState ()
 
 void MOS656X::event ()
 {
-	const auto	cycles = eventScheduler.getTime ( eventScheduler.phase () ) - rasterClk;
+	const event_clock_t cycles = eventScheduler.getTime ( eventScheduler.phase () ) - rasterClk;
 
 	event_clock_t delay;
 
@@ -254,14 +271,12 @@ void MOS656X::event ()
 		lineCycle += cycles;
 		lineCycle %= cyclesPerLine;
 
-		delay = ( this->*clock ) ();
+		delay = ( this->*clock )( );
 	}
 	else
-	{
 		delay = 1;
-	}
 
-	eventScheduler.schedule ( *this, uint32_t ( delay - eventScheduler.phase () ), EVENT_CLOCK_PHI1 );
+	eventScheduler.schedule ( *this, (unsigned int)( delay - eventScheduler.phase () ), EVENT_CLOCK_PHI1 );
 }
 //-----------------------------------------------------------------------------
 
@@ -281,7 +296,7 @@ event_clock_t MOS656X::clockPAL ()
 			startDma<5> ();
 
 			// No sprites before next compulsory cycle
-			if ( ! sprites.isDma ( 0xf8 ) )
+			if ( !sprites.isDma ( 0xf8 ) )
 				delay = 10;
 			break;
 
@@ -365,7 +380,7 @@ event_clock_t MOS656X::clockPAL ()
 			sprites.checkDisplay ();
 
 			// No sprites before next compulsory cycle
-			if ( ! sprites.isDma ( 0x1f ) )
+			if ( !sprites.isDma ( 0x1f ) )
 				delay = 6;
 			break;
 
@@ -502,7 +517,7 @@ event_clock_t MOS656X::clockNTSC ()
 			sprites.checkDisplay ();
 
 			// No sprites before next compulsory cycle
-			if ( ! sprites.isDma ( 0x1f ) )
+			if ( !sprites.isDma ( 0x1f ) )
 				delay = 7;
 			break;
 
@@ -554,7 +569,7 @@ event_clock_t MOS656X::clockOldNTSC ()
 			startDma<5> ();
 
 			// No sprites before next compulsory cycle
-			if ( ! sprites.isDma ( 0xf8 ) )
+			if ( !sprites.isDma ( 0xf8 ) )
 				delay = 10;
 			break;
 
@@ -673,18 +688,18 @@ event_clock_t MOS656X::clockOldNTSC ()
 }
 //-----------------------------------------------------------------------------
 
-// void MOS656X::triggerLightpen ()
-// {
-// 	lpAsserted = true;
-// 
-// 	eventScheduler.schedule ( lightpenTriggerEvent, 1 );
-// }
-// //-----------------------------------------------------------------------------
-// 
-// void MOS656X::clearLightpen ()
-// {
-// 	lpAsserted = false;
-// }
-// //-----------------------------------------------------------------------------
+void MOS656X::triggerLightpen ()
+{
+	lpAsserted = true;
+
+	eventScheduler.schedule ( lightpenTriggerEvent, 1 );
+}
+//-----------------------------------------------------------------------------
+
+void MOS656X::clearLightpen ()
+{
+	lpAsserted = false;
+}
+//-----------------------------------------------------------------------------
 
 }
