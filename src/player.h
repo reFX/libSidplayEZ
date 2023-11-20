@@ -25,6 +25,7 @@
 #include <cstdio>
 
 #include "sidplayfp/SidConfig.h"
+#include "sidplayfp/SidTune.h"
 #include "sidplayfp/SidTuneInfo.h"
 #include "SidInfoImpl.h"
 #include "sidemu.h"
@@ -35,10 +36,6 @@
 #include <atomic>
 #include <vector>
 #include <unordered_map>
-
-class SidTune;
-class SidInfo;
-class sidbuilder;
 
 namespace libsidplayfp
 {

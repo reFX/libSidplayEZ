@@ -142,7 +142,7 @@ void SID::setChipModel ( ChipModel _model )
 {
 	model = _model;
 
-	pulldownTable = WaveformCalculator::buildPulldownTable ( model );
+	pulldownTable = WaveformCalculator::buildPulldownTable ( model == MOS6581 );
 
 	if ( model == MOS6581 )
 	{
@@ -158,7 +158,7 @@ void SID::setChipModel ( ChipModel _model )
 	// calculate envelope DAC table
 	{
 		Dac dacBuilder ( ENV_DAC_BITS );
-		dacBuilder.kinkedDac ( model );
+		dacBuilder.kinkedDac ( model == MOS6581 );
 
 		for ( auto i = 0u; i < ( 1 << ENV_DAC_BITS ); i++ )
 			envDAC[ i ] = float ( dacBuilder.getOutput ( i ) );
@@ -167,7 +167,7 @@ void SID::setChipModel ( ChipModel _model )
 	// calculate oscillator DAC table
 	{
 		Dac dacBuilder ( OSC_DAC_BITS );
-		dacBuilder.kinkedDac ( model );
+		dacBuilder.kinkedDac ( model == MOS6581 );
 
 		const auto  offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
 

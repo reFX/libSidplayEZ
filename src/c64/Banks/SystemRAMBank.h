@@ -21,7 +21,7 @@
 */
 
 #include <stdint.h>
-#include <cstring>
+#include <array>
 
 #include "Bank.h"
 

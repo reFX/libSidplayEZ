@@ -21,10 +21,9 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "FilterModelConfig.h"
-
 #include <memory>
 
+#include "FilterModelConfig.h"
 #include "Dac.h"
 
 namespace reSIDfp
@@ -33,8 +32,8 @@ namespace reSIDfp
 class Integrator6581;
 
 /**
-	* Calculate parameters for 6581 filter emulation.
-	*/
+* Calculate parameters for 6581 filter emulation.
+*/
 class FilterModelConfig6581 final : public FilterModelConfig
 {
 private:
@@ -55,7 +54,7 @@ private:
 	//@}
 
 	// DAC lookup table
-	Dac dac;
+	Dac	dac;
 
 	// VCR - 6581 only.
 	//@{

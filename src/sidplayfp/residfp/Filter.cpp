@@ -21,6 +21,7 @@
 */
 
 #include "Filter.h"
+#include <array>
 
 namespace reSIDfp
 {

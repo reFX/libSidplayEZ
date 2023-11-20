@@ -20,19 +20,10 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include <vector>
+
 namespace reSIDfp
 {
-
-/**
-* Combined waveform model parameters
-*/
-typedef struct
-{
-	float threshold;
-	float pulsestrength;
-	float distance1;
-	float distance2;
-} CombinedWaveformConfig;
 
 /**
 * Combined waveform calculator for WaveformGenerator.
@@ -94,7 +85,7 @@ namespace WaveformCalculator
 	*
 	* @return Waveform table
 	*/
-	static std::vector<int16_t> buildWaveTable ();
+	std::vector<int16_t> buildWaveTable ();
 
 	/**
 	* Build pulldown table for use by WaveformGenerator
@@ -102,7 +93,7 @@ namespace WaveformCalculator
 	* @param model Chip model to use
 	* @return Pulldown table
 	*/
-	static std::vector<int16_t> buildPulldownTable ( ChipModel model );
+	std::vector<int16_t> buildPulldownTable ( const bool is6581 );
 }
 
 } // namespace reSIDfp

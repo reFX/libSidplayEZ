@@ -93,7 +93,7 @@ public:
 	*
 	* @param chipModel 6581 or 8580
 	*/
-	void kinkedDac ( ChipModel chipModel );
+	void kinkedDac ( const bool is6581 );
 
 	/**
 	* Get the Vo output for a  given combination of input bits.

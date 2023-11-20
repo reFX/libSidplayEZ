@@ -21,10 +21,10 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "FilterModelConfig6581.h"
-
 #include <stdint.h>
 #include <cassert>
+
+#include "FilterModelConfig6581.h"
 
 // uncomment to enable use of the slope factor
 // in the EKV model

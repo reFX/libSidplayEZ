@@ -27,7 +27,18 @@
 namespace reSIDfp
 {
 
-	//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+/**
+* Combined waveform model parameters
+*/
+typedef struct
+{
+	float threshold;
+	float pulsestrength;
+	float distance1;
+	float distance2;
+} CombinedWaveformConfig;
 
 /**
 * Parameters derived with the Monte Carlo method based on samplings by Kevtris
@@ -59,7 +70,7 @@ const CombinedWaveformConfig config[ 2 ][ 5 ] =
 };
 //-----------------------------------------------------------------------------
 
-static std::vector<int16_t> WaveformCalculator::buildWaveTable ()
+std::vector<int16_t> WaveformCalculator::buildWaveTable ()
 {
 	std::vector<int16_t>	waveTable ( 4 * 4096 );
 
@@ -137,11 +148,11 @@ static int16_t calculatePulldown ( float distancetable[], float pulsestrength, f
 }
 //-----------------------------------------------------------------------------
 
-static std::vector<int16_t> WaveformCalculator::buildPulldownTable ( ChipModel model )
+std::vector<int16_t> WaveformCalculator::buildPulldownTable ( const bool is6581 )
 {
 	std::vector<int16_t>	pulldownTable ( 5 * 4096 );
 
-	const auto  cfgArray = config[ model == MOS6581 ? 0 : 1 ];
+	const auto  cfgArray = config[ is6581 ? 0 : 1 ];
 
 	for ( auto wav = 0; wav < 5; wav++ )
 	{

@@ -111,7 +111,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 	, dac_scale ( 2.63 )
 	, dac ( DAC_BITS )
 {
-	dac.kinkedDac ( MOS6581 );
+	dac.kinkedDac ( true );
 
 	// Create lookup tables for gains / summers.
 

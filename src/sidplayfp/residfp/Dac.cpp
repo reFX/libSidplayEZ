@@ -52,15 +52,15 @@ double Dac::getOutput ( unsigned int input ) const
 }
 //-----------------------------------------------------------------------------
 
-void Dac::kinkedDac ( ChipModel chipModel )
+void Dac::kinkedDac ( const bool is6581 )
 {
 	constexpr auto  R_INFINITY = 1e6;
 
 	// Non-linearity parameter, 8580 DACs are perfectly linear
-	const auto  _2R_div_R = chipModel == MOS6581 ? 2.20 : 2.00;
+	const auto  _2R_div_R = is6581 ? 2.20 : 2.00;
 
 	// 6581 DACs are not terminated by a 2R resistor
-	const auto  term = chipModel == MOS8580;
+	const auto  term = ! is6581;
 
 	// Calculate voltage contribution by each individual bit in the R-2R ladder.
 	for ( auto set_bit = 0u; set_bit < dacLength; set_bit++ )

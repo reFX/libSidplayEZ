@@ -29,6 +29,8 @@
 	 Ported to c++ and cut down for use in libsidplayfp by Leandro Nini
  */
 
+#include <stdint.h>
+
  /**
   * reloc65 -- A part of xa65 - 65xx/65816 cross-assembler and utility suite
   * o65 file relocator. Trimmed down for our needs.

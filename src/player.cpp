@@ -1,4 +1,3 @@
-#pragma once
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
