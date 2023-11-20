@@ -33,7 +33,7 @@
 
 #include <cstring>
 
-#include "sidendian.h"
+#include "../../sidendian.h"
 
 namespace libsidplayfp
 {

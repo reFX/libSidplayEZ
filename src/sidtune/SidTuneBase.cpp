@@ -32,9 +32,9 @@
 
 #include "SidTuneTools.h"
 #include "SidTuneInfoImpl.h"
-#include "sidendian.h"
-#include "sidmemory.h"
-#include "stringutils.h"
+#include "../sidendian.h"
+#include "../sidmemory.h"
+#include "../stringutils.h"
 
 #include "p00.h"
 #include "prg.h"

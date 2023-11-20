@@ -21,7 +21,7 @@
 */
 
 #include "Bank.h"
-#include "c64/c64sid.h"
+#include "../c64sid.h"
 
 #include "NullSid.h"
 

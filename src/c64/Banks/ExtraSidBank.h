@@ -23,7 +23,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "c64/c64sid.h"
+#include "../c64sid.h"
 
 namespace libsidplayfp
 {

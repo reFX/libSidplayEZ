@@ -19,7 +19,7 @@
 *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "c64/c64env.h"
+#include "c64env.h"
 #include "CPU/mos6510.h"
 
 namespace libsidplayfp

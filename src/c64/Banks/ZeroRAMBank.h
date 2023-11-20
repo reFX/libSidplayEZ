@@ -27,7 +27,7 @@
 #include "SystemRAMBank.h"
 #include "pla.h"
 
-#include "Event.h"
+#include "../../Event.h"
 
 namespace libsidplayfp
 {

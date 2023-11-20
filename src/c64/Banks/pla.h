@@ -20,7 +20,7 @@
 */
 
 #include <stdint.h>
-#include "Event.h"
+#include "../../Event.h"
 
 namespace libsidplayfp
 {

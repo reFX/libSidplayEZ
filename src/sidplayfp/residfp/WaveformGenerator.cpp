@@ -34,7 +34,7 @@ namespace reSIDfp
 * and [VICE Bug #1128](http://sourceforge.net/p/vice-emu/bugs/1128/)
 */
 constexpr auto	FLOATING_OUTPUT_TTL_6581R3 = 54000u;	// ~95ms
-constexpr auto	FLOATING_OUTPUT_TTL_6581R4 = 1000000u;	// ~1s
+//constexpr auto	FLOATING_OUTPUT_TTL_6581R4 = 1000000u;	// ~1s
 constexpr auto	FLOATING_OUTPUT_TTL_8580R5 = 800000u;	// ~1s
 
 /**
@@ -44,7 +44,7 @@ constexpr auto	FLOATING_OUTPUT_TTL_8580R5 = 800000u;	// ~1s
 */
 constexpr auto	SHIFT_REGISTER_RESET_6581R3	= 50000u;	// ~210ms
 constexpr auto	SHIFT_REGISTER_FADE_6581R3	= 15000u;	// ~210ms
-constexpr auto	SHIFT_REGISTER_RESET_6581R4	= 2150000u;	// ~2.15s
+//constexpr auto	SHIFT_REGISTER_RESET_6581R4	= 2150000u;	// ~2.15s
 constexpr auto	SHIFT_REGISTER_RESET_8580R5	= 986000u;	// ~2.8s
 constexpr auto	SHIFT_REGISTER_FADE_8580R5	= 314300u;	// ~2.8s
 

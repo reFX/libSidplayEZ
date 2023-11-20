@@ -24,7 +24,7 @@
 
 #include "interrupt.h"
 
-#include "Event.h"
+#include "../../Event.h"
 
 namespace libsidplayfp
 {

@@ -27,7 +27,7 @@
 #include <cctype>
 #include <memory>
 
-#include "sidplayfp/SidTuneInfo.h"
+#include "../sidplayfp/SidTuneInfo.h"
 
 #include "SidTuneTools.h"
 

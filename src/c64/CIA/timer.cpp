@@ -22,7 +22,7 @@
 
 #include "timer.h"
 
-#include "sidendian.h"
+#include "../../sidendian.h"
 
 namespace libsidplayfp
 {

@@ -26,10 +26,10 @@
 #include <string>
 #include <memory>
 
-#include "sidplayfp/SidTuneInfo.h"
+#include "../sidplayfp/SidTuneInfo.h"
 
-#include "sidendian.h"
-#include "MD5/MD5.h"
+#include "../sidendian.h"
+#include "../MD5/MD5.h"
 
 namespace libsidplayfp
 {

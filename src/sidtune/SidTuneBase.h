@@ -26,9 +26,9 @@
 #include <vector>
 #include <string>
 
-#include "sidplayfp/SidTuneInfo.h"
+#include "../sidplayfp/SidTuneInfo.h"
 #include "SidTuneInfoImpl.h"
-#include "sidmemory.h"
+#include "../sidmemory.h"
 
 namespace libsidplayfp
 {

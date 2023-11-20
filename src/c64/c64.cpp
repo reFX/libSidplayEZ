@@ -24,8 +24,8 @@
 
 #include <algorithm>
 
-#include "c64/CIA/mos652x.h"
-#include "c64/VIC_II/mos656x.h"
+#include "CIA/mos652x.h"
+#include "VIC_II/mos656x.h"
 
 namespace libsidplayfp
 {

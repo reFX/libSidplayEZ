@@ -32,13 +32,13 @@
 #include "Banks/SidBank.h"
 #include "Banks/ExtraSidBank.h"
 
-#include "EventScheduler.h"
+#include "../EventScheduler.h"
 
-#include "c64/c64env.h"
-#include "c64/c64cpu.h"
-#include "c64/c64cia.h"
-#include "c64/c64vic.h"
-#include "c64/mmu.h"
+#include "c64env.h"
+#include "c64cpu.h"
+#include "c64cia.h"
+#include "c64vic.h"
+#include "mmu.h"
 
 namespace libsidplayfp
 {

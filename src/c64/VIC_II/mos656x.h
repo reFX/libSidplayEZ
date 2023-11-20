@@ -27,9 +27,9 @@
 
 #include "lightpen.h"
 #include "sprites.h"
-#include "Event.h"
-#include "EventCallback.h"
-#include "EventScheduler.h"
+#include "../../Event.h"
+#include "../../EventCallback.h"
+#include "../../EventScheduler.h"
 
 namespace libsidplayfp
 {

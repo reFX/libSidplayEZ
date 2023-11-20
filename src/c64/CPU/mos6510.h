@@ -25,8 +25,8 @@
 #include <cstdio>
 
 #include "flags.h"
-#include "EventCallback.h"
-#include "EventScheduler.h"
+#include "../../EventCallback.h"
+#include "../../EventScheduler.h"
 
 class EventContext;
 

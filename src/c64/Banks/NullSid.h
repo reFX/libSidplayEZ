@@ -20,7 +20,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "c64/c64sid.h"
+#include "../c64sid.h"
 
 namespace libsidplayfp
 {

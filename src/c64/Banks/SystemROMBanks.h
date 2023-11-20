@@ -24,7 +24,7 @@
 #include <cstring>
 
 #include "Bank.h"
-#include "c64/CPU/opcodes.h"
+#include "../CPU/opcodes.h"
 
 namespace libsidplayfp
 {

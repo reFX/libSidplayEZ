@@ -30,7 +30,7 @@
 #include "timer.h"
 #include "tod.h"
 #include "SerialPort.h"
-#include "EventScheduler.h"
+#include "../../EventScheduler.h"
 
 class EventContext;
 

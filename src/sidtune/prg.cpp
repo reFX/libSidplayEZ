@@ -24,10 +24,10 @@
 
 #include <memory>
 
-#include "sidplayfp/SidTuneInfo.h"
+#include "../sidplayfp/SidTuneInfo.h"
 
 #include "SidTuneTools.h"
-#include "stringutils.h"
+#include "../stringutils.h"
 
 namespace libsidplayfp
 {

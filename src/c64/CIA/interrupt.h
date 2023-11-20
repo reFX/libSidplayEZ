@@ -21,9 +21,9 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "Event.h"
-#include "EventScheduler.h"
-#include "EventCallback.h"
+#include "../../Event.h"
+#include "../../EventScheduler.h"
+#include "../../EventCallback.h"
 
 #include <stdint.h>
 

@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-#include "EventScheduler.h"
+#include "../../EventScheduler.h"
 
 namespace libsidplayfp
 {

@@ -25,7 +25,7 @@
 
 #include <cstring>
 
-#include "sidendian.h"
+#include "../../sidendian.h"
 
 namespace libsidplayfp
 {
@@ -189,37 +189,30 @@ uint8_t MOS652X::read ( uint8_t addr )
 
 	switch ( addr )
 	{
-		case PRA: // Simulate a serial port
-			return ( regs[ PRA ] | ~regs[ DDRA ] );
-		case PRB:
-			return adjustDataPort ( regs[ PRB ] | ~regs[ DDRB ] );
-		case TAL:
-			return endian_16lo8 ( timerA.getTimer () );
-		case TAH:
-			return endian_16hi8 ( timerA.getTimer () );
-		case TBL:
-			return endian_16lo8 ( timerB.getTimer () );
-		case TBH:
-			return endian_16hi8 ( timerB.getTimer () );
+		case PRA:		return ( regs[ PRA ] | ~regs[ DDRA ] );			// Simulate a serial port
+		case PRB:		return adjustDataPort ( regs[ PRB ] | ~regs[ DDRB ] );
+		case TAL:		return endian_16lo8 ( timerA.getTimer () );
+		case TAH:		return endian_16hi8 ( timerA.getTimer () );
+		case TBL:		return endian_16lo8 ( timerB.getTimer () );
+		case TBH:		return endian_16hi8 ( timerB.getTimer () );
+
 		case TOD_TEN:
 		case TOD_SEC:
 		case TOD_MIN:
 		case TOD_HR:
 			return tod.read ( addr - TOD_TEN );
-		case IDR:
-			return interruptSource->clear ();
-		case CRA:
-			return ( regs[ CRA ] & 0xee ) | ( timerA.getState () & 1 );
-		case CRB:
-			return ( regs[ CRB ] & 0xee ) | ( timerB.getState () & 1 );
-		default:
-			return regs[ addr ];
+
+		case IDR:		return interruptSource->clear ();
+		case CRA:		return ( regs[ CRA ] & 0xee ) | ( timerA.getState () & 1 );
+		case CRB:		return ( regs[ CRB ] & 0xee ) | ( timerB.getState () & 1 );
+
+		default:		return regs[ addr ];
 	}
 }
 
 void MOS652X::write ( uint8_t addr, uint8_t data )
 {
-	addr &= 0x0f;
+	addr &= 0x0F;
 
 	timerA.syncWithCpu ();
 	timerB.syncWithCpu ();
@@ -233,50 +226,48 @@ void MOS652X::write ( uint8_t addr, uint8_t data )
 		case DDRA:
 			portA ();
 			break;
+
 		case PRB:
 		case DDRB:
 			portB ();
 			break;
-		case TAL:
-			timerA.latchLo ( data );
-			break;
-		case TAH:
-			timerA.latchHi ( data );
-			break;
-		case TBL:
-			timerB.latchLo ( data );
-			break;
-		case TBH:
-			timerB.latchHi ( data );
-			break;
+
+		case TAL:		timerA.latchLo ( data );			break;
+		case TAH:		timerA.latchHi ( data );			break;
+		case TBL:		timerB.latchLo ( data );			break;
+		case TBH:		timerB.latchHi ( data );			break;
+
 		case TOD_TEN:
 		case TOD_SEC:
 		case TOD_MIN:
 		case TOD_HR:
 			tod.write ( addr - TOD_TEN, data );
 			break;
+
 		case SDR:
 			serialPort.startSdr ();
 			break;
+
 		case ICR:
 			interruptSource->set ( data );
 			break;
+
 		case CRA:
 			if ( ( data ^ oldData ) & 0x40 )
 				serialPort.switchSerialDirection ( ( data & 0x40 ) == 0 );
-			if ( ( data & 1 ) && !( oldData & 1 ) )
-			{
-				// Reset the underflow flipflop for the data port
+
+			// Reset the underflow flipflop for the data port
+			if ( ( data & 1 ) && ! ( oldData & 1 ) )
 				timerA.setPbToggle ( true );
-			}
+
 			timerA.setControlRegister ( data );
 			break;
+
 		case CRB:
-			if ( ( data & 1 ) && !( oldData & 1 ) )
-			{
-				// Reset the underflow flipflop for the data port
+			// Reset the underflow flipflop for the data port
+			if ( ( data & 1 ) && ! ( oldData & 1 ) )
 				timerB.setPbToggle ( true );
-			}
+
 			timerB.setControlRegister ( data | ( data & 0x40 ) >> 1 );
 			break;
 	}
@@ -295,12 +286,8 @@ void MOS652X::underflowA ()
 	interruptSource->trigger ( InterruptSource::INTERRUPT_UNDERFLOW_A );
 
 	if ( ( regs[ CRB ] & 0x41 ) == 0x41 )
-	{
 		if ( timerB.started () )
-		{
 			eventScheduler.schedule ( bTickEvent, 0, EVENT_CLOCK_PHI2 );
-		}
-	}
 }
 
 void MOS652X::underflowB ()
@@ -327,6 +314,7 @@ void MOS652X::setModel ( model_t model )
 			serialPort.setModel4485 ( model == MOS6526W4485 );
 			interruptSource.reset ( new InterruptSource6526 ( eventScheduler, *this ) );
 			break;
+
 		case MOS8521:
 			serialPort.setModel4485 ( false );
 			interruptSource.reset ( new InterruptSource8521 ( eventScheduler, *this ) );

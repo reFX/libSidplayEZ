@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 
-#include "sidplayfp/SidTuneInfo.h"
+#include "../sidplayfp/SidTuneInfo.h"
 
 namespace libsidplayfp
 {

@@ -19,7 +19,7 @@
  */
 
 #include "SidTune.h"
-#include "sidtune/SidTuneBase.h"
+#include "../sidtune/SidTuneBase.h"
 
 //-----------------------------------------------------------------------------
 

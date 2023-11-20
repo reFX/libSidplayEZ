@@ -23,9 +23,9 @@
 
 #include <stdint.h>
 
-#include "sidendian.h"
-#include "sidmemory.h"
-#include "EventScheduler.h"
+#include "../sidendian.h"
+#include "../sidmemory.h"
+#include "../EventScheduler.h"
 
 #include "Banks/pla.h"
 #include "Banks/SystemRAMBank.h"

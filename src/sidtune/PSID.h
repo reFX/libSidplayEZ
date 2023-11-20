@@ -22,7 +22,7 @@
 #include <stdint.h>
 
 #include "SidTuneBase.h"
-#include "sidplayfp/SidTune.h"
+#include "../sidplayfp/SidTune.h"
 
 namespace libsidplayfp
 {
