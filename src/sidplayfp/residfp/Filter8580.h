@@ -273,7 +273,7 @@ namespace reSIDfp
 class Filter8580 final : public Filter
 {
 private:
-	double cp = 0.5;
+	double	cp;
 
 	/// VCR + associated capacitor connected to highpass output.
 	std::unique_ptr<Integrator8580> const hpIntegrator;

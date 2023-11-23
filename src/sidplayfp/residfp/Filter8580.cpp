@@ -46,7 +46,7 @@ Filter8580::Filter8580 ()
 	gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();
 	gain_vol = FilterModelConfig8580::getInstance ()->getGainVol ();
 
-	setFilterCurve ( cp );
+	setFilterCurve ( 0.5 );
 	ve = mixer[ 0 ][ 0 ];
 }
 //-----------------------------------------------------------------------------
@@ -80,7 +80,7 @@ void Filter8580::setFilterCurve ( double curvePosition )
 {
 	// Adjust cp
 	// 1.2 <= cp <= 1.8
-	cp = 1.8 - curvePosition * 3.0 / 5.0;
+	cp = 1.2 + curvePosition * 3.0 / 5.0;
 
 	hpIntegrator->setV ( cp );
 	bpIntegrator->setV ( cp );

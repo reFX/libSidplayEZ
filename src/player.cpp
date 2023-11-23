@@ -56,7 +56,7 @@ Player::Player ()
 	//
 	// Default filter-curve map
 	//
-	fcMap = {
+/*	fcMap = {
 		{ "david dunn",					1.1 },
 		{ "david dunn & aidan bell",	1.1 },
 //		{ "martin galway",				0.6 },	// Any other setting higher than 0.5 makes "Wizball" misbehave
@@ -68,7 +68,7 @@ Player::Player ()
 		{ "fred gray",					1.1 },	// He only used the filter in "Frankie Goes to Hollywood"
 		{ "geir tjelta",				0.6 },
 	};
-
+*/
 	// Get component credits
 	m_info.m_credits.push_back ( m_c64.cpuCredits () );
 	m_info.m_credits.push_back ( m_c64.ciaCredits () );
