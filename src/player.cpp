@@ -274,17 +274,9 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 			// Attempt to have better sounding 6581 filters by adjusting the curve per author
 			// with the assumption they worked with the same machine their entire career
 			//
-			auto	filter6581Curve = 0.5;
+			auto	filterSettings = chipSelector.getChipProfile ( tuneInfo->path (), tuneInfo->dataFileName () );
 
-			if ( auto ccAuthor = tuneInfo->infoString ( 1 ) )
-			{
-				const auto	author = stringutils::toLower ( ccAuthor );
-
-				if ( auto it = fcMap.find ( author ); it != fcMap.end () )
-					filter6581Curve = it->second;
-			}
-
-			set6581FilterCurve ( filter6581Curve );
+			set6581FilterCurve ( filterSettings.filter );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
@@ -467,16 +459,6 @@ void Player::sidParams ( double cpuFreq, int frequency )
 	for ( auto i = 0u; i < 3 ; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->sampling ( (float)cpuFreq, frequency );
-}
-//-----------------------------------------------------------------------------
-
-void Player::setCurveMap ( const filterCurveMap& newMap )
-{
-	for ( const auto& [ name, value ] : newMap )
-	{
-		auto	exAscIIName = stringutils::utf8toExtendedASCII ( name );
-		fcMap[ stringutils::toLower ( exAscIIName ) ] = value;
-	}
 }
 //-----------------------------------------------------------------------------
 

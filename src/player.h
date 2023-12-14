@@ -33,6 +33,8 @@
 #include "mixer.h"
 #include "c64/c64.h"
 
+#include "chip-selector.h"
+
 #include <atomic>
 #include <vector>
 #include <unordered_map>
@@ -42,9 +44,6 @@ namespace libsidplayfp
 
 class Player final
 {
-public:
-	using filterCurveMap = std::unordered_map<std::string, double>;
-
 private:
 	typedef enum
 	{
@@ -66,7 +65,7 @@ private:
 	state_t		m_isPlaying = STOPPED;	// Playback status
 	uint8_t		videoSwitch;			// PAL/NTSC switch value
 
-	filterCurveMap	fcMap;
+	ChipSelector	chipSelector;
 
 	/**
 	* Get the C64 model for the current loaded tune.
@@ -104,7 +103,6 @@ public:
 
 	[[ nodiscard ]] int getNumChips () const { return m_mixer.getNumChips (); }
 
-	void setCurveMap ( const filterCurveMap& newMap );
 	void set6581FilterCurve ( const double value );
 
 	[[ nodiscard ]] uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds
