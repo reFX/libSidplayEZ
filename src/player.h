@@ -103,6 +103,7 @@ public:
 
 	[[ nodiscard ]] int getNumChips () const { return m_mixer.getNumChips (); }
 
+	void setChipProfiles ( const ChipSelector::profileMap& map ) { chipSelector.setProfiles ( map ); }
 	void set6581FilterCurve ( const double value );
 
 	[[ nodiscard ]] uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds

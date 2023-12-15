@@ -48,4 +48,10 @@ ChipSelector::settings ChipSelector::getChipProfile ( const char* _path, const c
 }
 //-----------------------------------------------------------------------------
 
+void ChipSelector::setProfiles ( const profileMap& map )
+{
+	chipProfiles = map;
+}
+//-----------------------------------------------------------------------------
+
 }
