@@ -62,6 +62,8 @@ private:
 	uint16_t    vcr_n_Ids_term[ 1 << 16 ];
 	//@}
 
+	void filterSomething2 ();
+
 private:
 	double getDacZero ( double adjustment ) const {	return dac_zero + adjustment;		}
 
@@ -70,6 +72,8 @@ private:
 
 public:
 	static FilterModelConfig6581* getInstance ();
+
+	void setFilterRange ( double adjustment );
 
 	/**
 	* Construct an 11 bit cutoff frequency DAC output voltage table.
@@ -90,9 +94,11 @@ public:
 
 	inline uint16_t getVcr_nVg ( int i ) const { return vcr_nVg[ i ]; }
 	inline uint16_t getVcr_n_Ids_term ( int i ) const { return vcr_n_Ids_term[ i ]; }
-	// only used if SLOPE_FACTOR is defined
-	inline double getUt () const { return Ut; }
-	inline double getN16 () const { return N16; }
+
+	#ifdef SLOPE_FACTOR
+		inline double getUt () const { return Ut; }
+		inline double getN16 () const { return N16; }
+	#endif
 };
 
 } // namespace reSIDfp

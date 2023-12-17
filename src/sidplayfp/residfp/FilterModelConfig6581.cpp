@@ -94,6 +94,18 @@ FilterModelConfig6581* FilterModelConfig6581::getInstance ()
 }
 //-----------------------------------------------------------------------------
 
+void FilterModelConfig6581::setFilterRange ( double adjustment )
+{
+	adjustment = std::clamp ( adjustment, 0.05, 2.0 ) * 20e-6;
+
+	if ( std::abs ( uCox - adjustment ) < 1e-12 )
+		return;
+
+	uCox = adjustment;
+	filterSomething2 ();
+}
+//-----------------------------------------------------------------------------
+
 FilterModelConfig6581::FilterModelConfig6581 ()
 	: FilterModelConfig (
 		1.5,     // voice voltage range
@@ -229,40 +241,13 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			vcr_nVg[ i ] = uint16_t ( tmp + 0.5 );
 		}
 	};
-	auto filterSomething2 = [ this ]
-	{
-		//  EKV model:
-		//
-		//  Ids = Is * (if - ir)
-		//  Is = (2 * u*Cox * Ut^2)/k * W/L
-		//  if = ln^2(1 + e^((k*(Vg - Vt) - Vs)/(2*Ut))
-		//  ir = ln^2(1 + e^((k*(Vg - Vt) - Vd)/(2*Ut))
-
-		// moderate inversion characteristic current
-		const auto  Is = ( 2.0 * uCox * Ut * Ut ) * WL_vcr;
-
-		// Normalized current factor for 1 cycle at 1MHz
-		const auto  N15 = norm * ( ( 1 << 15 ) - 1 );
-		const auto  n_Is = N15 * 1.0e-6 / C * Is;
-
-		// kVgt_Vx = k*(Vg - Vt) - Vx
-		// I.e. if k != 1.0, Vg must be scaled accordingly
-		for ( auto kVgt_Vx = 0; kVgt_Vx < ( 1 << 16 ); kVgt_Vx++ )
-		{
-			const auto  log_term = std::log1p ( std::exp ( ( kVgt_Vx / N16 ) / ( 2.0 * Ut ) ) );
-			// Scaled by m*2^15
-			const auto  tmp = n_Is * log_term * log_term;
-			assert ( tmp > -0.5 && tmp < 65535.5 );
-			vcr_n_Ids_term[ kVgt_Vx ] = uint16_t ( tmp + 0.5 );
-		}
-	};
 
 	auto    thdSummer = std::thread ( filterSummer );
 	auto    thdMixer = std::thread ( filterMixer );
 	auto    thdGain = std::thread ( filterGain );
 	auto    thdGainRes = std::thread ( filterGainRes );
 	auto    thdSomething1 = std::thread ( filterSomething1 );
-	auto    thdSomething2 = std::thread ( filterSomething2 );
+	auto    thdSomething2 = std::thread ( [ this ] { filterSomething2 (); } );
 
 	thdSummer.join ();
 	thdMixer.join ();
@@ -284,6 +269,35 @@ uint16_t* FilterModelConfig6581::getDAC ( double adjustment ) const
 
 	return f0_dac;
 }
+//-----------------------------------------------------------------------------
+
+void FilterModelConfig6581::filterSomething2 ()
+{
+	//  EKV model:
+	//
+	//  Ids = Is * (if - ir)
+	//  Is = (2 * u*Cox * Ut^2)/k * W/L
+	//  if = ln^2(1 + e^((k*(Vg - Vt) - Vs)/(2*Ut))
+	//  ir = ln^2(1 + e^((k*(Vg - Vt) - Vd)/(2*Ut))
+
+	// moderate inversion characteristic current
+	const auto  Is = ( 2.0 * uCox * Ut * Ut ) * WL_vcr;
+
+	// Normalized current factor for 1 cycle at 1MHz
+	const auto  N15 = norm * ( ( 1 << 15 ) - 1 );
+	const auto  n_Is = N15 * 1.0e-6 / C * Is;
+
+	// kVgt_Vx = k*(Vg - Vt) - Vx
+	// I.e. if k != 1.0, Vg must be scaled accordingly
+	for ( auto kVgt_Vx = 0; kVgt_Vx < ( 1 << 16 ); kVgt_Vx++ )
+	{
+		const auto  log_term = std::log1p ( std::exp ( ( kVgt_Vx / N16 ) / ( 2.0 * Ut ) ) );
+		// Scaled by m*2^15
+		const auto  tmp = n_Is * log_term * log_term;
+		assert ( tmp > -0.5 && tmp < 65535.5 );
+		vcr_n_Ids_term[ kVgt_Vx ] = uint16_t ( tmp + 0.5 );
+	}
+};
 //-----------------------------------------------------------------------------
 
 } // namespace reSIDfp

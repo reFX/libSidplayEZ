@@ -276,7 +276,7 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 			//
 			auto	filterSettings = chipSelector.getChipProfile ( tuneInfo->path (), tuneInfo->dataFileName () );
 
-			set6581FilterCurve ( filterSettings.filter );
+			set6581FilterRange ( filterSettings.filter );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
@@ -467,6 +467,14 @@ void Player::set6581FilterCurve ( const double value )
 	for ( auto i = 0u; i < 3; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->filter6581Curve ( value );
+}
+//-----------------------------------------------------------------------------
+
+void Player::set6581FilterRange ( const double value )
+{
+	for ( auto i = 0u; i < 3; i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->filter6581Range ( value );
 }
 //-----------------------------------------------------------------------------
 

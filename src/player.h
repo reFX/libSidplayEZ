@@ -105,6 +105,7 @@ public:
 
 	void setChipProfiles ( const ChipSelector::profileMap& map ) { chipSelector.setProfiles ( map ); }
 	void set6581FilterCurve ( const double value );
+	void set6581FilterRange ( const double value );
 
 	[[ nodiscard ]] uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds
 	[[ nodiscard ]] uint32_t timeMs () const { return m_c64.getTimeMs (); }				// Time in milliseconds

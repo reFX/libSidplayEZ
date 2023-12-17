@@ -43,7 +43,7 @@ protected:
 	const double Vdd;
 	const double Vth;           ///< Threshold voltage
 	const double Ut;            ///< Thermal voltage: Ut = kT/q = 8.61734315e-5*T ~ 26mV
-	const double uCox;          ///< Transconductance coefficient: u*Cox
+	double uCox;          ///< Transconductance coefficient: u*Cox
 	const double Vddt;          ///< Vdd - Vth
 	//@}
 
@@ -116,14 +116,14 @@ public:
 	uint16_t** getMixer () { return mixer; }
 
 	/**
-		* The digital range of one voice is 20 bits; create a scaling term
-		* for multiplication which fits in 11 bits.
-		*/
+	* The digital range of one voice is 20 bits; create a scaling term
+	* for multiplication which fits in 11 bits.
+	*/
 	int getVoiceScaleS11 () const { return int ( ( norm * ( ( 1 << 11 ) - 1 ) ) * voice_voltage_range ); }
 
 	/**
-		* The "zero" output level of the voices.
-		*/
+	* The "zero" output level of the voices.
+	*/
 	int getNormalizedVoiceDC () const { return int ( N16 * ( voice_DC_voltage - vmin ) ); }
 
 	inline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }

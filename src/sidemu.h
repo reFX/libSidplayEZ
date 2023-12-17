@@ -115,6 +115,7 @@ public:
 	void write ( uint8_t addr, uint8_t data ) override	{	clock ();	m_sid.write ( addr, data );	}
 
 	void filter6581Curve ( double filterCurve )			{	m_sid.setFilter6581Curve ( filterCurve );	}
+	void filter6581Range ( double adjustment )			{	m_sid.setFilter6581Range ( adjustment );	}
 	void filter8580Curve ( double filterCurve )			{	m_sid.setFilter8580Curve ( filterCurve );	}
 
 	[[ nodiscard ]] float getInternalEnvValue ( int voiceNo ) const		{	return m_sid.getEnvLevel ( voiceNo );		}

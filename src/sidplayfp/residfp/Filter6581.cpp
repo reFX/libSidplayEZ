@@ -59,4 +59,10 @@ void Filter6581::setFilterCurve ( double curvePosition )
 }
 //-----------------------------------------------------------------------------
 
+void Filter6581::setFilterRange ( double adjustment )
+{
+	FilterModelConfig6581::getInstance ()->setFilterRange ( adjustment );
+}
+//-----------------------------------------------------------------------------
+
 } // namespace reSIDfp
