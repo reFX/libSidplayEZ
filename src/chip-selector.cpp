@@ -7,7 +7,7 @@ namespace libsidplayfp
 
 //-----------------------------------------------------------------------------
 
-ChipSelector::settings ChipSelector::getChipProfile ( const char* _path, const char* _filename )
+std::pair<std::string, ChipSelector::settings> ChipSelector::getChipProfile ( const char* _path, const char* _filename )
 {
 	auto	path = std::string ( _path );
 
@@ -30,7 +30,7 @@ ChipSelector::settings ChipSelector::getChipProfile ( const char* _path, const c
 			continue;
 
 		if ( set.exceptions.empty () )
-			return set;
+			return std::make_pair ( name, set );
 
 		// Get filename without extension
 		auto	filename = std::string ( _filename );
@@ -38,9 +38,9 @@ ChipSelector::settings ChipSelector::getChipProfile ( const char* _path, const c
 
 		// Find new author if exception matches
 		if ( auto exception = set.exceptions.find ( filename ); exception != set.exceptions.end () )
-			return chipProfiles.at ( exception->second );
+			return std::make_pair ( exception->second, chipProfiles.at ( exception->second ) );
 
-		return set;
+		return std::make_pair ( name, set );
 	}
 
 	// Default

@@ -66,6 +66,7 @@ private:
 	uint8_t		videoSwitch;			// PAL/NTSC switch value
 
 	ChipSelector	chipSelector;
+	std::string		selectedChipProfile;
 
 	/**
 	* Get the C64 model for the current loaded tune.
@@ -119,6 +120,8 @@ public:
 	[[ nodiscard ]] uint16_t getCia1TimerA () const { return m_c64.getCia1TimerA (); }
 
 	bool getSidStatus ( int sidNum, uint8_t regs[ 32 ] );
+
+	[[ nodiscard ]] std::string getChipProfile () const { return selectedChipProfile; }
 };
 
 }

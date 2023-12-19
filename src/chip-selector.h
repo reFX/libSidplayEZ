@@ -19,7 +19,7 @@ public:
 
 	using profileMap = std::unordered_map<std::string, settings>;
 
-	settings getChipProfile ( const char* path, const char* filename );
+	std::pair<std::string, settings> getChipProfile ( const char* path, const char* filename );
 	void setProfiles ( const profileMap& map );
 
 private:

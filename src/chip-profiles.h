@@ -31,21 +31,21 @@
 { "Jouni Ikonen",		{	.folder = "/MUSICIANS/M/Mixer/",					.filter = 0.25	} },
 { "Laxity",				{	.folder = "/MUSICIANS/L/Laxity/",					.filter = 0.3	} },
 { "lft",				{	.folder = "/MUSICIANS/L/Lft/",						.filter = 0.3	} },
-{ "Mark Cooksey",		{	.folder = "/MUSICIANS/C/Cooksey_Mark/",				.filter = 0.175	} },
-{ "Markus Mueller",		{	.folder = "/MUSICIANS/M/Mueller_Markus/",			.filter = 0.25	} },
-{ "Martin Galway",		{	.folder = "/MUSICIANS/G/Galway_Martin/",			.filter = 1.3	} },
+{ "Mark Cooksey",		{	.folder = "/MUSICIANS/C/Cooksey_Mark/",				.filter = 0.15	} },
+{ "Markus Mueller",		{	.folder = "/MUSICIANS/M/Mueller_Markus/",			.filter = 0.3	} },
+{ "Martin Galway",		{	.folder = "/MUSICIANS/G/Galway_Martin/",			.filter = 1.0	} },
 { "Martin Walker",		{	.folder = "/MUSICIANS/W/Walker_Martin/",			.filter = 0.15	} },
-{ "Matt Gray",			{	.folder = "/MUSICIANS/G/Gray_Matt/",				.filter = 0.25	} },
+{ "Matt Gray",			{	.folder = "/MUSICIANS/G/Gray_Matt/",				.filter = 0.3	} },
 { "Michael Hendriks",	{	.folder = "/MUSICIANS/F/FAME/Hendriks_Michael/",	.filter = 0.2	} },
 { "Mitch",				{	.folder = "/MUSICIANS/M/Mitch_and_Dane/Mitch/",		.filter = 0.25	} },
 { "Neil Brennan",		{	.folder = "/MUSICIANS/B/Brennan_Neil/",				.filter = 0.25	} },
 { "Peter Clarke",		{	.folder = "/MUSICIANS/C/Clarke_Peter/",				.filter = 0.2	} },
-{ "Pex Tufvesson",		{	.folder = "/MUSICIANS/M/Mahoney/",					.filter = 0.5	} },
+{ "Pex Tufvesson",		{	.folder = "/MUSICIANS/M/Mahoney/",					.filter = 0.35	} },
 { "Reyn Ouwehand",		{	.folder = "/MUSICIANS/O/Ouwehand_Reyn/",			.filter = 0.25	} },
 { "Richard Joseph",		{	.folder = "/MUSICIANS/J/Joseph_Richard/",			.filter = 0.3	} },
-{ "Rob Hubbard",		{	.folder = "/MUSICIANS/H/Hubbard_Rob/",				.filter = 0.25,	.exceptions = { { "BMX_Kidz", "Yip"	} } } }, 			// Only Yip used the filter for subtune 4
+{ "Rob Hubbard",		{	.folder = "/MUSICIANS/H/Hubbard_Rob/",				.filter = 0.35,	.exceptions = { { "BMX_Kidz", "Yip"	} } } }, 			// Only Yip used the filter for subtune 4
 { "Russell Lieblich",	{	.folder = "/MUSICIANS/L/Lieblich_Russell/",			.filter = 0.25	} },
-{ "Steve Turner",		{	.folder = "/MUSICIANS/T/Turner_Steve/",				.filter = 0.4,	.exceptions = { { "Bushido", "Jason Page"	} } } },	// Only Jason Page used the filter for subtune 2
+{ "Steve Turner",		{	.folder = "/MUSICIANS/T/Turner_Steve/",				.filter = 0.6,	.exceptions = { { "Bushido", "Jason Page"	} } } },	// Only Jason Page used the filter for subtune 2
 { "Tim Follin",			{	.folder = "/MUSICIANS/F/Follin_Tim/",				.filter = 0.5	} },
 { "Yip",				{	.folder = "/MUSICIANS/Y/Yip/",						.filter = 0.125	} },
 { "Zoci-Joe",			{	.folder = "/MUSICIANS/Z/Zoci-Joe/",					.filter = 0.3	} },
