@@ -224,10 +224,15 @@ public:
 		#endif
 
 		// VCR voltages for EKV model table lookup.
-		const int kVgt_Vs = ( vx < kVgt ) ? kVgt - vx : 0;
-		assert ( kVgt_Vs < ( 1 << 16 ) );
-		const int kVgt_Vd = ( vi < kVgt ) ? kVgt - vi : 0;
-		assert ( kVgt_Vd < ( 1 << 16 ) );
+// 		const int	kVgt_Vs = ( vx < kVgt ) ? kVgt - vx : 0;
+// 		assert ( kVgt_Vs < ( 1 << 16 ) );
+// 		const int	kVgt_Vd = ( vi < kVgt ) ? kVgt - vi : 0;
+// 		assert ( kVgt_Vd < ( 1 << 16 ) );
+
+		const int	kVgt_Vs = ( kVgt - vx ) + ( 1 << 15 );
+		assert ( ( kVgt_Vs >= 0 ) && ( kVgt_Vs < ( 1 << 16 ) ) );
+		const int	kVgt_Vd = ( kVgt - vi ) + ( 1 << 15 );
+		assert ( ( kVgt_Vd >= 0 ) && ( kVgt_Vd < ( 1 << 16 ) ) );
 
 		// VCR current, scaled by m*2^15*2^15 = m*2^30
 		const unsigned int If = static_cast<unsigned int>( fmc->getVcr_n_Ids_term ( kVgt_Vs ) ) << 15;

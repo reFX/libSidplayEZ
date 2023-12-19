@@ -289,13 +289,14 @@ void FilterModelConfig6581::filterSomething2 ()
 
 	// kVgt_Vx = k*(Vg - Vt) - Vx
 	// I.e. if k != 1.0, Vg must be scaled accordingly
-	for ( auto kVgt_Vx = 0; kVgt_Vx < ( 1 << 16 ); kVgt_Vx++ )
+	for ( auto i = 0; i < ( 1 << 16 ); i++ )
 	{
+		const auto	kVgt_Vx = i - ( 1 << 15 );
 		const auto  log_term = std::log1p ( std::exp ( ( kVgt_Vx / N16 ) / ( 2.0 * Ut ) ) );
 		// Scaled by m*2^15
 		const auto  tmp = n_Is * log_term * log_term;
 		assert ( tmp > -0.5 && tmp < 65535.5 );
-		vcr_n_Ids_term[ kVgt_Vx ] = uint16_t ( tmp + 0.5 );
+		vcr_n_Ids_term[ i ] = uint16_t ( tmp + 0.5 );
 	}
 };
 //-----------------------------------------------------------------------------
