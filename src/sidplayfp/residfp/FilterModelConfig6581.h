@@ -37,10 +37,6 @@ class Integrator6581;
 class FilterModelConfig6581 final : public FilterModelConfig
 {
 private:
-	static std::unique_ptr<FilterModelConfig6581> instance;
-	// This allows access to the private constructor
-	friend std::unique_ptr<FilterModelConfig6581>::deleter_type;
-
 	// Transistor parameters.
 	//@{
 	const double WL_vcr;        ///< W/L for VCR
@@ -64,13 +60,12 @@ private:
 
 	void filterSomething2 ();
 
-private:
 	double getDacZero ( double adjustment ) const {	return dac_zero + adjustment;		}
 
+public:
 	FilterModelConfig6581 ();
 	~FilterModelConfig6581 () = default;
 
-public:
 	static FilterModelConfig6581* getInstance ();
 
 	void setFilterRange ( double adjustment );

@@ -35,16 +35,10 @@ class Integrator8580;
 */
 class FilterModelConfig8580 final : public FilterModelConfig
 {
-private:
-	static std::unique_ptr<FilterModelConfig8580> instance;
-	// This allows access to the private constructor
-	friend std::unique_ptr<FilterModelConfig8580>::deleter_type;
-
-private:
+public:
 	FilterModelConfig8580 ();
 	~FilterModelConfig8580 () = default;
 
-public:
 	static FilterModelConfig8580* getInstance ();
 
 	/**
@@ -52,7 +46,6 @@ public:
 	*
 	* @return the integrator
 	*/
-
 	std::unique_ptr<Integrator8580> buildIntegrator ()	{	return std::make_unique<Integrator8580> ( this );	}
 };
 
