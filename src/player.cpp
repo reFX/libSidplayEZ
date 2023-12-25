@@ -274,7 +274,7 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 			// Attempt to have better sounding 6581 filters by adjusting the curve per author
 			// with the assumption they worked with the same machine their entire career
 			//
-			const auto	[ profileName, filterSettings ] = chipSelector.getChipProfile (tuneInfo->path (), tuneInfo->dataFileName ());
+			const auto [ profileName, filterSettings ] = chipSelector.getChipProfile ( tuneInfo->path (), tuneInfo->dataFileName () );
 
 			selectedChipProfile = profileName;
 			set6581FilterRange ( filterSettings.filter );

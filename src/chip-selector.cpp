@@ -26,7 +26,7 @@ std::pair<std::string, ChipSelector::settings> ChipSelector::getChipProfile ( co
 	// Identify author by folder
 	for ( const auto& [ name, set ] : chipProfiles )
 	{
-		if ( ! set.folder.starts_with ( path ) )
+		if ( ! path.starts_with ( set.folder ) )
 			continue;
 
 		if ( set.exceptions.empty () )
