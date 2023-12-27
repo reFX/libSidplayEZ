@@ -278,6 +278,7 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 
 			selectedChipProfile = profileName;
 			set6581FilterRange ( filterSettings.filter );
+			set6581FilterCurve ( filterSettings.zeroDac );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
