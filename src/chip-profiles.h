@@ -10,7 +10,7 @@
 { "Antony Crowther (Ratt)",				{	.folder = "/MUSICIANS/C/Crowther_Antony/",			.filter = 1.1	} },
 { "Ben Daglish",						{	.folder = "/MUSICIANS/D/Daglish_Ben/",				.filter = 0.6,	.exceptions = { { "Last_Ninja", "Anthony Lees" } } } },	// Only Anthony Lees used the filter
 { "Charles Deenen",						{	.folder = "/MUSICIANS/D/Deenen_Charles/",			.filter = 0.2	} },
-{ "Chris Huelsbeck",					{	.folder = "/MUSICIANS/H/Huelsbeck_Chris/",			.filter = 0.5	} },
+{ "Chris Hülsbeck",						{	.folder = "/MUSICIANS/H/Huelsbeck_Chris/",			.filter = 0.5	} },
 { "Clever Music",						{	.folder = "/MUSICIANS/C/Clever_Music/",				.filter = 0.25	} },
 { "Mitch & Dane",						{	.folder = "/MUSICIANS/M/Mitch_and_Dane/",			.filter = 0.75	} },
 { "Michael Nilsson-Vonderburgh (Mitch)",{	.folder = "/MUSICIANS/M/Mitch_and_Dane/Mitch/",		.filter = 0.25	} },
