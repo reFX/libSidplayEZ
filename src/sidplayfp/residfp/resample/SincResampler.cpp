@@ -48,34 +48,6 @@ int SincResampler::fir ( int subcycle )
 	{
 		auto    out = 0;
 
-		const uintptr_t offset = (uintptr_t)( a ) & 0x0f;
-		// check for aligned accesses
-		if ( offset == ( (uintptr_t)( b ) & 0x0f ) )
-		{
-			if ( offset )
-			{
-				const int l = ( 0x10 - offset ) / 2;
-				for ( int i = 0; i < l; i++ )
-				{
-					out += *a++ * *b++;
-				}
-				bLength -= offset;
-			}
-			__m128i acc = _mm_setzero_si128 ();
-			const int n = bLength / 8;
-			for ( int i = 0; i < n; i++ )
-			{
-				const __m128i tmp = _mm_madd_epi16 ( *( __m128i* )a, *( __m128i* )b );
-				acc = _mm_add_epi32 ( acc, tmp );
-				a += 8;
-				b += 8;
-			}
-			__m128i vsum = _mm_add_epi32 ( acc, _mm_srli_si128 ( acc, 8 ) );
-			vsum = _mm_add_epi32 ( vsum, _mm_srli_si128 ( vsum, 4 ) );
-			out += _mm_cvtsi128_si32 ( vsum );
-			bLength &= 7;
-		}
-
 		while ( bLength-- )
 			out += *a++ * *b++;
 
