@@ -123,11 +123,11 @@ FilterModelConfig8580* FilterModelConfig8580::getInstance ()
 
 FilterModelConfig8580::FilterModelConfig8580 () :
 	FilterModelConfig (
-		0.5,	// voice voltage range	(was 0.3)
+		0.3,	// voice voltage range
 		4.84,	// voice DC voltage
 		22e-9,  // capacitor value
-		13.0,	// Vdd					(was 9.09)
-		1.0,	// Vth					(was 0.80)
+		9.09,	// Vdd
+		0.80,	// Vth
 		100e-6, // uCox
 		opamp_voltage_8580,
 		OPAMP_SIZE_8580
