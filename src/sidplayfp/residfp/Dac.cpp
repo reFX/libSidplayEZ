@@ -62,6 +62,8 @@ void Dac::kinkedDac ( const bool is6581 )
 	// 6581 DACs are not terminated by a 2R resistor
 	const auto  term = ! is6581;
 
+	auto	Vsum = 0.0;
+
 	// Calculate voltage contribution by each individual bit in the R-2R ladder.
 	for ( auto set_bit = 0u; set_bit < dacLength; set_bit++ )
 	{
@@ -98,14 +100,10 @@ void Dac::kinkedDac ( const bool is6581 )
 		}
 
 		dac[ set_bit ] = Vn;
+		Vsum += Vn;
 	}
 
 	// Normalize to integerish behavior
-	auto	Vsum = 0.0;
-
-	for ( auto i = 0u; i < dacLength; i++ )
-		Vsum += dac[ i ];
-
 	Vsum /= 1 << dacLength;
 
 	for ( auto i = 0u; i < dacLength; i++ )
