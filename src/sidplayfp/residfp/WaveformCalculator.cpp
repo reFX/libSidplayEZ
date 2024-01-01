@@ -32,40 +32,72 @@ namespace reSIDfp
 /**
 * Combined waveform model parameters
 */
+typedef float ( *distance_t )( float, int );
+
 typedef struct
 {
+	distance_t distFunc;
 	float threshold;
+	float topbit;
 	float pulsestrength;
 	float distance1;
 	float distance2;
 } CombinedWaveformConfig;
 
+// Distance functions
+static float exponentialDistance ( float distance, int i )
+{
+	return std::pow ( distance, float ( -i ) );
+}
+
+static float linearDistance ( float distance, int i )
+{
+	return 1.0f / ( 1.0f + i * distance );
+}
+
+static float quadraticDistance ( float distance, int i )
+{
+	return 1.0f / ( 1.0f + ( i * i ) * distance );
+}
+
 /**
-* Parameters derived with the Monte Carlo method based on samplings by Kevtris
-* Code and data available in the project repository [1]
-*
-* The score here reported is the acoustic error calculated XORing the estimated and the sampled values
-* In parentheses the number of mispredicted bits
-*
-* [1] https://github.com/libsidplayfp/combined-waveforms
-*/
+ * Parameters derived with the Monte Carlo method based on
+ * samplings from real machines.
+ * Code and data available in the project repository [1].
+ * Sampling program made by Dag Lem [2].
+ *
+ * The score here reported is the acoustic error
+ * calculated XORing the estimated and the sampled values.
+ * In parentheses the number of mispredicted bits.
+ *
+ * [1] https://github.com/libsidplayfp/combined-waveforms
+ * [2] https://github.com/daglem/reDIP-SID/blob/master/research/combsample.d64
+ */
 const CombinedWaveformConfig config[ 2 ][ 5 ] =
 {
-	// Kevtris chip G (6581 R2)
-	{
-		{	0.862147212f,	0.0f,			10.8962431f,	2.50848103f },	// TS  error  1941 (327/28672)
-		{	0.932746708f,	2.07508397f,	1.03668225f,	1.14876997f },	// PT  error  5992 (126/32768)
-		{	0.860927045f,	2.43506575f,	0.908603609f,	1.07907593f },	// PS  error  3693 (521/28672)
-		{	0.741343081f,	0.0452554375f,	1.1439606f,		1.05711341f },	// PTS error   338 ( 29/28672)
-		{	0.96f,			2.5f,			1.1f,			1.2f        },	// NP  guessed
+	{	// 6581 R3 4785 sampled by Trurl
+		// TS  error 2298 (339/32768)
+		{ exponentialDistance, 0.776678205f, 1.18439901f, 0.0f, 2.25732255f, 5.12803745f },
+		// PT  error  582 (57/32768)
+		{ linearDistance, 1.01866758f, 1.0f, 2.69177628f, 0.0233543925f, 0.0850229636f },
+		// PS  error 9242 (679/32768)
+		{ linearDistance, 2.20329857f, 1.04501438f, 10.5146885f, 0.277294368f, 0.143747061f },
+		// PTS error 2799 (71/32768)
+		{ linearDistance, 1.35652959f, 1.09051275f, 3.21098137f, 0.16658926f, 0.370252877f },
+		// NP  guessed
+		{ exponentialDistance, 0.96f, 1.0f, 2.5f, 1.1f, 1.2f },
 	},
-	// Kevtris chip V (8580 R5)
-	{
-		{	0.715788841f,	0.0f,			1.32999945f,	2.2172699f	},	// TS  error   928 (135/32768)
-		{	0.93500334f,	1.05977178f,	1.08629429f,	1.43518543f	},	// PT  error  7991 (212/32768)
-		{	0.920648575f,	0.943601072f,	1.13034654f,	1.41881108f	},	// PS  error 12566 (394/32768)
-		{	0.90921098f,	0.979807794f,	0.942194462f,	1.40958893f	},	// PTS error  2092 ( 60/32768)
-		{	0.95f,			1.15f,			1.0f,			1.45f		},	// NP  guessed
+	{	// 8580 R5 5092 25 sampled by reFX-Mike
+		// TS  error 1212 (183/32768)
+		{ exponentialDistance, 0.684999049f, 0.916620493f, 0.0f, 1.14715648f, 2.02339816f },
+		// PT  error 6153 (295/32768)
+		{ exponentialDistance,  0.940367579f, 1.0f, 1.26695442f, 0.976729453f, 1.57954705f },
+		// PS  error 7620 (454/32768)
+		{ quadraticDistance, 0.963866293f, 1.22095084f, 1.01380754f, 0.0110885892f, 0.381492466f },
+		// PTS error 3701 (117/32768)
+		{ linearDistance, 0.976761818f, 0.202727556f, 0.988633931f, 0.939373314f, 9.37139416f },
+		// NP  guessed
+		{ exponentialDistance, 0.95f, 1.0f, 1.15f, 1.0f, 1.45f },
 	},
 };
 //-----------------------------------------------------------------------------
@@ -104,12 +136,14 @@ std::vector<int16_t> WaveformCalculator::buildWaveTable ()
 * @param threshold
 * @param accumulator the high bits of the accumulator value
 */
-static int16_t calculatePulldown ( float distancetable[], float pulsestrength, float threshold, unsigned int accumulator )
+static int16_t calculatePulldown ( float distancetable[], float topbit, float pulsestrength, float threshold, unsigned int accumulator )
 {
 	uint8_t	bit[ 12 ];
 
 	for ( auto i = 0; i < 12; i++ )
 		bit[ i ] = ( accumulator & ( 1 << i ) ) ? 1 : 0;
+
+	bit[ 11 ] = uint8_t ( bit[ 11 ] * topbit );
 
 	float   pulldown[ 12 ];
 
@@ -157,17 +191,18 @@ std::vector<int16_t> WaveformCalculator::buildPulldownTable ( const bool is6581 
 	for ( auto wav = 0; wav < 5; wav++ )
 	{
 		const auto&	cfg = cfgArray[ wav ];
+		const auto	distFunc = cfg.distFunc;
 
 		float	distancetable[ 12 * 2 + 1 ];
 		distancetable[ 12 ] = 1.0f;
 		for ( auto i = 12; i > 0; i-- )
 		{
-			distancetable[ 12 - i ] = std::powf ( cfg.distance1, -i );
-			distancetable[ 12 + i ] = std::powf ( cfg.distance2, -i );
+			distancetable[ 12 - i ] = distFunc ( cfg.distance1, i );
+			distancetable[ 12 + i ] = distFunc ( cfg.distance2, i );
 		}
 
 		for ( auto idx = 0u; idx < ( 1 << 12 ); idx++ )
-			pulldownTable[ ( wav << 12 ) + idx ] = calculatePulldown ( distancetable, cfg.pulsestrength, cfg.threshold, idx );
+			pulldownTable[ ( wav << 12 ) + idx ] = calculatePulldown ( distancetable, cfg.topbit, cfg.pulsestrength, cfg.threshold, idx );
 	}
 
 	return pulldownTable;
