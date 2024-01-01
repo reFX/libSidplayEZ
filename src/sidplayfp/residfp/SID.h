@@ -88,8 +88,11 @@ private:
 	// SID voices
 	Voice	voice[ numVoices ];
 
+	// Used to amplify the output by x/2 to get an adequate playback volume
+	int	scaleFactor;
+
 	// Time to live for the last written value
-	int busValueTtl;
+	int	busValueTtl;
 
 	// Current chip model's bus value TTL
 	int modelTTL;
@@ -129,7 +132,9 @@ private:
 		const auto  v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
 		const auto  v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
 
-		return externalFilter.clock ( filter->clock ( v1, v2, v3 ) );
+		const auto	input = ( scaleFactor * uint32_t ( filter->clock ( v1, v2, v3 ) ) ) / 2;
+
+		return externalFilter.clock ( input );
 	}
 
 	/**
