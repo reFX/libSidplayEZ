@@ -84,13 +84,9 @@ protected:
 	// Current volume.
 	uint8_t	vol = 0;
 
-private:
-	uint8_t	filt = 0;		// Selects which inputs to route through filter
-	uint8_t	filtMode = 0;	// Selects which filter types are used
+	uint8_t	filtResMode = 0;		// Selects which inputs to route through filter
+	uint8_t	sumFltResults[ 256 ];	// Precalculate all possible summers and filter mixers
 
-	uint8_t	sumFltResults[ 256 ];
-
-protected:
 	/**
 	* Set filter cutoff frequency.
 	*/
@@ -108,7 +104,7 @@ protected:
 	{
 		currentGain = gain_vol[ vol ];
 
-		const auto	ni_no = sumFltResults[ filtMode | filt ];
+		const auto	ni_no = sumFltResults[ filtResMode ];
 
 		currentSummer = summer[ ni_no >> 4 ];
 		currentMixer = mixer[ ni_no & 0xF ];

@@ -315,7 +315,7 @@ namespace reSIDfp
 class Filter6581 final : public Filter
 {
 private:
-	const uint16_t* f0_dac;
+	const uint16_t* f0_dac = nullptr;
 
 	/// VCR + associated capacitor connected to highpass output.
 	std::unique_ptr<Integrator6581> const hpIntegrator;

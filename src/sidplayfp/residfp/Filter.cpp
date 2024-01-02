@@ -36,16 +36,16 @@ Filter::Filter ()
 		auto	ni = 0;
 		auto	no = 0;
 
-		if ( i & 1 )	{ ni++; } else { no++; }
-	 	if ( i & 2 )	{ ni++; } else { no++; }
-	 	if ( i & 4 )	{ ni++; } else if ( ! ( i & 0x80 ) )	{ no++; }
-	 	if ( i & 8 )	{ ni++; } else { no++; }
+		if ( i & 1 )	{ ni += 0x10; } else { no++; }
+	 	if ( i & 2 )	{ ni += 0x10; } else { no++; }
+	 	if ( i & 4 )	{ ni += 0x10; } else if ( ! ( i & 0x80 ) )	{ no++; }
+	 	if ( i & 8 )	{ ni += 0x10; } else { no++; }
 
 		if ( i & 0x10 )	no++;
 		if ( i & 0x20 )	no++;
 		if ( i & 0x40 )	no++;
 
-		sumFltResults[ i ] = uint8_t ( ( ni << 4 ) | no );
+		sumFltResults[ i ] = uint8_t ( ni | no );
 	}
 }
 //-----------------------------------------------------------------------------
@@ -77,14 +77,14 @@ void Filter::writeFC_HI ( uint8_t fc_hi )
 
 void Filter::writeRES_FILT ( uint8_t res_filt )
 {
-	filt = res_filt & 0xF;
+	filtResMode = ( filtResMode & ~0xF ) | ( res_filt & 0xF );
 
-	updateResonance ( ( res_filt >> 4 ) & 0x0F );
+	updateResonance ( res_filt >> 4 );
 
-	filt1 = filt & 0x01;
-	filt2 = filt & 0x02;
-	filt3 = filt & 0x04;
-	filtE = filt & 0x08;
+	filt1 = res_filt & 0x01;
+	filt2 = res_filt & 0x02;
+	filt3 = res_filt & 0x04;
+	filtE = res_filt & 0x08;
 
 	updatedMixing ();
 }
@@ -92,7 +92,7 @@ void Filter::writeRES_FILT ( uint8_t res_filt )
 
 void Filter::writeMODE_VOL ( uint8_t mode_vol )
 {
-	filtMode = mode_vol & 0xF0;
+	filtResMode = ( filtResMode & ~0xF0 ) | ( mode_vol & 0xF0 );
 
 	vol = mode_vol & 0x0F;
 

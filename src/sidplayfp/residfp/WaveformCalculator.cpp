@@ -107,21 +107,21 @@ std::vector<int16_t> WaveformCalculator::buildWaveTable ()
 	std::vector<int16_t>	waveTable ( 4 * 4096 );
 
 	// Calculate triangle waveform
-	auto triXor = [] ( unsigned int val )
+	auto triXor = [] ( unsigned int val ) -> unsigned int
 	{
 		return ( ( ( val & 0x800 ) == 0 ) ? val : ( val ^ 0xfff ) ) << 1;
 	};
 
 	// Build waveform table
-	for ( auto idx = 0u; idx < ( 1 << 12 ); idx++ )
+	for ( auto idx = 0u; idx < ( 1u << 12 ); idx++ )
 	{
-		const auto  saw = uint16_t ( idx );
-		const auto  tri = uint16_t ( triXor ( idx ) );
+		const auto  saw = int16_t ( idx );
+		const auto  tri = int16_t ( triXor ( idx ) );
 
 		waveTable[ ( 0 << 12 ) + idx ] = 0x0FFF;
 		waveTable[ ( 1 << 12 ) + idx ] = tri;
 		waveTable[ ( 2 << 12 ) + idx ] = saw;
-		waveTable[ ( 3 << 12 ) + idx ] = saw & ( saw << 1 );
+		waveTable[ ( 3 << 12 ) + idx ] = int16_t ( saw & ( saw << 1 ) );
 	}
 
 	return waveTable;
@@ -140,7 +140,7 @@ static int16_t calculatePulldown ( float distancetable[], float topbit, float pu
 {
 	uint8_t	bit[ 12 ];
 
-	for ( auto i = 0; i < 12; i++ )
+	for ( auto i = 0u; i < 12; i++ )
 		bit[ i ] = ( accumulator & ( 1 << i ) ) ? 1 : 0;
 
 	bit[ 11 ] = uint8_t ( bit[ 11 ] * topbit );
@@ -158,7 +158,7 @@ static int16_t calculatePulldown ( float distancetable[], float topbit, float pu
 				continue;
 
 			const auto  weight = distancetable[ sb - cb + 12 ];
-			avg += ( 1 - bit[ cb ] ) * weight;
+			avg += float ( 1 - bit[ cb ] ) * weight;
 			n += weight;
 		}
 
@@ -175,7 +175,7 @@ static int16_t calculatePulldown ( float distancetable[], float topbit, float pu
 		const auto  bitValue = bit[ i ] ? 1.0f - pulldown[ i ] : 0.0f;
 
 		if ( bitValue > threshold )
-			value |= 1 << i;
+			value |= 1u << i;
 	}
 
 	return value;
@@ -187,6 +187,7 @@ std::vector<int16_t> WaveformCalculator::buildPulldownTable ( const bool is6581 
 	std::vector<int16_t>	pulldownTable ( 5 * 4096 );
 
 	const auto  cfgArray = config[ is6581 ? 0 : 1 ];
+	const auto	thresMul = is6581 ? 0.8f : 1.0f;
 
 	for ( auto wav = 0; wav < 5; wav++ )
 	{
@@ -202,7 +203,7 @@ std::vector<int16_t> WaveformCalculator::buildPulldownTable ( const bool is6581 
 		}
 
 		for ( auto idx = 0u; idx < ( 1 << 12 ); idx++ )
-			pulldownTable[ ( wav << 12 ) + idx ] = calculatePulldown ( distancetable, cfg.topbit, cfg.pulsestrength, cfg.threshold, idx );
+			pulldownTable[ ( wav << 12 ) + idx ] = calculatePulldown ( distancetable, cfg.topbit, cfg.pulsestrength, cfg.threshold * thresMul, idx );
 	}
 
 	return pulldownTable;

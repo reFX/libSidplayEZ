@@ -224,11 +224,6 @@ public:
 		#endif
 
 		// VCR voltages for EKV model table lookup.
-// 		const int	kVgt_Vs = ( vx < kVgt ) ? kVgt - vx : 0;
-// 		assert ( kVgt_Vs < ( 1 << 16 ) );
-// 		const int	kVgt_Vd = ( vi < kVgt ) ? kVgt - vi : 0;
-// 		assert ( kVgt_Vd < ( 1 << 16 ) );
-
 		const int	kVgt_Vs = ( kVgt - vx ) + ( 1 << 15 );
 		assert ( ( kVgt_Vs >= 0 ) && ( kVgt_Vs < ( 1 << 16 ) ) );
 		const int	kVgt_Vd = ( kVgt - vi ) + ( 1 << 15 );
