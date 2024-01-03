@@ -383,6 +383,13 @@ public:
 	* @param adjustment 0 .. 2, where 0 sets center frequency low, 1 is default, 2 is bright. This also affects the range
 	*/
 	void setFilterRange ( double adjustment );
+
+	/**
+	* Set DC offset for external filter input which affects the digi volume
+	*
+	* @param adjustment 0 .. 2, where 0 sets volume to zero (inaudble), 1 is default and 2 gets very loud
+	*/
+	void setDigiVolume ( double adjustment );
 };
 
 

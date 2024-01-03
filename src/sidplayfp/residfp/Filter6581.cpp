@@ -38,7 +38,7 @@ Filter6581::Filter6581 ()
 	voiceScaleS11 = FilterModelConfig6581::getInstance ()->getVoiceScaleS11 ();
 	voiceDC = FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ();
 
-	ve = mixer[ 0 ][ 0 ];
+	setDigiVolume ( 1.0 );
 }
 //-----------------------------------------------------------------------------
 
@@ -62,6 +62,12 @@ void Filter6581::setFilterCurve ( double curvePosition )
 void Filter6581::setFilterRange ( double adjustment )
 {
 	FilterModelConfig6581::getInstance ()->setFilterRange ( adjustment );
+}
+//-----------------------------------------------------------------------------
+
+void Filter6581::setDigiVolume ( double adjustment )
+{
+	ve = std::clamp ( int ( mixer[ 0 ][ 0 ] * adjustment ), 0, 32767 );
 }
 //-----------------------------------------------------------------------------
 

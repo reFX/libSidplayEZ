@@ -315,6 +315,13 @@ public:
 	void setFilter6581Range ( double adjustment )	{	filter6581.setFilterRange ( adjustment );	}
 
 	/**
+	* Set filter digi volume for 6581 model
+	*
+	* @see Filter6581::setDigitVolume(double)
+	*/
+	void setFilter6581Digi ( double adjustment )	{	filter6581.setDigiVolume ( adjustment );	}
+
+	/**
 	* Set filter curve parameter for 8580 model.
 	*
 	* @see Filter8580::setFilterCurve(double)

@@ -46,8 +46,9 @@ Filter8580::Filter8580 ()
 	gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();
 	gain_vol = FilterModelConfig8580::getInstance ()->getGainVol ();
 
-	setFilterCurve ( 0.5 );
 	ve = mixer[ 0 ][ 0 ];
+
+	setFilterCurve ( 0.5 );
 }
 //-----------------------------------------------------------------------------
 

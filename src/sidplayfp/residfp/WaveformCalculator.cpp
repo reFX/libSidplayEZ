@@ -187,7 +187,7 @@ std::vector<int16_t> WaveformCalculator::buildPulldownTable ( const bool is6581 
 	std::vector<int16_t>	pulldownTable ( 5 * 4096 );
 
 	const auto  cfgArray = config[ is6581 ? 0 : 1 ];
-	const auto	thresMul = is6581 ? 0.8f : 1.0f;
+	const auto	thresMul = is6581 ? 0.8f : 0.5f;
 
 	for ( auto wav = 0; wav < 5; wav++ )
 	{

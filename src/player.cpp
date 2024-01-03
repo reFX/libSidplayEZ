@@ -279,6 +279,7 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 			selectedChipProfile = profileName;
 			set6581FilterRange ( filterSettings.filter );
 			set6581FilterCurve ( 0.5 );// filterSettings.zeroDac );
+			set6581DigiVolume ( filterSettings.digi );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
@@ -477,6 +478,14 @@ void Player::set6581FilterRange ( const double value )
 	for ( auto i = 0u; i < 3; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->filter6581Range ( value );
+}
+//-----------------------------------------------------------------------------
+
+void Player::set6581DigiVolume ( const double value )
+{
+	for ( auto i = 0u; i < 3; i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->filter6581Digi ( value );
 }
 //-----------------------------------------------------------------------------
 
