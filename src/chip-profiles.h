@@ -30,7 +30,7 @@
 { "Jason Page",							{	.folder = "/MUSICIANS/P/Page_Jason/",				.filter = 0.35	} },
 { "Jeroen Tel",							{	.folder = "/MUSICIANS/T/Tel_Jeroen/",				.filter = 0.35,	.digi = 0.95	} },
 { "Johannes Bjerregaard",				{	.folder = "/MUSICIANS/B/Bjerregaard_Johannes/",		.filter = 0.35	} },
-{ "Johathan Dunn",						{	.folder = "/MUSICIANS/D/Dunn_Jonathan/",			.filter = 0.25	} },
+{ "Jonathan Dunn",						{	.folder = "/MUSICIANS/D/Dunn_Jonathan/",			.filter = 0.25,	.digi = 0.8	} },
 { "Jouni Ikonen (Mixer)",				{	.folder = "/MUSICIANS/M/Mixer/",					.filter = 0.25	} },
 { "Laxity",								{	.folder = "/MUSICIANS/L/Laxity/",					.filter = 0.3	} },
 { "Linus Åkesson (lft)",				{	.folder = "/MUSICIANS/L/Lft/",						.filter = 0.3	} },
