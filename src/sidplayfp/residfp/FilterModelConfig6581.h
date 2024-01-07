@@ -54,11 +54,9 @@ private:
 
 	// VCR - 6581 only.
 	//@{
-	uint16_t    vcr_nVg[ 1 << 16 ];
-	uint16_t    vcr_n_Ids_term[ 1 << 16 ];
+	uint16_t	vcr_nVg[ 1 << 16 ];
+	double		vcr_n_Ids_term[ 1 << 16 ];
 	//@}
-
-	void filterSomething2 ();
 
 	double getDacZero ( double adjustment ) const {	return dac_zero + adjustment;		}
 
@@ -88,7 +86,7 @@ public:
 	std::unique_ptr<Integrator6581> buildIntegrator ()	{	return std::make_unique<Integrator6581> ( this, WL_snake );		}
 
 	inline uint16_t getVcr_nVg ( int i ) const { return vcr_nVg[ i ]; }
-	inline uint16_t getVcr_n_Ids_term ( int i ) const { return vcr_n_Ids_term[ i ]; }
+	inline uint16_t getVcr_n_Ids_term ( int i ) const	{	return uint16_t ( vcr_n_Ids_term[i] * uCox );	}
 
 	#ifdef SLOPE_FACTOR
 		inline double getUt () const { return Ut; }
