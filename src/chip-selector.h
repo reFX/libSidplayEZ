@@ -14,8 +14,8 @@ public:
 	{
 		std::string	folder;
 		double		filter = 0.5;
-		double		digi = 0.85;
-		double		zeroDac = 0.4;
+		double		digi = 1.0;
+		double		zeroDac = 0.5;
 		std::unordered_map<std::string, std::string>	exceptions;
 	};
 
