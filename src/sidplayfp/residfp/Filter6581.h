@@ -2,7 +2,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2022 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004,2010 Dag Lem <resid@nimrod.no>
 *
@@ -324,6 +324,12 @@ private:
 	std::unique_ptr<Integrator6581> const bpIntegrator;
 
 protected:
+	inline int getVoiceDC ( int env ) const override
+	{
+		const auto	voiceDC = 5.0 + ( 0.2145 * double ( env ) / 255.0 );
+		return FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ( voiceDC );
+	}
+
 	/**
 	* Set filter cutoff frequency.
 	*/
@@ -346,10 +352,8 @@ public:
 
 	inline uint16_t clock ( int voice1, int voice2, int voice3 ) override
 	{
-		voice1 = ( voice1 * voiceScaleS11 >> 15 ) + voiceDC;
-		voice2 = ( voice2 * voiceScaleS11 >> 15 ) + voiceDC;
 		// Voice 3 is silenced by voice3off if it is not routed through the filter
-		voice3 = ( filt3 || ! voice3off ) ? ( voice3 * voiceScaleS11 >> 15 ) + voiceDC : 0;
+		voice3 = ( filt3 || ! voice3off ) ? voice3 : 0;
 
 		auto	Vi = 0;
 		auto	Vo = 0;

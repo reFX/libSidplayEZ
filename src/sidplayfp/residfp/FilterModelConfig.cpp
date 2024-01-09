@@ -1,7 +1,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2022 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004,2010 Dag Lem
 *
@@ -27,9 +27,8 @@
 namespace reSIDfp
 {
 
-FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size )
+FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size )
 	: voice_voltage_range ( vvr )
-	, voice_DC_voltage ( vdv )
 	, C ( c )
 	, Vdd ( vdd )
 	, Vth ( vth )

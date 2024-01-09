@@ -1,7 +1,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2023 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2010 Dag Lem
 *
@@ -102,12 +102,11 @@ void FilterModelConfig6581::setFilterRange ( double adjustment )
 
 FilterModelConfig6581::FilterModelConfig6581 ()
 	: FilterModelConfig (
-		1.5,     // voice voltage range
-		5.075,   // voice DC voltage
-		470e-12, // capacitor value
-		12.18,   // Vdd
-		1.31,    // Vth
-		20e-6,   // uCox
+		1.785,		// voice voltage range
+		470e-12,	// capacitor value
+		12.18,		// Vdd
+		1.31,		// Vth
+		20e-6,		// uCox
 		opamp_voltage_6581,
 		OPAMP_SIZE_6581
 	)

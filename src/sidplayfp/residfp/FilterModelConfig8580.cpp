@@ -1,7 +1,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2023 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2010 Dag Lem
 *
@@ -123,12 +123,11 @@ FilterModelConfig8580* FilterModelConfig8580::getInstance ()
 
 FilterModelConfig8580::FilterModelConfig8580 () :
 	FilterModelConfig (
-		0.24,	// voice voltage range
-		4.84,	// voice DC voltage
-		22e-9,  // capacitor value
+		0.237,	// voice voltage range
+		22e-9,	// capacitor value
 		9.09,	// Vdd
 		0.80,	// Vth
-		100e-6, // uCox
+		100e-6,	// uCox
 		opamp_voltage_8580,
 		OPAMP_SIZE_8580
 	)

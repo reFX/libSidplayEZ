@@ -1,7 +1,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2019 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004,2010 Dag Lem <resid@nimrod.no>
 *
@@ -35,12 +35,11 @@ constexpr auto	DAC_WL0 = 0.00615;
 //-----------------------------------------------------------------------------
 
 Filter8580::Filter8580 ()
-	: hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
+	: Filter ( FilterModelConfig8580::getInstance ()->getVoiceScaleS11 () )
+	, voiceDC ( FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC ( 4.76 ) )
+	, hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
 	, bpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
 {
-	voiceScaleS11 = FilterModelConfig8580::getInstance ()->getVoiceScaleS11 ();
-	voiceDC = FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC ();
-
 	mixer = FilterModelConfig8580::getInstance ()->getMixer ();
 	summer = FilterModelConfig8580::getInstance ()->getSummer ();
 	gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();

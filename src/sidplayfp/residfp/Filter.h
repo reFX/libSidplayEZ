@@ -2,7 +2,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2017 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004 Dag Lem <resid@nimrod.no>
 *
@@ -37,8 +37,7 @@ protected:
 	uint16_t**	gain_res = nullptr;
 	uint16_t**	gain_vol = nullptr;
 
-	int voiceScaleS11;
-	int voiceDC;
+	const int voiceScaleS11;
 
 	// Current volume amplifier setting.
 	uint16_t*	currentGain = nullptr;
@@ -100,7 +99,7 @@ protected:
 	/**
 	* Mixing configuration modified (offsets change)
 	*/
-	inline void updatedMixing ()
+	inline void updateMixing ()
 	{
 		currentGain = gain_vol[ vol ];
 
@@ -110,8 +109,10 @@ protected:
 		currentMixer = mixer[ ni_no & 0xF ];
 	}
 
+	virtual int getVoiceDC ( int env ) const = 0;
+
 public:
-	Filter ();
+	Filter ( int _voiceScaleS11 );
 	virtual ~Filter () = default;
 
 	/**
@@ -123,6 +124,8 @@ public:
 	* @return filtered output
 	*/
 	virtual uint16_t clock ( int v1, int v2, int v3 ) = 0;
+
+	inline int getNormalizedVoice ( int val, int env ) const	{	return ( val * voiceScaleS11 / ( 1 << 15 ) ) + getVoiceDC ( env );	}
 
 	/**
 	* SID reset.

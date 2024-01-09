@@ -2,7 +2,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2016 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004 Dag Lem <resid@nimrod.no>
 *
@@ -128,11 +128,15 @@ private:
 	*/
 	inline int output ()
 	{
-		const auto  v1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
-		const auto  v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
-		const auto  v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
+		const int	env1 = voice[ 0 ].envelopeGenerator.output ();
+		const int	env2 = voice[ 1 ].envelopeGenerator.output ();
+		const int	env3 = voice[ 2 ].envelopeGenerator.output ();
 
-		const auto	input = ( scaleFactor * uint32_t ( filter->clock ( v1, v2, v3 ) ) ) / 2;
+		const int	v1 = filter->getNormalizedVoice ( voice[ 0 ].output ( voice[ 2 ].waveformGenerator ), env1 );
+		const int	v2 = filter->getNormalizedVoice ( voice[ 1 ].output ( voice[ 0 ].waveformGenerator ), env2 );
+		const int	v3 = filter->getNormalizedVoice ( voice[ 2 ].output ( voice[ 1 ].waveformGenerator ), env3 );
+
+		const int	input = ( scaleFactor * int ( filter->clock ( v1, v2, v3 ) ) ) / 2;
 
 		return externalFilter.clock ( input );
 	}

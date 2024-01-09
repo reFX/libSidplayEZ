@@ -2,7 +2,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2023 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004,2010 Dag Lem
 *
@@ -33,7 +33,6 @@ class FilterModelConfig
 {
 protected:
 	const double voice_voltage_range;
-	const double voice_DC_voltage;
 
 	// Capacitor value.
 	const double C;
@@ -85,7 +84,6 @@ protected:
 	*/
 	FilterModelConfig (
 		double vvr,
-		double vdv,
 		double c,
 		double vdd,
 		double vth,
@@ -119,12 +117,12 @@ public:
 	* The digital range of one voice is 20 bits; create a scaling term
 	* for multiplication which fits in 11 bits.
 	*/
-	int getVoiceScaleS11 () const { return int ( ( norm * ( ( 1 << 11 ) - 1 ) ) * voice_voltage_range ); }
+	inline int getVoiceScaleS11 () const { return int ( ( norm * ( ( 1 << 11 ) - 1 ) ) * voice_voltage_range ); }
 
 	/**
 	* The "zero" output level of the voices.
 	*/
-	int getNormalizedVoiceDC () const { return int ( N16 * ( voice_DC_voltage - vmin ) ); }
+	inline int getNormalizedVoiceDC ( double voiceDC ) const { return int ( N16 * ( voiceDC - vmin ) ); }
 
 	inline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }
 	inline double getVddt () const { return Vddt; }

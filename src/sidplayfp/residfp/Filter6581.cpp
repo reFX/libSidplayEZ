@@ -1,7 +1,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2015 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004,2010 Dag Lem <resid@nimrod.no>
 *
@@ -27,7 +27,8 @@ namespace reSIDfp
 //-----------------------------------------------------------------------------
 
 Filter6581::Filter6581 ()
-	: f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
+	: Filter ( FilterModelConfig6581::getInstance ()->getVoiceScaleS11 () )
+	, f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
 	, hpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
 	, bpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
 {
@@ -35,8 +36,7 @@ Filter6581::Filter6581 ()
 	summer = FilterModelConfig6581::getInstance ()->getSummer ();
 	gain_res = FilterModelConfig6581::getInstance ()->getGainRes ();
 	gain_vol = FilterModelConfig6581::getInstance ()->getGainVol ();
-	voiceScaleS11 = FilterModelConfig6581::getInstance ()->getVoiceScaleS11 ();
-	voiceDC = FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ();
+//	voiceDC = FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ();
 
 	setDigiVolume ( 1.0 );
 }

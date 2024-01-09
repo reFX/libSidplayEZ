@@ -1,7 +1,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2016 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004 Dag Lem <resid@nimrod.no>
 *
@@ -100,10 +100,6 @@ constexpr auto	OSC_DAC_BITS = 12u;
 * whereas that digi-compatible 8580 has it very narrow.
 * On my 6581R4AR has 0x3A as the only value giving the same output level as 1.prg
 */
-//@{
-unsigned int constexpr OFFSET_6581 = 0x380;
-unsigned int constexpr OFFSET_8580 = 0x9c0;
-//@}
 
 /**
 * Bus value stays alive for some time after each operation.
@@ -171,7 +167,7 @@ void SID::setChipModel ( ChipModel _model )
 		Dac dacBuilder ( OSC_DAC_BITS );
 		dacBuilder.kinkedDac ( model == MOS6581 );
 
-		const auto  offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
+		const auto  offset = double ( 1 << ( OSC_DAC_BITS - 1 ) );
 
 		for ( auto i = 0u; i < ( 1 << OSC_DAC_BITS ); i++ )
 			oscDAC[ i ] = float ( dacBuilder.getOutput ( i ) - offset );

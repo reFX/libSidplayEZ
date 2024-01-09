@@ -1,7 +1,7 @@
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
-* Copyright 2011-2013 Leandro Nini <drfiemost@users.sourceforge.net>
+* Copyright 2011-2024 Leandro Nini <drfiemost@users.sourceforge.net>
 * Copyright 2007-2010 Antti Lankila
 * Copyright 2004 Dag Lem <resid@nimrod.no>
 *
@@ -28,7 +28,8 @@ namespace reSIDfp
 
 //-----------------------------------------------------------------------------
 
-Filter::Filter ()
+Filter::Filter ( int _voiceScaleS11 )
+	: voiceScaleS11 ( _voiceScaleS11 )
 {
 	// Pre-calculate all possible summer/mixer combinations
 	for ( auto i = 0u; i < std::size ( sumFltResults ); ++i )
@@ -86,7 +87,7 @@ void Filter::writeRES_FILT ( uint8_t res_filt )
 	filt3 = res_filt & 0x04;
 	filtE = res_filt & 0x08;
 
-	updatedMixing ();
+	updateMixing ();
 }
 //-----------------------------------------------------------------------------
 
@@ -102,7 +103,7 @@ void Filter::writeMODE_VOL ( uint8_t mode_vol )
 
 	voice3off = mode_vol & 0x80;
 
-	updatedMixing ();
+	updateMixing ();
 }
 //-----------------------------------------------------------------------------
 
