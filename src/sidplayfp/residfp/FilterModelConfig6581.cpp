@@ -96,7 +96,7 @@ void FilterModelConfig6581::setFilterRange ( double adjustment )
 	if ( std::abs ( uCox - adjustment ) < 1e-12 )
 		return;
 
-	uCox = adjustment;
+	setUCox ( adjustment );
 }
 //-----------------------------------------------------------------------------
 

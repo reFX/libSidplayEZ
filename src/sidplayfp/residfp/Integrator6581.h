@@ -177,16 +177,18 @@ private:
 	const uint16_t	nVddt;
 	const uint16_t	nVt;
 	const uint16_t	nVmin;
-	const uint16_t	nSnake;
+//	const uint16_t	nSnake;
+	const double	WL_snake;
 
 	const FilterModelConfig6581* fmc;
 
 public:
-	Integrator6581 ( const FilterModelConfig6581* _fmc, double WL_snake )
+	Integrator6581 ( const FilterModelConfig6581* _fmc, double _WL_snake )
 		: nVddt ( _fmc->getNormalizedValue ( _fmc->getVddt () ) )
 		, nVt ( _fmc->getNormalizedValue ( _fmc->getVth () ) )
 		, nVmin ( _fmc->getNVmin () )
-		, nSnake ( _fmc->getNormalizedCurrentFactor ( WL_snake ) )
+//		, nSnake ( _fmc->getNormalizedCurrentFactor ( WL_snake ) )
+		, WL_snake ( _WL_snake )
 		, fmc ( _fmc )
 	{
 	}
@@ -210,11 +212,11 @@ public:
 		const unsigned int Vgdt_2 = Vgdt * Vgdt;
 
 		// "Snake" current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
-		const int n_I_snake = nSnake * ( static_cast<int>( Vgst_2 - Vgdt_2 ) >> 15 );
+		const auto	n_I_snake = fmc->getNormalizedCurrentFactor ( WL_snake ) * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
 
 		// VCR gate voltage.       // Scaled by m*2^16
 		// Vg = Vddt - sqrt(((Vddt - Vw)^2 + Vgdt^2)/2)
-		const int nVg = static_cast<int>( fmc->getVcr_nVg ( ( nVddt_Vw_2 + ( Vgdt_2 >> 1 ) ) >> 16 ) );
+		const auto	nVg = int ( fmc->getVcr_nVg ( ( nVddt_Vw_2 + ( Vgdt_2 >> 1 ) ) >> 16 ) );
 
 		#ifdef SLOPE_FACTOR
 			const double nVp = static_cast<double>( nVg - nVt ) / n; // Pinch-off voltage

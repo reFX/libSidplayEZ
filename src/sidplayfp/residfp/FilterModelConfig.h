@@ -54,7 +54,7 @@ protected:
 	const double N16;
 
 	// Current factor coefficient for op-amp integrators
-	const double currFactorCoeff;
+	double currFactorCoeff;
 
 	// Lookup tables for gain and summer op-amps in output stage / filter
 	//@{
@@ -106,6 +106,8 @@ protected:
 			delete[] gain_res[ i ];
 		}
 	}
+
+	void setUCox ( double new_uCox );
 
 public:
 	uint16_t** getGainVol () { return gain_vol; }
