@@ -27,6 +27,7 @@
 namespace reSIDfp
 {
 	typedef enum { MOS6581 = 1, MOS8580 } ChipModel;
+	typedef enum { WEAK, AVERAGE, STRONG } CombinedWaveforms;
 }
 
 #include "Filter6581.h"
@@ -38,24 +39,6 @@ namespace reSIDfp
 namespace reSIDfp
 {
 
-//-----------------------------------------------------------------------------
-
-/**
-* SID error exception.
-*/
-class SIDError
-{
-private:
-	const char* message;
-
-public:
-	SIDError ( const char* msg )
-		: message ( msg )
-	{
-	}
-
-	const char* getMessage () const { return message; }
-};
 //-----------------------------------------------------------------------------
 
 /**
@@ -191,6 +174,11 @@ public:
 	* Get currently emulated chip model.
 	*/
 	ChipModel getChipModel () const { return model; }
+
+	/**
+	* Set combined waveforms strength.
+	*/
+	void setCombinedWaveforms ( CombinedWaveforms cws, const float threshold );
 
 	/**
 	* SID reset.

@@ -295,7 +295,7 @@ protected:
 	*
 	* @param res the new resonance value
 	*/
-	void updateResonance ( uint8_t res ) override { currentResonance = gain_res[ res ]; }
+	void updateResonance ( uint8_t res ) override { currentResonance = resonance[ res ]; }
 
 public:
 	Filter8580 ();
@@ -321,7 +321,7 @@ public:
 		if ( bp ) Vo += Vbp;
 		if ( hp ) Vo += Vhp;
 
-		return currentGain[ currentMixer[ Vo ] ];
+		return currentVolume[ currentMixer[ Vo ] ];
 	}
 
 	/**

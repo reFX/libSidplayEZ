@@ -123,7 +123,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 	//
 	// We spawn six threads to calculate these tables in parallel
 	//
-	auto filterSummer = [ this ]
+	auto buildSummerTable = [ this ]
 	{
 		OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
@@ -151,7 +151,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			}
 		}
 	};
-	auto filterMixer = [ this ]
+	auto builMixerTable = [ this ]
 	{
 		OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
@@ -175,7 +175,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			}
 		}
 	};
-	auto filterGain = [ this ]
+	auto buildVolumeTable = [ this ]
 	{
 		OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
@@ -189,16 +189,16 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			const auto  size = 1 << 16;
 			const auto  n = n8 / 12.0;
 			opampModel.reset ();
-			gain_vol[ n8 ] = new uint16_t[ size ];
+			volume[ n8 ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
 				const auto  vin = vmin + vi / N16; // vmin .. vmax
-				gain_vol[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
+				volume[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
 			}
 		}
 	};
-	auto filterGainRes = [ this ]
+	auto buildResonanceTable = [ this ]
 	{
 		OpAmp   opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_6581 ), std::end ( opamp_voltage_6581 ) ), Vddt, vmin, vmax );
 
@@ -212,12 +212,12 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			const auto  size = 1 << 16;
 			const auto  n = ( ~n8 & 0xF ) / 8.0;
 			opampModel.reset ();
-			gain_res[ n8 ] = new uint16_t[ size ];
+			resonance[ n8 ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
 				const auto  vin = vmin + vi / N16; // vmin .. vmax
-				gain_res[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
+				resonance[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
 			}
 		}
 	};
@@ -261,17 +261,17 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 		}
 	};
 
-	auto    thdSummer = std::thread ( filterSummer );
-	auto    thdMixer = std::thread ( filterMixer );
-	auto    thdGain = std::thread ( filterGain );
-	auto    thdGainRes = std::thread ( filterGainRes );
+	auto    thdSummer = std::thread ( buildSummerTable );
+	auto    thdMixer = std::thread ( builMixerTable );
+	auto    thdVolume = std::thread ( buildVolumeTable );
+	auto    thdResonance = std::thread ( buildResonanceTable );
 	auto    thdSomething1 = std::thread ( filterSomething1 );
 	auto    thdSomething2 = std::thread ( filterSomething2 );
 
 	thdSummer.join ();
 	thdMixer.join ();
-	thdGain.join ();
-	thdGainRes.join ();
+	thdVolume.join ();
+	thdResonance.join ();
 	thdSomething1.join ();
 	thdSomething2.join ();
 }

@@ -62,28 +62,10 @@ void sidemu::unlock ()
 }
 //-----------------------------------------------------------------------------
 
-void sidemu::model ( SidConfig::sid_model_t _model )
-{
-	m_sid.setChipModel ( _model == SidConfig::MOS6581 ? reSIDfp::MOS6581 : reSIDfp::MOS8580 );
-	m_status = true;
-}
-//-----------------------------------------------------------------------------
-
 void sidemu::sampling ( float systemfreq, float outputfreq )
 {
-	try
-	{
-		const auto  halfFreq = int ( std::min ( outputfreq * ( 20000.0f / 44100.0f ), 20000.0f ) );
-		m_sid.setSamplingParameters ( systemfreq, outputfreq, halfFreq );
-	}
-	catch ( reSIDfp::SIDError const& )
-	{
-		m_status = false;
-		m_error = "Unable to set desired output frequency.";
-		return;
-	}
-
-	m_status = true;
+	const auto  halfFreq = int ( std::min ( outputfreq * ( 20000.0f / 44100.0f ), 20000.0f ) );
+	m_sid.setSamplingParameters ( systemfreq, outputfreq, halfFreq );
 }
 //-----------------------------------------------------------------------------
 

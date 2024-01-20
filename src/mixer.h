@@ -140,7 +140,7 @@ public:
 	* @param i the number of the SID to get
 	* @return a pointer to the requested sid emu or 0 if not found
 	*/
-	[[ nodiscard ]] inline sidemu* getSid ( unsigned int i ) const { return ( i < m_chips.size () ) ? m_chips[ i ] : nullptr; }
+	[[ nodiscard ]] inline sidemu* getSid ( int i ) const { return ( i < int ( m_chips.size () ) ) ? m_chips[ i ] : nullptr; }
 
 	/**
 	* Set mixing mode.

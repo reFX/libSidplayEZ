@@ -42,8 +42,8 @@ Filter8580::Filter8580 ()
 {
 	mixer = FilterModelConfig8580::getInstance ()->getMixer ();
 	summer = FilterModelConfig8580::getInstance ()->getSummer ();
-	gain_res = FilterModelConfig8580::getInstance ()->getGainRes ();
-	gain_vol = FilterModelConfig8580::getInstance ()->getGainVol ();
+	resonance = FilterModelConfig8580::getInstance ()->getResonance ();
+	volume = FilterModelConfig8580::getInstance ()->getVolume ();
 
 	ve = mixer[ 0 ][ 0 ];
 

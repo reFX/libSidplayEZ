@@ -138,8 +138,6 @@ void SID::setChipModel ( ChipModel _model )
 {
 	model = _model;
 
-	pulldownTable = WaveformCalculator::buildPulldownTable ( model == MOS6581 );
-
 	if ( model == MOS6581 )
 	{
 		filter = &filter6581;
@@ -180,8 +178,18 @@ void SID::setChipModel ( ChipModel _model )
 		vce.setWavDAC ( oscDAC );
 		vce.waveformGenerator.setModel ( model == MOS6581 );
 		vce.waveformGenerator.setWaveformModels ( waveTable );
-		vce.waveformGenerator.setPulldownModels ( pulldownTable );
 	}
+
+	setCombinedWaveforms ( CombinedWaveforms::STRONG, model == MOS6581 ? 1.0f : 0.5f );
+}
+//-----------------------------------------------------------------------------
+
+void SID::setCombinedWaveforms ( CombinedWaveforms cws, const float threshold )
+{
+	WaveformCalculator::buildPulldownTable ( pulldownTable, model == MOS6581, cws, threshold );
+
+	for ( auto& vce : voice )
+		vce.waveformGenerator.setPulldownModels ( pulldownTable );
 }
 //-----------------------------------------------------------------------------
 

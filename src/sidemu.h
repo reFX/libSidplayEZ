@@ -61,7 +61,6 @@ protected:
 	/// Current position in buffer
 	int	m_bufferpos = 0;
 
-	bool m_status = true;
 	bool isLocked = false;
 
 	std::string m_error = "N/A";
@@ -94,7 +93,8 @@ public:
 	/**
 	* Set SID model.
 	*/
-	void model ( SidConfig::sid_model_t _model );
+
+	void model ( SidConfig::sid_model_t _model )	{	m_sid.setChipModel ( _model == SidConfig::MOS6581 ? reSIDfp::MOS6581 : reSIDfp::MOS8580 );	}
 
 	/**
 	* Set the sampling method.
@@ -114,9 +114,12 @@ public:
 	[[ nodiscard ]] uint8_t read ( uint8_t addr ) override				{	clock ();	return m_sid.read ( addr );	}
 	void write ( uint8_t addr, uint8_t data ) override	{	clock ();	m_sid.write ( addr, data );	}
 
+	void combinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold )	{	m_sid.setCombinedWaveforms ( cws, threshold );	}
+
 	void filter6581Curve ( double filterCurve )			{	m_sid.setFilter6581Curve ( filterCurve );	}
 	void filter6581Range ( double adjustment )			{	m_sid.setFilter6581Range ( adjustment );	}
 	void filter6581Digi ( double adjustment )			{	m_sid.setFilter6581Digi ( adjustment );		}
+
 	void filter8580Curve ( double filterCurve )			{	m_sid.setFilter8580Curve ( filterCurve );	}
 
 	[[ nodiscard ]] float getInternalEnvValue ( int voiceNo ) const		{	return m_sid.getEnvLevel ( voiceNo );		}

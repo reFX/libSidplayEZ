@@ -34,8 +34,8 @@ Filter6581::Filter6581 ()
 {
 	mixer = FilterModelConfig6581::getInstance ()->getMixer ();
 	summer = FilterModelConfig6581::getInstance ()->getSummer ();
-	gain_res = FilterModelConfig6581::getInstance ()->getGainRes ();
-	gain_vol = FilterModelConfig6581::getInstance ()->getGainVol ();
+	resonance = FilterModelConfig6581::getInstance ()->getResonance ();
+	volume = FilterModelConfig6581::getInstance ()->getVolume ();
 //	voiceDC = FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ();
 
 	setDigiVolume ( 1.0 );

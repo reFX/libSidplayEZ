@@ -35,14 +35,14 @@ class SidInfoImpl final : public SidInfo
 {
 public:
 	const std::string	m_name = "libsidplayEZ";
-	const std::string	m_version = "2.5.0";
+	const std::string	m_version = "2.6.0";
 
 	std::vector<std::string>	m_credits = {
-		"libsidplayEZ 2.5.0 Engine:\n",
+		m_name + " " + m_version + " Engine:\n",
 		"Copyright (C) 2000 Simon White\n",
 		"Copyright (C) 2007-2010 Antti Lankila\n",
-		"Copyright (C) 2010-2023 Leandro Nini\n",
-		"Copyright (C) 2023 Michael Hartmann\n",
+		"Copyright (C) 2010-2024 Leandro Nini\n",
+		"Copyright (C) 2023-2024 Michael Hartmann\n",
 		"https://github.com/reFX/libsidplayEZ/\n",
 	};
 

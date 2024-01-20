@@ -53,22 +53,6 @@ Player::Player ()
 
 	setConfig ( m_cfg );
 
-	//
-	// Default filter-curve map
-	//
-/*	fcMap = {
-		{ "david dunn",					1.1 },
-		{ "david dunn & aidan bell",	1.1 },
-//		{ "martin galway",				0.6 },	// Any other setting higher than 0.5 makes "Wizball" misbehave
-		{ "chris h\xFClsbeck",			0.6 },
-		{ "georg feil",					0.6 },
-		{ "jeroen tel",					0.6 },
-		{ "rob hubbard",				0.6 },
-		{ "rob hubbard & ben dagglish",	0.6 },
-		{ "fred gray",					1.1 },	// He only used the filter in "Frankie Goes to Hollywood"
-		{ "geir tjelta",				0.6 },
-	};
-*/
 	// Get component credits
 	m_info.m_credits.push_back ( m_c64.cpuCredits () );
 	m_info.m_credits.push_back ( m_c64.ciaCredits () );
@@ -271,15 +255,17 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 			sidCreate ( cfg.defaultSidModel, cfg.forceSidModel, addresses );
 
 			//
-			// Attempt to have better sounding 6581 filters by adjusting the curve per author
-			// with the assumption they worked with the same machine their entire career
+			// Attempt to have better sounding SIDs by adjusting filter-range, digi-boost, and combined waveform strength
+			// per author with the assumption they worked with the same machine their entire career
 			//
-			const auto [ profileName, filterSettings ] = chipSelector.getChipProfile ( tuneInfo->path (), tuneInfo->dataFileName () );
+			const auto [ profileName, chipProfile ] = chipSelector.getChipProfile ( tuneInfo->path (), tuneInfo->dataFileName () );
 
 			selectedChipProfile = profileName;
-			set6581FilterRange ( filterSettings.filter );
-			set6581FilterCurve ( 0.5 );// filterSettings.zeroDac );
-			set6581DigiVolume ( filterSettings.digi );
+
+			setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), float ( chipProfile.cwsThreshold ) );
+			set6581FilterRange ( chipProfile.filter );
+			set6581FilterCurve ( chipProfile.zeroDac );
+			set6581DigiVolume ( chipProfile.digi );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
@@ -418,7 +404,7 @@ void Player::sidRelease ()
 {
 	m_c64.clearSids ();
 
-	for ( auto i = 0u; i < 3; i++ )
+	for ( auto i = 0; i < 3; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 				s->unlock ();
 
@@ -459,15 +445,23 @@ void Player::sidCreate ( SidConfig::sid_model_t defaultModel, bool forced, const
 
 void Player::sidParams ( double cpuFreq, int frequency )
 {
-	for ( auto i = 0u; i < 3 ; i++ )
+	for ( auto i = 0; i < 3 ; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
-			s->sampling ( (float)cpuFreq, frequency );
+			s->sampling ( float ( cpuFreq ), frequency );
+}
+//-----------------------------------------------------------------------------
+
+void Player::setCombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold )
+{
+	for ( auto i = 0; i < 3; i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->combinedWaveforms ( cws, threshold );
 }
 //-----------------------------------------------------------------------------
 
 void Player::set6581FilterCurve ( const double value )
 {
-	for ( auto i = 0u; i < 3; i++ )
+	for ( auto i = 0; i < 3; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->filter6581Curve ( value );
 }
@@ -475,7 +469,7 @@ void Player::set6581FilterCurve ( const double value )
 
 void Player::set6581FilterRange ( const double value )
 {
-	for ( auto i = 0u; i < 3; i++ )
+	for ( auto i = 0; i < 3; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->filter6581Range ( value );
 }
@@ -483,7 +477,7 @@ void Player::set6581FilterRange ( const double value )
 
 void Player::set6581DigiVolume ( const double value )
 {
-	for ( auto i = 0u; i < 3; i++ )
+	for ( auto i = 0; i < 3; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->filter6581Digi ( value );
 }

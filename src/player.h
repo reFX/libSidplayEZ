@@ -105,6 +105,9 @@ public:
 	[[ nodiscard ]] int getNumChips () const { return m_mixer.getNumChips (); }
 
 	void setChipProfiles ( const ChipSelector::profileMap& map ) { chipSelector.setProfiles ( map ); }
+
+	void setCombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold );
+
 	void set6581FilterCurve ( const double value );
 	void set6581FilterRange ( const double value );
 	void set6581DigiVolume ( const double value );

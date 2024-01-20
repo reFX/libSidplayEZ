@@ -60,8 +60,8 @@ protected:
 	//@{
 	uint16_t*	mixer[ 8 ];       //-V730_NOINIT this is initialized in the derived class constructor
 	uint16_t*	summer[ 5 ];      //-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	gain_vol[ 16 ];   //-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	gain_res[ 16 ];   //-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t*	volume[ 16 ];   //-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t*	resonance[ 16 ];   //-V730_NOINIT this is initialized in the derived class constructor
 	//@}
 
 	// Reverse op-amp transfer function
@@ -102,16 +102,16 @@ protected:
 
 		for ( int i = 0; i < 16; i++ )
 		{
-			delete[] gain_vol[ i ];
-			delete[] gain_res[ i ];
+			delete[] volume[ i ];
+			delete[] resonance[ i ];
 		}
 	}
 
 	void setUCox ( double new_uCox );
 
 public:
-	uint16_t** getGainVol () { return gain_vol; }
-	uint16_t** getGainRes () { return gain_res; }
+	uint16_t** getVolume () { return volume; }
+	uint16_t** getResonance () { return resonance; }
 	uint16_t** getSummer () { return summer; }
 	uint16_t** getMixer () { return mixer; }
 

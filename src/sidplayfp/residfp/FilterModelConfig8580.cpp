@@ -138,7 +138,7 @@ FilterModelConfig8580::FilterModelConfig8580 () :
 	// We spawn four threads to calculate these tables in parallel
 	//
 
-	auto filterSummer = [ this ]
+	auto buildSummerTable = [ this ]
 	{
 		OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
 		// The filter summer operates at n ~ 1, and has 5 fundamentally different
@@ -163,7 +163,7 @@ FilterModelConfig8580::FilterModelConfig8580 () :
 			}
 		}
 	};
-	auto filterMixer = [ this ]
+	auto builMixerTable = [ this ]
 	{
 		OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
 		// The audio mixer operates at n ~ 8/5, and has 8 fundamentally different
@@ -186,7 +186,7 @@ FilterModelConfig8580::FilterModelConfig8580 () :
 			}
 		}
 	};
-	auto filterGain = [ this ]
+	auto buildVolumeTable = [ this ]
 	{
 		OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
 		// 4 bit "resistor" ladders in the audio output gain
@@ -199,16 +199,16 @@ FilterModelConfig8580::FilterModelConfig8580 () :
 			const auto  size = 1 << 16;
 			const auto  n = n8 / 16.0;
 			opampModel.reset ();
-			gain_vol[ n8 ] = new uint16_t[ size ];
+			volume[ n8 ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
 				const auto  vin = vmin + vi / N16; // vmin .. vmax
-				gain_vol[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
+				volume[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
 			}
 		}
 	};
-	auto filterGainRes = [ this ]
+	auto buildResonanceTable = [ this ]
 	{
 		OpAmp opampModel ( std::vector<Spline::Point> ( std::begin ( opamp_voltage_8580 ), std::end ( opamp_voltage_8580 ) ), Vddt, vmin, vmax );
 		// 4 bit "resistor" ladders in the bandpass resonance gain necessitate 16 gain tables.
@@ -217,25 +217,25 @@ FilterModelConfig8580::FilterModelConfig8580 () :
 		{
 			const auto  size = 1 << 16;
 			opampModel.reset ();
-			gain_res[ n8 ] = new uint16_t[ size ];
+			resonance[ n8 ] = new uint16_t[ size ];
 
 			for ( auto vi = 0; vi < size; vi++ )
 			{
 				const auto  vin = vmin + vi / N16; // vmin .. vmax
-				gain_res[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( resGain[ n8 ], vin ) );
+				resonance[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( resGain[ n8 ], vin ) );
 			}
 		}
 	};
 
-	auto    thdSummer = std::thread ( filterSummer );
-	auto    thdMixer = std::thread ( filterMixer );
-	auto    thdGain = std::thread ( filterGain );
-	auto    thdGainRes = std::thread ( filterGainRes );
+	auto    thdSummer = std::thread ( buildSummerTable );
+	auto    thdMixer = std::thread ( builMixerTable );
+	auto    thdVolume = std::thread ( buildVolumeTable );
+	auto    thdResonance = std::thread ( buildResonanceTable );
 
 	thdSummer.join ();
 	thdMixer.join ();
-	thdGain.join ();
-	thdGainRes.join ();
+	thdVolume.join ();
+	thdResonance.join ();
 }
 //-----------------------------------------------------------------------------
 

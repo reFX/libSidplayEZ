@@ -177,7 +177,6 @@ private:
 	const uint16_t	nVddt;
 	const uint16_t	nVt;
 	const uint16_t	nVmin;
-//	const uint16_t	nSnake;
 	const double	WL_snake;
 
 	const FilterModelConfig6581* fmc;
@@ -187,7 +186,6 @@ public:
 		: nVddt ( _fmc->getNormalizedValue ( _fmc->getVddt () ) )
 		, nVt ( _fmc->getNormalizedValue ( _fmc->getVth () ) )
 		, nVmin ( _fmc->getNVmin () )
-//		, nSnake ( _fmc->getNormalizedCurrentFactor ( WL_snake ) )
 		, WL_snake ( _WL_snake )
 		, fmc ( _fmc )
 	{

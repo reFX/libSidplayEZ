@@ -34,13 +34,13 @@ class Filter
 protected:
 	uint16_t**	mixer = nullptr;
 	uint16_t**	summer = nullptr;
-	uint16_t**	gain_res = nullptr;
-	uint16_t**	gain_vol = nullptr;
+	uint16_t**	resonance = nullptr;
+	uint16_t**	volume = nullptr;
 
 	const int voiceScaleS11;
 
 	// Current volume amplifier setting.
-	uint16_t*	currentGain = nullptr;
+	uint16_t*	currentVolume = nullptr;
 
 	// Current filter/voice mixer setting.
 	uint16_t*	currentMixer = nullptr;
@@ -101,7 +101,7 @@ protected:
 	*/
 	inline void updateMixing ()
 	{
-		currentGain = gain_vol[ vol ];
+		currentVolume = volume[ vol ];
 
 		const auto	ni_no = sumFltResults[ filtResMode ];
 
