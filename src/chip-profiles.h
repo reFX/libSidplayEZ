@@ -55,3 +55,4 @@
 { "Barry Leitch (The Jackal)",			{	.folder = "/MUSICIANS/L/Leitch_Barry/",				.filter = 0.05,	.digi = 1.25 } },
 { "Markus Schneider",					{	.folder = "/MUSICIANS/S/Schneider_Markus/",			.digi = 1.1	} },
 { "Ramiro Vaca",						{	.folder = "/MUSICIANS/V/Vaca_Ramiro/",				.digi = 0.85	} },
+{ "Mark Wilson",						{	.folder = "/MUSICIANS/W/Wilson_Mark/",				.filter = 0.2,	.digi = 1.1	} },
