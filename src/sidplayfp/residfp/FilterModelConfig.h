@@ -25,6 +25,7 @@
 #include <cassert>
 
 #include "Spline.h"
+#include "OpAmp.h"
 
 namespace reSIDfp
 {
@@ -92,21 +93,12 @@ protected:
 		int opamp_size
 	);
 
-	~FilterModelConfig ()
-	{
-		for ( int i = 0; i < 8; i++ )
-			delete[] mixer[ i ];
+	~FilterModelConfig ();
 
-		for ( int i = 0; i < 5; i++ )
-			delete[] summer[ i ];
-
-		for ( int i = 0; i < 16; i++ )
-		{
-			delete[] volume[ i ];
-			delete[] resonance[ i ];
-		}
-	}
-
+	void buildSummerTable ( OpAmp& opAmp );
+	void buildMixerTable ( OpAmp& opampModel, double nRatio );
+	void buildVolumeTable ( OpAmp& opampModel, double nDivisor );
+	void buildResonanceTable ( OpAmp& opampModel, const double resonance_n[ 16 ] );
 	void setUCox ( double new_uCox );
 
 public:
