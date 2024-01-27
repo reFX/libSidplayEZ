@@ -255,7 +255,7 @@ public:
 		assert ( tmp < ( 1 << 16 ) );
 		vx = fmc->getOpampRev ( tmp );
 
-		// Return vo.
+		// Return vo
 		return vx - ( vc >> 14 );
 	}
 };

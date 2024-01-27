@@ -33,8 +33,6 @@ namespace reSIDfp
 class FilterModelConfig
 {
 protected:
-	const double voice_voltage_range;
-
 	// Capacitor value.
 	const double C;
 
@@ -53,6 +51,9 @@ protected:
 
 	// Fixed point scaling for 16 bit op-amp output.
 	const double N16;
+
+	const double voice_voltage_range;
+	const double voice_DC_voltage;
 
 	// Current factor coefficient for op-amp integrators
 	double currFactorCoeff;
@@ -85,6 +86,7 @@ protected:
 	*/
 	FilterModelConfig (
 		double vvr,
+		double vdv,
 		double c,
 		double vdd,
 		double vth,

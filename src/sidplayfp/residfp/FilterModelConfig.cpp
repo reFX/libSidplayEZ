@@ -27,9 +27,8 @@
 namespace reSIDfp
 {
 
-FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size )
-	: voice_voltage_range ( vvr )
-	, C ( c )
+FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size )
+	: C ( c )
 	, Vdd ( vdd )
 	, Vth ( vth )
 	, Ut ( 26.0e-3 )
@@ -38,7 +37,9 @@ FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double 
 	, vmax ( std::max ( Vddt, opamp_voltage[ 0 ].y ) )
 	, denorm ( vmax - vmin )
 	, norm ( 1.0 / denorm )
-	, N16 ( norm* ( ( 1 << 16 ) - 1 ) )
+	, N16 ( norm * ( ( 1 << 16 ) - 1 ) )
+	, voice_voltage_range ( vvr )
+	, voice_DC_voltage ( vdv )
 {
 	setUCox ( ucox );
 

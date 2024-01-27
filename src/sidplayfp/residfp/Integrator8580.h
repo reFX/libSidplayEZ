@@ -104,7 +104,7 @@ public:
 		const unsigned int Vgdt_2 = Vgdt * Vgdt;
 
 		// DAC current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
-		const int n_I_dac = n_dac * ( static_cast<int>( Vgst_2 - Vgdt_2 ) >> 15 );
+		const auto	n_I_dac = n_dac * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
 
 		// Change in capacitor charge.
 		vc += n_I_dac;
@@ -114,7 +114,7 @@ public:
 		assert ( tmp < ( 1 << 16 ) );
 		vx = fmc->getOpampRev ( tmp );
 
-		// Return vo.
+		// Return vo
 		return vx - ( vc >> 14 );
 	}
 };
