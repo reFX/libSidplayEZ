@@ -35,17 +35,17 @@ constexpr auto	DAC_WL0 = 0.00615;
 //-----------------------------------------------------------------------------
 
 Filter8580::Filter8580 ()
-	: Filter ( FilterModelConfig8580::getInstance ()->getVoiceScaleS11 () )
+	: Filter ( *FilterModelConfig8580::getInstance (), FilterModelConfig8580::getInstance ()->getVoiceScaleS11 () )
 	, voiceDC ( FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC ( 4.76 ) )
-	, hpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
-	, bpIntegrator ( FilterModelConfig8580::getInstance ()->buildIntegrator () )
+	, hpIntegrator ( FilterModelConfig8580::getInstance () )
+	, bpIntegrator ( FilterModelConfig8580::getInstance () )
 {
 	mixer = FilterModelConfig8580::getInstance ()->getMixer ();
 	summer = FilterModelConfig8580::getInstance ()->getSummer ();
 	resonance = FilterModelConfig8580::getInstance ()->getResonance ();
 	volume = FilterModelConfig8580::getInstance ()->getVolume ();
 
-	ve = mixer[ 0 ][ 0 ];
+	Ve = mixer[ 0 ][ 0 ];
 
 	setFilterCurve ( 0.5 );
 }
@@ -71,8 +71,8 @@ void Filter8580::updatedCenterFrequency ()
 		wl = dacWL / 2.0;
 	}
 
-	hpIntegrator->setFc ( wl );
-	bpIntegrator->setFc ( wl );
+	hpIntegrator.setFc ( wl );
+	bpIntegrator.setFc ( wl );
 }
 //-----------------------------------------------------------------------------
 
@@ -82,8 +82,8 @@ void Filter8580::setFilterCurve ( double curvePosition )
 	// 1.2 <= cp <= 1.8
 	cp = 1.2 + curvePosition * 3.0 / 5.0;
 
-	hpIntegrator->setV ( cp );
-	bpIntegrator->setV ( cp );
+	hpIntegrator.setV ( cp );
+	bpIntegrator.setV ( cp );
 }
 //-----------------------------------------------------------------------------
 

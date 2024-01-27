@@ -77,15 +77,9 @@ public:
 	* @return the DAC table
 	*/
 	uint16_t* getDAC ( double adjustment ) const;
+	double getWL_snake () const { return WL_snake; }
 
-	/**
-	* Construct an integrator solver.
-	*
-	* @return the integrator
-	*/
-	std::unique_ptr<Integrator6581> buildIntegrator ()	{	return std::make_unique<Integrator6581> ( this, WL_snake );		}
-
-	inline uint16_t getVcr_nVg ( int i ) const { return vcr_nVg[ i ]; }
+	inline uint16_t getVcr_nVg ( int i ) const			{	return vcr_nVg[ i ]; }
 	inline uint16_t getVcr_n_Ids_term ( int i ) const	{	return uint16_t ( vcr_n_Ids_term[i] * uCox );	}
 
 	#ifdef SLOPE_FACTOR

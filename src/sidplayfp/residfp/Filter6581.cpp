@@ -27,10 +27,10 @@ namespace reSIDfp
 //-----------------------------------------------------------------------------
 
 Filter6581::Filter6581 ()
-	: Filter ( FilterModelConfig6581::getInstance ()->getVoiceScaleS11 () )
+	: Filter ( *FilterModelConfig6581::getInstance (), FilterModelConfig6581::getInstance ()->getVoiceScaleS11 () )
 	, f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
-	, hpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
-	, bpIntegrator ( FilterModelConfig6581::getInstance ()->buildIntegrator () )
+	, hpIntegrator ( FilterModelConfig6581::getInstance () )
+	, bpIntegrator ( FilterModelConfig6581::getInstance () )
 {
 	mixer = FilterModelConfig6581::getInstance ()->getMixer ();
 	summer = FilterModelConfig6581::getInstance ()->getSummer ();
@@ -46,8 +46,8 @@ void Filter6581::updatedCenterFrequency ()
 {
 	const auto	Vw = f0_dac[ fc ];
 
-	hpIntegrator->setVw ( Vw );
-	bpIntegrator->setVw ( Vw );
+	hpIntegrator.setVw ( Vw );
+	bpIntegrator.setVw ( Vw );
 }
 //-----------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ void Filter6581::setFilterRange ( double adjustment )
 
 void Filter6581::setDigiVolume ( double adjustment )
 {
-	ve = std::clamp ( int ( mixer[ 0 ][ 0 ] * adjustment ), 0, 32767 );
+	Ve = std::clamp ( int ( mixer[ 0 ][ 0 ] * adjustment ), 0, 32767 );
 }
 //-----------------------------------------------------------------------------
 

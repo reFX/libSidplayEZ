@@ -317,11 +317,8 @@ class Filter6581 final : public Filter
 private:
 	const uint16_t* f0_dac = nullptr;
 
-	/// VCR + associated capacitor connected to highpass output.
-	std::unique_ptr<Integrator6581> const hpIntegrator;
-
-	/// VCR + associated capacitor connected to bandpass output.
-	std::unique_ptr<Integrator6581> const bpIntegrator;
+	Integrator6581	hpIntegrator;	// VCR + associated capacitor connected to highpass output.
+	Integrator6581	bpIntegrator;	// VCR + associated capacitor connected to bandpass output.
 
 protected:
 	inline int getVoiceDC ( int env ) const override
@@ -361,11 +358,11 @@ public:
 		( filt1 ? Vi : Vo ) += voice1;
 		( filt2 ? Vi : Vo ) += voice2;
 		( filt3 ? Vi : Vo ) += voice3;
-		( filtE ? Vi : Vo ) += ve;
+		( filtE ? Vi : Vo ) += Ve;
 
 		Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vi ];
-		Vbp = hpIntegrator->solve ( Vhp );
-		Vlp = bpIntegrator->solve ( Vbp );
+		Vbp = hpIntegrator.solve ( Vhp );
+		Vlp = bpIntegrator.solve ( Vbp );
 
 		if ( lp )	Vo += Vlp;
 		if ( bp )	Vo += Vbp;

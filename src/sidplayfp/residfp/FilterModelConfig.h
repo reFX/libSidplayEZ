@@ -73,6 +73,11 @@ private:
 	FilterModelConfig ( const FilterModelConfig& ) = delete;
 	FilterModelConfig& operator= ( const FilterModelConfig& ) = delete;
 
+	inline double getVoiceVoltage ( float value ) const
+	{
+		return value * voice_voltage_range + voice_DC_voltage;
+	}
+
 protected:
 	/**
 	* @param vvr voice voltage range
@@ -84,17 +89,7 @@ protected:
 	* @param ominv opamp min voltage
 	* @param omaxv opamp max voltage
 	*/
-	FilterModelConfig (
-		double vvr,
-		double vdv,
-		double c,
-		double vdd,
-		double vth,
-		double ucox,
-		const Spline::Point* opamp_voltage,
-		int opamp_size
-	);
-
+	FilterModelConfig ( double vvr, double vdv, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size );
 	~FilterModelConfig ();
 
 	void buildSummerTable ( OpAmp& opAmp );
@@ -144,6 +139,11 @@ public:
 		const auto	tmp = N16 * vmin;
 		assert ( tmp > -0.5 && tmp < 65535.5 );
 		return uint16_t ( tmp + 0.5 );
+	}
+
+	inline int getNormalizedVoice ( float value ) const
+	{
+		return static_cast<int>( getNormalizedValue ( getVoiceVoltage ( value ) ) );
 	}
 };
 

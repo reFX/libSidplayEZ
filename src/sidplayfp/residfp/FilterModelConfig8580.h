@@ -40,13 +40,6 @@ public:
 	~FilterModelConfig8580 () = default;
 
 	static FilterModelConfig8580* getInstance ();
-
-	/**
-	* Construct an integrator solver.
-	*
-	* @return the integrator
-	*/
-	std::unique_ptr<Integrator8580> buildIntegrator ()	{	return std::make_unique<Integrator8580> ( this );	}
 };
 
 } // namespace reSIDfp

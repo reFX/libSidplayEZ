@@ -179,15 +179,15 @@ private:
 	const uint16_t	nVmin;
 	const double	WL_snake;
 
-	const FilterModelConfig6581* fmc;
+	const FilterModelConfig6581& fmc;
 
 public:
-	Integrator6581 ( const FilterModelConfig6581* _fmc, double _WL_snake )
+	Integrator6581 ( const FilterModelConfig6581* _fmc )
 		: nVddt ( _fmc->getNormalizedValue ( _fmc->getVddt () ) )
 		, nVt ( _fmc->getNormalizedValue ( _fmc->getVth () ) )
 		, nVmin ( _fmc->getNVmin () )
-		, WL_snake ( _WL_snake )
-		, fmc ( _fmc )
+		, WL_snake ( _fmc->getWL_snake () )
+		, fmc ( *_fmc )
 	{
 	}
 
@@ -210,11 +210,11 @@ public:
 		const unsigned int Vgdt_2 = Vgdt * Vgdt;
 
 		// "Snake" current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
-		const auto	n_I_snake = fmc->getNormalizedCurrentFactor ( WL_snake ) * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
+		const auto	n_I_snake = fmc.getNormalizedCurrentFactor ( WL_snake ) * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
 
 		// VCR gate voltage.       // Scaled by m*2^16
 		// Vg = Vddt - sqrt(((Vddt - Vw)^2 + Vgdt^2)/2)
-		const auto	nVg = int ( fmc->getVcr_nVg ( ( nVddt_Vw_2 + ( Vgdt_2 >> 1 ) ) >> 16 ) );
+		const auto	nVg = int ( fmc.getVcr_nVg ( ( nVddt_Vw_2 + ( Vgdt_2 >> 1 ) ) >> 16 ) );
 
 		#ifdef SLOPE_FACTOR
 			const double nVp = static_cast<double>( nVg - nVt ) / n; // Pinch-off voltage
@@ -230,8 +230,8 @@ public:
 		assert ( ( kVgt_Vd >= 0 ) && ( kVgt_Vd < ( 1 << 16 ) ) );
 
 		// VCR current, scaled by m*2^15*2^15 = m*2^30
-		const unsigned int If = static_cast<unsigned int>( fmc->getVcr_n_Ids_term ( kVgt_Vs ) ) << 15;
-		const unsigned int Ir = static_cast<unsigned int>( fmc->getVcr_n_Ids_term ( kVgt_Vd ) ) << 15;
+		const unsigned int If = static_cast<unsigned int>( fmc.getVcr_n_Ids_term ( kVgt_Vs ) ) << 15;
+		const unsigned int Ir = static_cast<unsigned int>( fmc.getVcr_n_Ids_term ( kVgt_Vd ) ) << 15;
 
 		#ifdef SLOPE_FACTOR
 			const double iVcr = static_cast<double>( If - Ir );
@@ -240,8 +240,8 @@ public:
 			// estimate new slope factor based on gate voltage
 			const double gamma = 1.0;   // body effect factor
 			const double phi = 0.8;     // bulk Fermi potential
-			const double Vp = nVp / fmc->getN16 ();
-			n = 1. + ( gamma / ( 2. * sqrt ( Vp + phi + 4. * fmc->getUt () ) ) );
+			const double Vp = nVp / fmc.getN16 ();
+			n = 1. + ( gamma / ( 2. * sqrt ( Vp + phi + 4. * fmc.getUt () ) ) );
 			assert ( ( n > 1.2 ) && ( n < 1.8 ) );
 		#else
 			const int n_I_vcr = If - Ir;
@@ -253,7 +253,7 @@ public:
 		// vx = g(vc)
 		const auto	tmp = ( vc >> 15 ) + ( 1 << 15 );
 		assert ( tmp < ( 1 << 16 ) );
-		vx = fmc->getOpampRev ( tmp );
+		vx = fmc.getOpampRev ( tmp );
 
 		// Return vo
 		return vx - ( vc >> 14 );

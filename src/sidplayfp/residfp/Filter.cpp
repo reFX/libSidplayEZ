@@ -21,6 +21,8 @@
 */
 
 #include "Filter.h"
+#include "FilterModelConfig.h"
+
 #include <array>
 
 namespace reSIDfp
@@ -28,8 +30,9 @@ namespace reSIDfp
 
 //-----------------------------------------------------------------------------
 
-Filter::Filter ( int _voiceScaleS11 )
-	: voiceScaleS11 ( _voiceScaleS11 )
+Filter::Filter ( FilterModelConfig& _fmc, int _voiceScaleS11 )
+	: fmc ( _fmc )
+	, voiceScaleS11 ( _voiceScaleS11 )
 {
 	// Pre-calculate all possible summer/mixer combinations
 	for ( auto i = 0u; i < std::size ( sumFltResults ); ++i )

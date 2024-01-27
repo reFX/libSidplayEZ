@@ -23,15 +23,18 @@
 
 #include <stdint.h>
 
+#include "FilterModelConfig.h"
+
 namespace reSIDfp
 {
-
 /**
 * SID filter base class
 */
 class Filter
 {
 protected:
+	FilterModelConfig&	fmc;
+
 	uint16_t**	mixer = nullptr;
 	uint16_t**	summer = nullptr;
 	uint16_t**	resonance = nullptr;
@@ -61,7 +64,7 @@ protected:
 	int Vlp = 0;
 
 	// Filter external input
-	int ve = 0;
+	int Ve = 0;
 
 	// Filter cutoff frequency
 	unsigned int fc = 0;
@@ -112,7 +115,7 @@ protected:
 	virtual int getVoiceDC ( int env ) const = 0;
 
 public:
-	Filter ( int _voiceScaleS11 );
+	Filter ( FilterModelConfig& fmc, int _voiceScaleS11 );
 	virtual ~Filter () = default;
 
 	/**
@@ -124,8 +127,7 @@ public:
 	* @return filtered output
 	*/
 	virtual uint16_t clock ( int v1, int v2, int v3 ) = 0;
-
-	inline int getNormalizedVoice ( int val, int env ) const	{	return ( val * voiceScaleS11 / ( 1 << 15 ) ) + getVoiceDC ( env );	}
+	inline int getNormalizedVoice ( int val, int env ) const { return ( val * voiceScaleS11 / ( 1 << 15 ) ) + getVoiceDC ( env ); }
 
 	/**
 	* SID reset.

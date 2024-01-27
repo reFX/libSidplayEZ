@@ -56,11 +56,11 @@ private:
 	uint16_t	nVgt;
 	uint16_t	n_dac;
 
-	const FilterModelConfig8580* fmc;
+	const FilterModelConfig8580& fmc;
 
 public:
 	Integrator8580 ( const FilterModelConfig8580* _fmc )
-		: fmc ( _fmc )
+		: fmc ( *_fmc )
 	{
 		setV ( 1.5 );
 	}
@@ -72,7 +72,7 @@ public:
 	{
 		// Normalized current factor, 1 cycle at 1MHz.
 		// Fit in 5 bits.
-		n_dac = fmc->getNormalizedCurrentFactor ( wl );
+		n_dac = fmc.getNormalizedCurrentFactor ( wl );
 	}
 
 	/**
@@ -84,11 +84,11 @@ public:
 		// Ua = Ue * v = 4.76v  1<v<2
 		assert ( v > 1.0 && v < 2.0 );
 		const auto	Vg = 4.76 * v;
-		const auto	Vgt = Vg - fmc->getVth ();
+		const auto	Vgt = Vg - fmc.getVth ();
 
 		// Vg - Vth, normalized so that translated values can be subtracted:
 		// Vgt - x = (Vgt - t) - (x - t)
-		nVgt = fmc->getNormalizedValue ( Vgt );
+		nVgt = fmc.getNormalizedValue ( Vgt );
 	}
 
 	inline int solve ( int vi )
@@ -112,7 +112,7 @@ public:
 		// vx = g(vc)
 		const auto	tmp = ( vc >> 15 ) + ( 1 << 15 );
 		assert ( tmp < ( 1 << 16 ) );
-		vx = fmc->getOpampRev ( tmp );
+		vx = fmc.getOpampRev ( tmp );
 
 		// Return vo
 		return vx - ( vc >> 14 );
