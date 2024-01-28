@@ -12,7 +12,7 @@
 { "Charles Deenen",						{	.folder = "/MUSICIANS/D/Deenen_Charles/",			.filter = 0.2	} },
 { "Chris Hülsbeck",						{	.folder = "/MUSICIANS/H/Huelsbeck_Chris/",			.filter = 0.6,	} },
 { "Clever Music",						{	.folder = "/MUSICIANS/C/Clever_Music/",				.filter = 0.25	} },
-{ "Mitch & Dane",						{	.folder = "/MUSICIANS/M/Mitch_and_Dane/",			.filter = 0.75	} },
+{ "Mitch & Dane",						{	.folder = "/MUSICIANS/M/Mitch_and_Dane/",			.filter = 0.75,	.cwsThreshold = 0.5	} },
 { "Michael Nilsson-Vonderburgh (Mitch)",{	.folder = "/MUSICIANS/M/Mitch_and_Dane/Mitch/",		.filter = 0.25	} },
 { "Stellan Andersson (Dane)",			{	.folder = "/MUSICIANS/M/Mitch_and_Dane/Dane/",		.filter = 0.75,	.cwsThreshold = 0.5	} },
 { "David Dunn",							{	.folder = "/MUSICIANS/D/Dunn_David/",				.filter = 0.15	} },
