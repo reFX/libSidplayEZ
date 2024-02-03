@@ -42,6 +42,10 @@ Dac::~Dac ()
 
 double Dac::getOutput ( unsigned int input ) const
 {
+	// DAC leakage
+	if ( ! input )
+		return dac[ 0 ] / 2.0;
+
 	auto    dacValue = 0.0;
 
 	for ( auto i = 0u; i < dacLength; i++ )
