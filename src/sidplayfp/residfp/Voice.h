@@ -64,7 +64,7 @@ public:
 	* @param ringModulator Ring-modulator for waveform
 	* @return the voice analog output
 	*/
-	inline int output ( WaveformGenerator& ringModulator )
+	inline float output ( WaveformGenerator& ringModulator )
 	{
 		auto	wav = waveformGenerator.output ( ringModulator );
 		auto	env = envelopeGenerator.output ();
@@ -72,7 +72,7 @@ public:
 		// DAC imperfections are emulated by using the digital output
 		// as an index into a DAC lookup table.
 		envLevel = envDAC[ env ];
-		return int ( wavDAC[ wav ] * envLevel );
+		return wavDAC[ wav ] * envLevel;
 	}
 
 	/**

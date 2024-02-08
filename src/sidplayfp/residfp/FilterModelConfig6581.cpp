@@ -209,7 +209,7 @@ uint16_t* FilterModelConfig6581::getDAC ( double adjustment ) const
 	auto    f0_dac = new uint16_t[ 1 << DAC_BITS ];
 
 	for ( auto i = 0u; i < ( 1 << DAC_BITS ); i++ )
-		f0_dac[ i ] = getNormalizedValue ( _dac_zero + dac.getOutput ( i ) * dac_scale / ( 1 << DAC_BITS ) );
+		f0_dac[ i ] = getNormalizedValue ( _dac_zero + dac.getOutput ( i ) * dac_scale );
 
 	return f0_dac;
 }

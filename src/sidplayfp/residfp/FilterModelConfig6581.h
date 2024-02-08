@@ -58,7 +58,7 @@ private:
 	double		vcr_n_Ids_term[ 1 << 16 ];
 	//@}
 
-	double getDacZero ( double adjustment ) const {	return dac_zero + adjustment;		}
+	inline double getDacZero ( double adjustment ) const	{	return dac_zero + adjustment;	}
 
 public:
 	FilterModelConfig6581 ();
@@ -79,8 +79,8 @@ public:
 	uint16_t* getDAC ( double adjustment ) const;
 	double getWL_snake () const { return WL_snake; }
 
-	inline uint16_t getVcr_nVg ( int i ) const			{	return vcr_nVg[ i ]; }
-	inline uint16_t getVcr_n_Ids_term ( int i ) const	{	return uint16_t ( vcr_n_Ids_term[i] * uCox );	}
+	inline uint16_t getVcr_nVg ( const int i ) const		{	return vcr_nVg[ i ];	}
+	inline uint16_t getVcr_n_Ids_term ( const int i ) const	{	return uint16_t ( vcr_n_Ids_term[ i ] * uCox + 0.5 );	}
 
 	#ifdef SLOPE_FACTOR
 		inline double getUt () const { return Ut; }

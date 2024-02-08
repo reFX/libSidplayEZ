@@ -27,7 +27,7 @@ namespace reSIDfp
 //-----------------------------------------------------------------------------
 
 Filter6581::Filter6581 ()
-	: Filter ( *FilterModelConfig6581::getInstance (), FilterModelConfig6581::getInstance ()->getVoiceScaleS11 () )
+	: Filter ( *FilterModelConfig6581::getInstance () )
 	, f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
 	, hpIntegrator ( FilterModelConfig6581::getInstance () )
 	, bpIntegrator ( FilterModelConfig6581::getInstance () )
@@ -36,7 +36,6 @@ Filter6581::Filter6581 ()
 	summer = FilterModelConfig6581::getInstance ()->getSummer ();
 	resonance = FilterModelConfig6581::getInstance ()->getResonance ();
 	volume = FilterModelConfig6581::getInstance ()->getVolume ();
-//	voiceDC = FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ();
 
 	setDigiVolume ( 1.0 );
 }
@@ -67,7 +66,7 @@ void Filter6581::setFilterRange ( double adjustment )
 
 void Filter6581::setDigiVolume ( double adjustment )
 {
-	Ve = std::clamp ( int ( mixer[ 0 ][ 0 ] * adjustment ), 0, 32767 );
+	input ( int ( ( adjustment - 1.0 ) * 65536.0 ) );
 }
 //-----------------------------------------------------------------------------
 

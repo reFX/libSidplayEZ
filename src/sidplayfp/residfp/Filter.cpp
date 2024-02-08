@@ -30,27 +30,28 @@ namespace reSIDfp
 
 //-----------------------------------------------------------------------------
 
-Filter::Filter ( FilterModelConfig& _fmc, int _voiceScaleS11 )
+Filter::Filter ( FilterModelConfig& _fmc )
 	: fmc ( _fmc )
-	, voiceScaleS11 ( _voiceScaleS11 )
 {
 	// Pre-calculate all possible summer/mixer combinations
 	for ( auto i = 0u; i < std::size ( sumFltResults ); ++i )
 	{
-		auto	ni = 0;
-		auto	no = 0;
+		auto	Nsum = 0;
+		auto	Nmix = 0;
 
-		if ( i & 1 )	{ ni += 0x10; } else { no++; }
-	 	if ( i & 2 )	{ ni += 0x10; } else { no++; }
-	 	if ( i & 4 )	{ ni += 0x10; } else if ( ! ( i & 0x80 ) )	{ no++; }
-	 	if ( i & 8 )	{ ni += 0x10; } else { no++; }
+		if ( i & 1 )	{ Nsum += 0x10; } else { Nmix++; }
+	 	if ( i & 2 )	{ Nsum += 0x10; } else { Nmix++; }
+	 	if ( i & 4 )	{ Nsum += 0x10; } else if ( ! ( i & 0x80 ) )	{ Nmix++; }
+	 	if ( i & 8 )	{ Nsum += 0x10; } else { Nmix++; }
 
-		if ( i & 0x10 )	no++;
-		if ( i & 0x20 )	no++;
-		if ( i & 0x40 )	no++;
+		if ( i & 0x10 )	Nmix++;
+		if ( i & 0x20 )	Nmix++;
+		if ( i & 0x40 )	Nmix++;
 
-		sumFltResults[ i ] = uint8_t ( ni | no );
+		sumFltResults[ i ] = uint8_t ( Nsum | Nmix );
 	}
+
+	input ( 0 );
 }
 //-----------------------------------------------------------------------------
 
@@ -81,9 +82,9 @@ void Filter::writeFC_HI ( uint8_t fc_hi )
 
 void Filter::writeRES_FILT ( uint8_t res_filt )
 {
-	filtResMode = ( filtResMode & ~0xF ) | ( res_filt & 0xF );
+	filtResMode = ( filtResMode & 0xF0 ) | ( res_filt & 0x0F );
 
-	updateResonance ( res_filt >> 4 );
+	currentResonance = resonance[ res_filt >> 4 ];
 
 	filt1 = res_filt & 0x01;
 	filt2 = res_filt & 0x02;
@@ -96,7 +97,7 @@ void Filter::writeRES_FILT ( uint8_t res_filt )
 
 void Filter::writeMODE_VOL ( uint8_t mode_vol )
 {
-	filtResMode = ( filtResMode & ~0xF0 ) | ( mode_vol & 0xF0 );
+	filtResMode = ( filtResMode & 0x0F ) | ( mode_vol & 0xF0 );
 
 	vol = mode_vol & 0x0F;
 

@@ -40,8 +40,6 @@ protected:
 	uint16_t**	resonance = nullptr;
 	uint16_t**	volume = nullptr;
 
-	const int voiceScaleS11;
-
 	// Current volume amplifier setting.
 	uint16_t*	currentVolume = nullptr;
 
@@ -95,27 +93,20 @@ protected:
 	virtual void updatedCenterFrequency () = 0;
 
 	/**
-	* Set filter resonance.
-	*/
-	virtual void updateResonance ( uint8_t res ) = 0;
-
-	/**
 	* Mixing configuration modified (offsets change)
 	*/
 	inline void updateMixing ()
 	{
 		currentVolume = volume[ vol ];
 
-		const auto	ni_no = sumFltResults[ filtResMode ];
+		const auto	Nsum_Nmix = sumFltResults[ filtResMode ];
 
-		currentSummer = summer[ ni_no >> 4 ];
-		currentMixer = mixer[ ni_no & 0xF ];
+		currentSummer = summer[ Nsum_Nmix >> 4 ];
+		currentMixer = mixer[ Nsum_Nmix & 0xF ];
 	}
 
-	virtual int getVoiceDC ( int env ) const = 0;
-
 public:
-	Filter ( FilterModelConfig& fmc, int _voiceScaleS11 );
+	Filter ( FilterModelConfig& fmc );
 	virtual ~Filter () = default;
 
 	/**
@@ -126,8 +117,7 @@ public:
 	* @param v3 voice 3 in
 	* @return filtered output
 	*/
-	virtual uint16_t clock ( int v1, int v2, int v3 ) = 0;
-	inline int getNormalizedVoice ( int val, int env ) const { return ( val * voiceScaleS11 / ( 1 << 15 ) ) + getVoiceDC ( env ); }
+	virtual uint16_t clock ( float v1, float v2, float v3 ) = 0;
 
 	/**
 	* SID reset.
@@ -161,6 +151,13 @@ public:
 	* @param mode_vol Filter Mode/Volume
 	*/
 	void writeMODE_VOL ( uint8_t mode_vol );
+
+	/**
+	* Apply a signal to EXT-IN
+	*
+	* @param input a 16 bit sample
+	*/
+	inline void input ( int input )	{	Ve = fmc.getNormalizedVoice ( input / 65536.0f );	}
 };
 
 } // namespace reSIDfp

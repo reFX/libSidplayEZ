@@ -100,6 +100,10 @@ constexpr auto	OSC_DAC_BITS = 12u;
 * whereas that digi-compatible 8580 has it very narrow.
 * On my 6581R4AR has 0x3A as the only value giving the same output level as 1.prg
 */
+//@{
+constexpr auto	OFFSET_6581 = 0x380u;
+constexpr auto	OFFSET_8580 = 0x9C0u;
+//@}
 
 /**
 * Bus value stays alive for some time after each operation.
@@ -119,8 +123,8 @@ constexpr auto	OSC_DAC_BITS = 12u;
 * [2]: http://noname.c64.org/csdb/forums/?roomid=11&topicid=29025&showallposts=1
 */
 //@{
-constexpr auto	BUS_TTL_6581 = 0x01d00;
-constexpr auto	BUS_TTL_8580 = 0xa2000;
+constexpr auto	BUS_TTL_6581 = 0x01D00;
+constexpr auto	BUS_TTL_8580 = 0xA2000;
 //@}
 
 //-----------------------------------------------------------------------------
@@ -165,7 +169,7 @@ void SID::setChipModel ( ChipModel _model )
 		Dac dacBuilder ( OSC_DAC_BITS );
 		dacBuilder.kinkedDac ( model == MOS6581 );
 
-		const auto  offset = double ( 1 << ( OSC_DAC_BITS - 1 ) );
+		const auto	offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
 
 		for ( auto i = 0u; i < ( 1 << OSC_DAC_BITS ); i++ )
 			oscDAC[ i ] = float ( dacBuilder.getOutput ( i ) - offset );

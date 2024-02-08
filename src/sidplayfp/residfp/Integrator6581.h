@@ -163,9 +163,10 @@ namespace reSIDfp
 class Integrator6581 final
 {
 private:
-	unsigned int nVddt_Vw_2 = 0;
 	int vx = 0;
 	int vc = 0;
+
+	const double	wlSnake;
 
 	#ifdef SLOPE_FACTOR
 		// Slope factor n = 1/k
@@ -174,19 +175,20 @@ private:
 		double n = 1.4;
 	#endif
 
+	unsigned int	nVddt_Vw_2 = 0;
+
 	const uint16_t	nVddt;
 	const uint16_t	nVt;
 	const uint16_t	nVmin;
-	const double	WL_snake;
 
 	const FilterModelConfig6581& fmc;
 
 public:
 	Integrator6581 ( const FilterModelConfig6581* _fmc )
-		: nVddt ( _fmc->getNormalizedValue ( _fmc->getVddt () ) )
+		: wlSnake ( _fmc->getWL_snake () )
+		, nVddt ( _fmc->getNormalizedValue ( _fmc->getVddt () ) )
 		, nVt ( _fmc->getNormalizedValue ( _fmc->getVth () ) )
 		, nVmin ( _fmc->getNVmin () )
-		, WL_snake ( _fmc->getWL_snake () )
 		, fmc ( *_fmc )
 	{
 	}
@@ -210,7 +212,7 @@ public:
 		const unsigned int Vgdt_2 = Vgdt * Vgdt;
 
 		// "Snake" current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
-		const auto	n_I_snake = fmc.getNormalizedCurrentFactor ( WL_snake ) * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
+		const auto	n_I_snake = fmc.getNormalizedCurrentFactor ( wlSnake ) * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
 
 		// VCR gate voltage.       // Scaled by m*2^16
 		// Vg = Vddt - sqrt(((Vddt - Vw)^2 + Vgdt^2)/2)
@@ -241,7 +243,7 @@ public:
 			const double gamma = 1.0;   // body effect factor
 			const double phi = 0.8;     // bulk Fermi potential
 			const double Vp = nVp / fmc.getN16 ();
-			n = 1. + ( gamma / ( 2. * sqrt ( Vp + phi + 4. * fmc.getUt () ) ) );
+			n = 1.0 + ( gamma / ( 2.0 * sqrt ( Vp + phi + 4.0 * fmc.getUt () ) ) );
 			assert ( ( n > 1.2 ) && ( n < 1.8 ) );
 		#else
 			const int n_I_vcr = If - Ir;

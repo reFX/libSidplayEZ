@@ -35,8 +35,7 @@ constexpr auto	DAC_WL0 = 0.00615;
 //-----------------------------------------------------------------------------
 
 Filter8580::Filter8580 ()
-	: Filter ( *FilterModelConfig8580::getInstance (), FilterModelConfig8580::getInstance ()->getVoiceScaleS11 () )
-	, voiceDC ( FilterModelConfig8580::getInstance ()->getNormalizedVoiceDC ( 4.76 ) )
+	: Filter ( *FilterModelConfig8580::getInstance () )
 	, hpIntegrator ( FilterModelConfig8580::getInstance () )
 	, bpIntegrator ( FilterModelConfig8580::getInstance () )
 {

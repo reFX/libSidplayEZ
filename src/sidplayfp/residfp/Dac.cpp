@@ -101,9 +101,6 @@ void Dac::kinkedDac ( const bool is6581 )
 		Vsum += Vn;
 	}
 
-	// Normalize to integerish behavior
-	Vsum /= 1 << dacLength;
-
 	for ( auto i = 0u; i < dacLength; i++ )
 		dac[ i ] /= Vsum;
 }

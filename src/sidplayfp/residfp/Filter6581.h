@@ -321,23 +321,10 @@ private:
 	Integrator6581	bpIntegrator;	// VCR + associated capacitor connected to bandpass output.
 
 protected:
-	inline int getVoiceDC ( int env ) const override
-	{
-		const auto	voiceDC = 5.0 + ( 0.2145 * double ( env ) / 255.0 );
-		return FilterModelConfig6581::getInstance ()->getNormalizedVoiceDC ( voiceDC );
-	}
-
 	/**
 	* Set filter cutoff frequency.
 	*/
 	void updatedCenterFrequency () override;
-
-	/**
-	* Set filter resonance.
-	*
-	* In the MOS 6581, 1/Q is controlled linearly by res.
-	*/
-	void updateResonance ( uint8_t res ) override { currentResonance = resonance[ res ]; }
 
 public:
 	Filter6581 ();
@@ -347,28 +334,30 @@ public:
 		delete[] f0_dac;
 	}
 
-	inline uint16_t clock ( int voice1, int voice2, int voice3 ) override
+	inline uint16_t clock ( float voice1, float voice2, float voice3 ) override
 	{
-		// Voice 3 is silenced by voice3off if it is not routed through the filter
-		voice3 = ( filt3 || ! voice3off ) ? voice3 : 0;
+		const auto	V1 = fmc.getNormalizedVoice ( voice1 );
+		const auto	V2 = fmc.getNormalizedVoice ( voice2 );
+		// Voice 3 is silenced by voice3off if it is not routed through the filter.
+		const auto	V3 = ( filt3 || ! voice3off ) ? fmc.getNormalizedVoice ( voice3 ) : 0;
 
-		auto	Vi = 0;
-		auto	Vo = 0;
+		auto	Vsum = 0;
+		auto	Vmix = 0;
 
-		( filt1 ? Vi : Vo ) += voice1;
-		( filt2 ? Vi : Vo ) += voice2;
-		( filt3 ? Vi : Vo ) += voice3;
-		( filtE ? Vi : Vo ) += Ve;
+		( filt1 ? Vsum : Vmix ) += V1;
+		( filt2 ? Vsum : Vmix ) += V2;
+		( filt3 ? Vsum : Vmix ) += V3;
+		( filtE ? Vsum : Vmix ) += Ve;
 
-		Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vi ];
+		Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vsum ];
 		Vbp = hpIntegrator.solve ( Vhp );
 		Vlp = bpIntegrator.solve ( Vbp );
 
-		if ( lp )	Vo += Vlp;
-		if ( bp )	Vo += Vbp;
-		if ( hp )	Vo += Vhp;
+		if ( lp )	Vmix += Vlp;
+		if ( bp )	Vmix += Vbp;
+		if ( hp )	Vmix += Vhp;
 
-		return currentVolume[ currentMixer[ Vo ] ];
+		return currentVolume[ currentMixer[ Vmix ] ];
 	}
 
 	/**

@@ -111,17 +111,14 @@ private:
 	*/
 	inline int output ()
 	{
-		const int	env1 = voice[ 0 ].envelopeGenerator.output ();
-		const int	env2 = voice[ 1 ].envelopeGenerator.output ();
-		const int	env3 = voice[ 2 ].envelopeGenerator.output ();
+		const float v1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
+		const float v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
+		const float v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
 
-		const int	v1 = filter->getNormalizedVoice ( voice[ 0 ].output ( voice[ 2 ].waveformGenerator ), env1 );
-		const int	v2 = filter->getNormalizedVoice ( voice[ 1 ].output ( voice[ 0 ].waveformGenerator ), env2 );
-		const int	v3 = filter->getNormalizedVoice ( voice[ 2 ].output ( voice[ 1 ].waveformGenerator ), env3 );
+		const int input = static_cast<int>( filter->clock ( v1, v2, v3 ) );
+		const int output = externalFilter.clock ( input );
 
-		const int	input = ( scaleFactor * int ( filter->clock ( v1, v2, v3 ) ) ) / 2;
-
-		return externalFilter.clock ( input );
+		return ( scaleFactor * output ) / 2;
 	}
 
 	/**
@@ -152,7 +149,7 @@ private:
 				continue;
 
 			const auto	accumulator = wave.readAccumulator ();
-			const auto	thisVoiceSync = ( ( 0x7fffff - accumulator ) & 0xffffff ) / freq + 1;
+			const auto	thisVoiceSync = ( ( 0x7FFFFF - accumulator ) & 0xFFFFFF ) / freq + 1;
 
 			if ( thisVoiceSync < nextVoiceSync )
 				nextVoiceSync = thisVoiceSync;
@@ -250,6 +247,7 @@ public:
 	*/
 	inline int clock ( unsigned int cycles, int16_t* buf )
 	{
+		// ageBusValue
 		if ( busValueTtl )
 		{
 			if ( busValueTtl -= cycles; busValueTtl <= 0 )
@@ -320,7 +318,7 @@ public:
 	*/
 	void setFilter8580Curve ( double filterCurve )	{	filter8580.setFilterCurve ( filterCurve );	}
 
-	float getEnvLevel ( int voiceNo ) const	{	return voice[voiceNo].getEnvLevel();	}
+	float getEnvLevel ( int voiceNo ) const		{	return voice[ voiceNo ].getEnvLevel (); }
 };
 //-----------------------------------------------------------------------------
 

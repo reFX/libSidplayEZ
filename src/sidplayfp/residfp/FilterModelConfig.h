@@ -73,10 +73,7 @@ private:
 	FilterModelConfig ( const FilterModelConfig& ) = delete;
 	FilterModelConfig& operator= ( const FilterModelConfig& ) = delete;
 
-	inline double getVoiceVoltage ( float value ) const
-	{
-		return value * voice_voltage_range + voice_DC_voltage;
-	}
+	inline double getVoiceVoltage ( float value ) const	{	return value * voice_voltage_range + voice_DC_voltage;	}
 
 protected:
 	/**
@@ -131,21 +128,7 @@ public:
 		return uint16_t ( tmp + 0.5 );
 	}
 
-	inline int getNormalizedVoice ( float value ) const
-	{
-		return int ( getNormalizedValue ( getVoiceVoltage ( value ) ) );
-	}
-
-	/**
-	* The digital range of one voice is 20 bits; create a scaling term
-	* for multiplication which fits in 11 bits.
-	*/
-	inline int getVoiceScaleS11 () const { return int ( ( norm * ( ( 1 << 11 ) - 1 ) ) * voice_voltage_range ); }
-
-	/**
-	* The "zero" output level of the voices.
-	*/
-	inline int getNormalizedVoiceDC ( double voiceDC ) const { return int ( N16 * ( voiceDC - vmin ) ); }
+	inline int getNormalizedVoice ( float value ) const	{	return int ( getNormalizedValue ( getVoiceVoltage ( value ) ) );	}
 };
 
 } // namespace reSIDfp
