@@ -49,7 +49,7 @@ FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double 
 	for ( auto i = 0; i < opamp_size; i++ )
 	{
 		// We add 32768 to get a positive number in the range [0-65535]
-		scaled_voltage[ i ].x = ( N16 * ( opamp_voltage[ i ].x - opamp_voltage[ i ].y ) / 2.0 ) + ( 1 << 15 );
+		scaled_voltage[ i ].x = ( N16 * ( opamp_voltage[ i ].x - opamp_voltage[ i ].y ) / 2.0 ) + double ( 1u << 15 );
 		scaled_voltage[ i ].y = N16 * ( opamp_voltage[ i ].x - vmin );
 	}
 
@@ -61,7 +61,7 @@ FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double 
 		const auto	out = s.evaluate ( x );
 		// When interpolating outside range the first elements may be negative
 		const auto	tmp = std::max ( out.x, 0.0 );
-		assert ( tmp >= 0.0 && tmp < 65535.5 );
+		assert ( tmp < 65535.5 );
 		opamp_rev[ x ] = uint16_t ( tmp + 0.5 );
 	}
 }
@@ -80,6 +80,13 @@ FilterModelConfig::~FilterModelConfig ()
 		delete[] volume[ i ];
 		delete[] resonance[ i ];
 	}
+}
+//-----------------------------------------------------------------------------
+
+void FilterModelConfig::setUCox ( double new_uCox )
+{
+	uCox = new_uCox;
+	currFactorCoeff = denorm * ( uCox / 2.0 * 1.0e-6 / C );
 }
 //-----------------------------------------------------------------------------
 
@@ -172,13 +179,6 @@ void FilterModelConfig::buildResonanceTable ( OpAmp& opampModel, const double re
 			resonance[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( resonance_n[ n8 ], vin ) );
 		}
 	}
-}
-//-----------------------------------------------------------------------------
-
-void FilterModelConfig::setUCox ( double new_uCox )
-{
-	uCox = new_uCox;
-	currFactorCoeff = denorm * ( uCox / 2.0 * 1.0e-6 / C );
 }
 //-----------------------------------------------------------------------------
 

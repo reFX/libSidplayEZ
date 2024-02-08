@@ -39,10 +39,10 @@ protected:
 	// Transistor parameters.
 	//@{
 	const double Vdd;
-	const double Vth;           ///< Threshold voltage
-	const double Ut;            ///< Thermal voltage: Ut = kT/q = 8.61734315e-5*T ~ 26mV
-	double uCox;          ///< Transconductance coefficient: u*Cox
-	const double Vddt;          ///< Vdd - Vth
+	const double Vth;			//< Threshold voltage
+	const double Ut;			//< Thermal voltage: Ut = kT/q = 8.61734315e-5*T ~ 26mV
+	double uCox;				//< Transconductance coefficient: u*Cox
+	const double Vddt;			//< Vdd - Vth
 	//@}
 
 	// Derived stuff
@@ -52,22 +52,22 @@ protected:
 	// Fixed point scaling for 16 bit op-amp output.
 	const double N16;
 
-	const double voice_voltage_range;
-	const double voice_DC_voltage;
-
 	// Current factor coefficient for op-amp integrators
 	double currFactorCoeff;
 
+	const double voice_voltage_range;
+	const double voice_DC_voltage;
+
 	// Lookup tables for gain and summer op-amps in output stage / filter
 	//@{
-	uint16_t*	mixer[ 8 ];       //-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	summer[ 5 ];      //-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	volume[ 16 ];   //-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	resonance[ 16 ];   //-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t*	mixer[ 8 ];				//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t*	summer[ 5 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t*	volume[ 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t*	resonance[ 16 ];		//-V730_NOINIT this is initialized in the derived class constructor
 	//@}
 
 	// Reverse op-amp transfer function
-	uint16_t	opamp_rev[ 1 << 16 ]; //-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	opamp_rev[ 1 << 16 ];	//-V730_NOINIT this is initialized in the derived class constructor
 
 private:
 	FilterModelConfig ( const FilterModelConfig& ) = delete;
@@ -92,28 +92,18 @@ protected:
 	FilterModelConfig ( double vvr, double vdv, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size );
 	~FilterModelConfig ();
 
+	void setUCox ( double new_uCox );
+
 	void buildSummerTable ( OpAmp& opAmp );
 	void buildMixerTable ( OpAmp& opampModel, double nRatio );
 	void buildVolumeTable ( OpAmp& opampModel, double nDivisor );
 	void buildResonanceTable ( OpAmp& opampModel, const double resonance_n[ 16 ] );
-	void setUCox ( double new_uCox );
 
 public:
 	uint16_t** getVolume () { return volume; }
 	uint16_t** getResonance () { return resonance; }
 	uint16_t** getSummer () { return summer; }
 	uint16_t** getMixer () { return mixer; }
-
-	/**
-	* The digital range of one voice is 20 bits; create a scaling term
-	* for multiplication which fits in 11 bits.
-	*/
-	inline int getVoiceScaleS11 () const { return int ( ( norm * ( ( 1 << 11 ) - 1 ) ) * voice_voltage_range ); }
-
-	/**
-	* The "zero" output level of the voices.
-	*/
-	inline int getNormalizedVoiceDC ( double voiceDC ) const { return int ( N16 * ( voiceDC - vmin ) ); }
 
 	inline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }
 	inline double getVddt () const { return Vddt; }
@@ -143,8 +133,19 @@ public:
 
 	inline int getNormalizedVoice ( float value ) const
 	{
-		return static_cast<int>( getNormalizedValue ( getVoiceVoltage ( value ) ) );
+		return int ( getNormalizedValue ( getVoiceVoltage ( value ) ) );
 	}
+
+	/**
+	* The digital range of one voice is 20 bits; create a scaling term
+	* for multiplication which fits in 11 bits.
+	*/
+	inline int getVoiceScaleS11 () const { return int ( ( norm * ( ( 1 << 11 ) - 1 ) ) * voice_voltage_range ); }
+
+	/**
+	* The "zero" output level of the voices.
+	*/
+	inline int getNormalizedVoiceDC ( double voiceDC ) const { return int ( N16 * ( voiceDC - vmin ) ); }
 };
 
 } // namespace reSIDfp
