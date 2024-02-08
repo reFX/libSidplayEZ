@@ -21,6 +21,8 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include <vector>
+
 namespace reSIDfp
 {
 
@@ -73,11 +75,8 @@ namespace reSIDfp
 class Dac final
 {
 private:
-	/// analog values
-	double* const dac;
-
-	/// the dac array length
-	const unsigned int dacLength;
+	// analog values
+	std::vector<double>	dac;
 
 public:
 	/**
@@ -86,7 +85,6 @@ public:
 	* @param bits the number of input bits
 	*/
 	Dac ( unsigned int bits );
-	~Dac ();
 
 	/**
 	* Build DAC model for specific chip.

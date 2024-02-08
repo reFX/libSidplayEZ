@@ -28,29 +28,23 @@ namespace reSIDfp
 //-----------------------------------------------------------------------------
 
 Dac::Dac ( unsigned int bits )
-	: dac ( new double[ bits ] )
-	, dacLength ( bits )
+	: dac ( bits )
 {
-}
-//-----------------------------------------------------------------------------
-
-Dac::~Dac ()
-{
-	delete[] dac;
 }
 //-----------------------------------------------------------------------------
 
 double Dac::getOutput ( unsigned int input ) const
 {
 	// DAC leakage
-	if ( ! input )
-		return dac[ 0 ] / 2.0;
+	constexpr auto	leakage = 0.01;
 
 	auto    dacValue = 0.0;
 
-	for ( auto i = 0u; i < dacLength; i++ )
-		if ( input & ( 1 << i ) )
-			dacValue += dac[ i ];
+	for ( auto i = 0; i < int ( dac.size () ); i++ )
+	{
+		const auto	transistor_on = ( input & ( 1 << i ) ) != 0;
+		dacValue += transistor_on ? dac[ i ] : dac[ i ] * leakage;
+	}
 
 	return dacValue;
 }
@@ -58,6 +52,8 @@ double Dac::getOutput ( unsigned int input ) const
 
 void Dac::kinkedDac ( const bool is6581 )
 {
+	const auto	dacLength = (unsigned int)( dac.size () );
+
 	constexpr auto  R_INFINITY = 1e6;
 
 	// Non-linearity parameter, 8580 DACs are perfectly linear
