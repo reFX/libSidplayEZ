@@ -22,7 +22,7 @@ public:
 		std::string	folder;
 		double		filter = 0.5;
 		double		digi = 1.0;
-		double		zeroDac = 0.5;
+		double		zeroDac = 0.4;
 		int			cwsLevel = strong;
 		double		cwsThreshold = 0.8;
 		std::unordered_map<std::string, std::string>	exceptions;
