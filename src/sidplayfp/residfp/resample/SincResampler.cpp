@@ -79,13 +79,12 @@ int SincResampler::fir ( int subcycle )
 
 void SincResampler::setup ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
 {
-	constexpr auto	BITS = 16;
-
 	reset ();
 
 	cyclesPerSample = int ( clockFrequency / samplingFrequency * 1024.0 );
 
 	// 16 bits -> -96dB stopband attenuation.
+	constexpr auto	BITS = 16;
 	const auto	A = -20.0 * std::log10 ( 1.0 / ( 1 << BITS ) );
 
 	// A fraction of the bandwidth is allocated to the transition band, which we double because we design the filter to transition halfway at Nyquist
@@ -165,7 +164,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 	const auto	tmp = firN / 2;
 	const auto	firN_2 = double ( tmp );
 
-	auto*	dst = firTable.data ();
+	auto	dst = firTable.data ();
 	for ( auto i = 0; i < firRES; i++ )
 	{
 		const auto	jPhase = double ( i ) / firRES + firN_2;
