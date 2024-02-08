@@ -28,16 +28,14 @@ namespace reSIDfp
 //-----------------------------------------------------------------------------
 
 Dac::Dac ( unsigned int bits )
-	: dac ( bits )
+	: leakage ( 0.01 )
+	, dac ( bits )
 {
 }
 //-----------------------------------------------------------------------------
 
 double Dac::getOutput ( unsigned int input ) const
 {
-	// DAC leakage
-	constexpr auto	leakage = 0.01;
-
 	auto    dacValue = 0.0;
 
 	for ( auto i = 0; i < int ( dac.size () ); i++ )
