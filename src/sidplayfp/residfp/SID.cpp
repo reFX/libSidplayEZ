@@ -184,7 +184,7 @@ void SID::setChipModel ( ChipModel _model )
 		vce.waveformGenerator.setWaveformModels ( waveTable );
 	}
 
-	setCombinedWaveforms ( CombinedWaveforms::STRONG, model == MOS6581 ? 1.0f : 0.5f );
+	setCombinedWaveforms ( CombinedWaveforms::STRONG, model == MOS6581 ? 1.0f : 1.0f );
 }
 //-----------------------------------------------------------------------------
 
