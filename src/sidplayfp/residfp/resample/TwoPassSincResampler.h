@@ -48,17 +48,40 @@ public:
 		s2.setup ( intermediateFrequency, samplingFrequency, highestAccurateFrequency );
 	}
 
-	inline bool input ( int sample )
+	inline bool input ( const int sample )
 	{
-		if ( s1.input ( sample ) )
-			return s2.input ( s1.output () );
-
-		return false;
+		return s1.input ( sample ) && s2.input ( s1.output () );
 	}
 
-	inline int output () const
+	inline int16_t output ( const int scaleFactor ) const
 	{
-		return s2.output ();
+		/*
+		* Clip the input as it may overflow the 16 bit range.
+		*
+		* Approximate measured input ranges:
+		* 6581: [-24262,+25080]  (Kawasaki_Synthesizer_Demo)
+		* 8580: [-21514,+35232]  (64_Forever, Drum_Fool)
+		*/
+		auto softClip = [] ( const int x ) -> int16_t
+		{
+			constexpr auto	max16 = float ( std::numeric_limits<int16_t>::max () );
+			constexpr auto	threshold = int ( max16 * 0.85454f );
+			const auto	abs_x = std::abs ( x );
+			if ( abs_x < threshold )
+				return int16_t ( x );
+
+			constexpr auto	t = threshold / max16;
+			constexpr auto	a = 1.0f - t;
+			constexpr auto	b = 1.0f / a;
+
+			auto	value = float ( abs_x - threshold ) / max16;
+			value = t + a * std::tanh ( b * value );
+
+			return int16_t ( value * ( x < 0 ? -max16 : max16 ) );
+		};
+
+		const auto	out = ( scaleFactor * s2.output () ) >> 1;
+		return softClip ( out );
 	}
 
 	void reset ()

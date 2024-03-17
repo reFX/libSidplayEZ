@@ -111,14 +111,12 @@ private:
 	*/
 	inline int output ()
 	{
-		const float v1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
-		const float v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
-		const float v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
+		const auto	v1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
+		const auto	v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
+		const auto	v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
 
-		const int input = static_cast<int>( filter->clock ( v1, v2, v3 ) );
-		const int output = externalFilter.clock ( input );
-
-		return ( scaleFactor * output ) / 2;
+		const auto	input = int ( filter->clock ( v1, v2, v3 ) );
+		return externalFilter.clock ( input );
 	}
 
 	/**
@@ -276,7 +274,7 @@ public:
 					voice[ 2 ].envelopeGenerator.clock ();
 
 					if ( resampler.input ( output () ) )
-						buf[ s++ ] = int16_t ( resampler.output () );
+						buf[ s++ ] = int16_t ( resampler.output ( scaleFactor ) );
 				}
 
 				cycles -= delta_t;

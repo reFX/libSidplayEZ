@@ -44,7 +44,7 @@ namespace reSIDfp
 
 int SincResampler::fir ( int subcycle )
 {
-	auto convolve = [] ( const int16_t* __restrict__ a, const int16_t* __restrict__ b, int bLength )
+	auto convolve = [] ( const int32_t* __restrict__ a, const int16_t* __restrict__ b, int bLength )
 	{
 		auto    out = 0;
 

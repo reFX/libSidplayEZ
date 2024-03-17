@@ -66,7 +66,7 @@ private:
 
 	int outputValue = 0;
 
-	int16_t	sample[ RINGSIZE * 2 ];
+	int32_t	sample[ RINGSIZE * 2 ];
 
 	int fir ( int subcycle );
 
@@ -93,34 +93,11 @@ public:
 	*/
 	void setup ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency );
 
-	inline bool input ( int input )
+	inline bool input ( const int input )
 	{
 		auto	ready = false;
 
-		/*
-		* Clip the input as it may overflow the 16 bit range.
-		*
-		* Approximate measured input ranges:
-		* 6581: [-24262,+25080]  (Kawasaki_Synthesizer_Demo)
-		* 8580: [-21514,+35232]  (64_Forever, Drum_Fool)
-		*/
-		auto softClip = [] ( int x )
-		{
-			constexpr auto	threshold = 28000;
-			if ( x < threshold )
-				return int16_t ( x );
-
-			constexpr auto	t = threshold / 32768.0;
-			constexpr auto	a = 1.0 - t;
-			constexpr auto	b = 1.0 / a;
-
-			auto	value = double ( x - threshold ) / 32768.0;
-			value = t + a * std::tanh ( b * value );
-
-			return int16_t ( value * 32768.0 );
-		};
-
-		sample[ sampleIndex ] = sample[ sampleIndex + RINGSIZE ] = softClip ( input );
+		sample[ sampleIndex ] = sample[ sampleIndex + RINGSIZE ] = input;
 		sampleIndex = ( sampleIndex + 1 ) & ( RINGSIZE - 1 );
 
 		if ( sampleOffset < 1024 )
