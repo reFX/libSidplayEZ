@@ -110,7 +110,7 @@ const Spline::Point opamp_voltage_8580[ OPAMP_SIZE_8580 ] =
 };
 //-----------------------------------------------------------------------------
 
-thread_local std::unique_ptr<FilterModelConfig8580>	instance;
+static thread_local std::unique_ptr<FilterModelConfig8580>	instance;
 
 FilterModelConfig8580* FilterModelConfig8580::getInstance ()
 {
