@@ -28,7 +28,7 @@ namespace reSIDfp
 //-----------------------------------------------------------------------------
 
 Dac::Dac ( unsigned int bits )
-	: leakage ( 0.01 )
+	: leakage ( 0.005 )
 	, dac ( bits )
 {
 }

@@ -24,7 +24,6 @@
 #include <memory>
 
 #include "Filter.h"
-#include "FilterModelConfig6581.h"
 #include "Integrator6581.h"
 
 namespace reSIDfp
