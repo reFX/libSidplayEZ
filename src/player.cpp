@@ -483,6 +483,14 @@ void Player::set6581DigiVolume ( const double value )
 }
 //-----------------------------------------------------------------------------
 
+void Player::setDacLeakage ( const double value )
+{
+	for ( auto i = 0; i < 3; i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->setDacLeakage ( value );
+}
+//-----------------------------------------------------------------------------
+
 bool Player::getSidStatus ( int sidNum, uint8_t regs[ 32 ] )
 {
 	if ( auto s = m_mixer.getSid ( sidNum ) )

@@ -155,25 +155,7 @@ void SID::setChipModel ( ChipModel _model )
 		modelTTL = BUS_TTL_8580;
 	}
 
-	// calculate envelope DAC table
-	{
-		Dac dacBuilder ( ENV_DAC_BITS );
-		dacBuilder.kinkedDac ( model == MOS6581 );
-
-		for ( auto i = 0u; i < ( 1 << ENV_DAC_BITS ); i++ )
-			envDAC[ i ] = float ( dacBuilder.getOutput ( i ) );
-	}
-
-	// calculate oscillator DAC table
-	{
-		Dac dacBuilder ( OSC_DAC_BITS );
-		dacBuilder.kinkedDac ( model == MOS6581 );
-
-		const auto	offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
-
-		for ( auto i = 0u; i < ( 1 << OSC_DAC_BITS ); i++ )
-			oscDAC[ i ] = float ( dacBuilder.getOutput ( i ) - offset );
-	}
+	recalculateDACs ();
 
 	// set voice tables
 	for ( auto& vce : voice )
@@ -194,6 +176,37 @@ void SID::setCombinedWaveforms ( CombinedWaveforms cws, const float threshold )
 
 	for ( auto& vce : voice )
 		vce.waveformGenerator.setPulldownModels ( pulldownTable );
+}
+//-----------------------------------------------------------------------------
+
+void SID::setDacLeakage ( const double leakage )
+{
+	dacLeakage = leakage;
+	recalculateDACs ();
+}
+//-----------------------------------------------------------------------------
+
+void SID::recalculateDACs ()
+{
+	// calculate envelope DAC table
+	{
+		Dac	dacBuilder ( ENV_DAC_BITS, dacLeakage );
+		dacBuilder.kinkedDac ( model == MOS6581 );
+
+		for ( auto i = 0u; i < ( 1 << ENV_DAC_BITS ); i++ )
+			envDAC[ i ] = float ( dacBuilder.getOutput ( i ) );
+	}
+
+	// calculate oscillator DAC table
+	{
+		Dac dacBuilder ( OSC_DAC_BITS, dacLeakage );
+		dacBuilder.kinkedDac ( model == MOS6581 );
+
+		const auto	offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
+
+		for ( auto i = 0u; i < ( 1 << OSC_DAC_BITS ); i++ )
+			oscDAC[ i ] = float ( dacBuilder.getOutput ( i ) - offset );
+	}
 }
 //-----------------------------------------------------------------------------
 

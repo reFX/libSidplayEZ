@@ -93,7 +93,7 @@ public:
 	*
 	* @param bits the number of input bits
 	*/
-	Dac ( unsigned int bits );
+	Dac ( unsigned int bits, const double leakage = 0.01 );
 
 	/**
 	* Build DAC model for specific chip.

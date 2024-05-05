@@ -122,6 +122,8 @@ public:
 
 	void filter8580Curve ( double filterCurve )			{	m_sid.setFilter8580Curve ( filterCurve );	}
 
+	void setDacLeakage ( const double leakage )			{	m_sid.setDacLeakage ( leakage );	}
+
 	[[ nodiscard ]] float getInternalEnvValue ( int voiceNo ) const		{	return m_sid.getEnvLevel ( voiceNo );		}
 
 	/**

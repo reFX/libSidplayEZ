@@ -86,20 +86,19 @@ private:
 	// Currently active chip model.
 	ChipModel model;
 
+	// Dac leakage
+	double	dacLeakage = 0.01;
+
 	// Last written value
 	uint8_t	busValue;
 
 	/**
-	* Emulated nonlinearity of the envelope DAC.
-	*
-	* @See Dac
+	* Emulated nonlinearity of the envelope DAC
 	*/
 	float	envDAC[ 256 ];
 
 	/**
-	* Emulated nonlinearity of the oscillator DAC.
-	*
-	* @See Dac
+	* Emulated nonlinearity of the oscillator DAC
 	*/
 	float	oscDAC[ 4096 ];
 
@@ -154,6 +153,8 @@ private:
 		}
 	}
 
+	void recalculateDACs ();
+
 public:
 	SID ();
 
@@ -174,6 +175,11 @@ public:
 	* Set combined waveforms strength.
 	*/
 	void setCombinedWaveforms ( CombinedWaveforms cws, const float threshold );
+
+	/**
+	* Set DAC leakage
+	*/
+	void setDacLeakage ( const double leakage );
 
 	/**
 	* SID reset.
