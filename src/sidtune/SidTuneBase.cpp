@@ -101,10 +101,10 @@ SidTuneBase* SidTuneBase::load ( const char* fileName, bool separatorIsSlash )
 
 SidTuneBase* SidTuneBase::load ( LoaderFunc loader, const char* fileName, bool separatorIsSlash )
 {
-	if ( ! fileName )
-		return nullptr;
+	if ( fileName && *fileName )
+		return getFromFiles ( loader, fileName, separatorIsSlash );
 
-	return getFromFiles ( loader, fileName, separatorIsSlash );
+	return nullptr;
 }
 //-----------------------------------------------------------------------------
 
