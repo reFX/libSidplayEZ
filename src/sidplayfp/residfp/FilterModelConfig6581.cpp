@@ -186,19 +186,12 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 		}
 	};
 
-	auto    thdSummer = std::thread ( clBuildSummerTable );
-	auto    thdMixer = std::thread ( clBuildMixerTable );
-	auto    thdVolume = std::thread ( clBuildVolumeTable );
-	auto    thdResonance = std::thread ( clBuildResonanceTable );
-	auto    thdSomething1 = std::thread ( clFilterSomething1 );
-	auto    thdSomething2 = std::thread ( clFilterSomething2 );
-
-	thdSummer.join ();
-	thdMixer.join ();
-	thdVolume.join ();
-	thdResonance.join ();
-	thdSomething1.join ();
-	thdSomething2.join ();
+	auto    thdSummer = std::jthread ( clBuildSummerTable );
+	auto    thdMixer = std::jthread ( clBuildMixerTable );
+	auto    thdVolume = std::jthread ( clBuildVolumeTable );
+	auto    thdResonance = std::jthread ( clBuildResonanceTable );
+	auto    thdSomething1 = std::jthread ( clFilterSomething1 );
+	auto    thdSomething2 = std::jthread ( clFilterSomething2 );
 }
 //-----------------------------------------------------------------------------
 
