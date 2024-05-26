@@ -188,9 +188,11 @@ void SID::setDacLeakage ( const double leakage )
 
 void SID::recalculateDACs ()
 {
+	const auto	dacLeakFactor = model == MOS6581 ? dacLeakage : dacLeakage / 2.0;
+
 	// calculate envelope DAC table
 	{
-		Dac	dacBuilder ( ENV_DAC_BITS, dacLeakage );
+		Dac	dacBuilder ( ENV_DAC_BITS, dacLeakFactor );
 		dacBuilder.kinkedDac ( model == MOS6581 );
 
 		for ( auto i = 0u; i < ( 1 << ENV_DAC_BITS ); i++ )
@@ -199,7 +201,7 @@ void SID::recalculateDACs ()
 
 	// calculate oscillator DAC table
 	{
-		Dac dacBuilder ( OSC_DAC_BITS, dacLeakage );
+		Dac dacBuilder ( OSC_DAC_BITS, dacLeakFactor );
 		dacBuilder.kinkedDac ( model == MOS6581 );
 
 		const auto	offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
