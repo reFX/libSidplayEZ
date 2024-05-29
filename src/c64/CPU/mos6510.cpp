@@ -36,12 +36,19 @@ namespace libsidplayfp
 * The constants here defined are based on VICE testsuite which
 * refers to some real case usage of the opcodes.
 */
-const uint8_t lxa_magic = 0xee;
-const uint8_t ane_magic = 0xef;
+constexpr uint8_t lxa_magic = 0xee;
+constexpr uint8_t ane_magic = 0xef;
 
-const int interruptDelay = 2;
+constexpr int interruptDelay = 2;
 
-//-------------------------------------------------------------------------//
+//-----------------------------------------------------------------------------
+
+template<void( MOS6510::* Func )()>
+void StaticFuncWrapper ( MOS6510& self )
+{
+	( self.*Func )();
+}
+//-----------------------------------------------------------------------------
 
 /**
 * When AEC signal is high, no stealing is possible.
@@ -49,7 +56,7 @@ const int interruptDelay = 2;
 void MOS6510::eventWithoutSteals ()
 {
 	const ProcessorCycle& instr = instrTable[ cycleCount++ ];
-	( this->*( instr.func ) ) ();
+	( instr.func )( *this );
 	eventScheduler.schedule ( m_nosteal, 1 );
 }
 
@@ -61,7 +68,7 @@ void MOS6510::eventWithSteals ()
 	if ( instrTable[ cycleCount ].nosteal )
 	{
 		const ProcessorCycle& instr = instrTable[ cycleCount++ ];
-		( this->*( instr.func ) ) ( );
+		( instr.func )( *this );
 		eventScheduler.schedule ( m_steal, 1 );
 	}
 	else
@@ -1411,9 +1418,9 @@ void MOS6510::rra_instr ()
 */
 MOS6510::MOS6510 ( EventScheduler& scheduler )
 	: eventScheduler ( scheduler )
-	, m_nosteal ( "CPU-nosteal", *this, &MOS6510::eventWithoutSteals )
-	, m_steal ( "CPU-steal", *this, &MOS6510::eventWithSteals )
-	, clearInt ( "Remove IRQ", *this, &MOS6510::removeIRQ )
+	, m_nosteal ( "CPU-nosteal", *this )
+	, m_steal ( "CPU-steal", *this )
+	, clearInt ( "Remove IRQ", *this )
 {
 	buildInstructionTable ();
 
@@ -1460,7 +1467,7 @@ void MOS6510::buildInstructionTable ()
 			case PHPn: case PLAn: case PLPn: case ROLn: case RORn:
 			case SECn: case SEDn: case SEIn: case TAXn:  case TAYn:
 			case TSXn: case TXAn: case TXSn: case TYAn:
-				instrTable[ buildCycle++ ].func = &MOS6510::throwAwayFetch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayFetch>;
 				break;
 
 				// Immediate and Relative Addressing Mode Handler
@@ -1469,7 +1476,7 @@ void MOS6510::buildInstructionTable ()
 			case BRKn: case BVCr:  case BVSr:  case CMPb: case CPXb: case CPYb:
 			case EORb: case LDAb:  case LDXb:  case LDYb: case LXAb: case NOPb_:
 			case ORAb: case SBCb_: case SBXb:  case RTIn: case RTSn:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchDataByte>;
 				break;
 
 				// Zero Page Addressing Mode Handler - Read & RMW
@@ -1481,7 +1488,7 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case SAXz: case STAz: case STXz: case STYz:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
 				break;
 
 				// Zero Page with X Offset Addressing Mode Handler
@@ -1495,9 +1502,9 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case STAzx: case STYzx:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddrX;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddrX>;
 				// operates on 0 page in read mode. Truly side-effect free.
-				instrTable[ buildCycle++ ].func = &MOS6510::WasteCycle;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
 				break;
 
 				// Zero Page with Y Offset Addressing Mode Handler
@@ -1505,9 +1512,9 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case STXzy: case SAXzy:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddrY;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddrY>;
 				// operates on 0 page in read mode. Truly side-effect free.
-				instrTable[ buildCycle++ ].func = &MOS6510::WasteCycle;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
 				break;
 
 				// Absolute Addressing Mode Handler
@@ -1519,23 +1526,23 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case JMPw: case SAXa: case STAa: case STXa: case STYa:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighAddr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddr>;
 				break;
 
 			case JSRw:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
 				break;
 
 				// Absolute With X Offset Addressing Mode Handler (Read)
 			case ADCax: case ANDax:  case CMPax: case EORax: case LDAax:
 			case LDYax: case NOPax_: case ORAax: case SBCax:
 				access = READ;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighAddrX2;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddrX2>;
 				// this cycle is skipped if the address is already correct.
 				// otherwise, it will be read and ignored.
-				instrTable[ buildCycle++ ].func = &MOS6510::throwAwayRead;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayRead>;
 				break;
 
 				// Absolute X (RMW; no page crossing handled, always reads before writing)
@@ -1545,18 +1552,18 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case SHYax: case STAax:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighAddrX;
-				instrTable[ buildCycle++ ].func = &MOS6510::throwAwayRead;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddrX>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayRead>;
 				break;
 
 				// Absolute With Y Offset Addressing Mode Handler (Read)
 			case ADCay: case ANDay: case CMPay: case EORay: case LASay:
 			case LAXay: case LDAay: case LDXay: case ORAay: case SBCay:
 				access = READ;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighAddrY2;
-				instrTable[ buildCycle++ ].func = &MOS6510::throwAwayRead;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddrY2>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayRead>;
 				break;
 
 				// Absolute Y (No page crossing handled)
@@ -1565,17 +1572,17 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case SHAay: case SHSay: case SHXay: case STAay:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighAddrY;
-				instrTable[ buildCycle++ ].func = &MOS6510::throwAwayRead;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddrY>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayRead>;
 				break;
 
 				// Absolute Indirect Addressing Mode Handler
 			case JMPi:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowPointer;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighPointer;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowEffAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighEffAddr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointer>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighPointer>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowEffAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighEffAddr>;
 				break;
 
 				// Indexed with X Preinc Addressing Mode Handler
@@ -1585,20 +1592,20 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case SAXix: case STAix:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowPointer;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowPointerX;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowEffAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighEffAddr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointer>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointerX>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowEffAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighEffAddr>;
 				break;
 
 				// Indexed with Y Postinc Addressing Mode Handler (Read)
 			case ADCiy: case ANDiy: case CMPiy: case EORiy: case LAXiy:
 			case LDAiy: case ORAiy: case SBCiy:
 				access = READ;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowPointer;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowEffAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighEffAddrY2;
-				instrTable[ buildCycle++ ].func = &MOS6510::throwAwayRead;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointer>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowEffAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighEffAddrY2>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayRead>;
 				break;
 
 				// Indexed Y (No page crossing handled)
@@ -1607,10 +1614,10 @@ void MOS6510::buildInstructionTable ()
 				access = READ;
 				[[ fallthrough ]];
 			case SHAiy: case STAiy:
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowPointer;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchLowEffAddr;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighEffAddrY;
-				instrTable[ buildCycle++ ].func = &MOS6510::throwAwayRead;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointer>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowEffAddr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighEffAddrY>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayRead>;
 				break;
 
 			default:
@@ -1620,7 +1627,7 @@ void MOS6510::buildInstructionTable ()
 
 		if ( access == READ )
 		{
-			instrTable[ buildCycle++ ].func = &MOS6510::FetchEffAddrDataByte;
+			instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchEffAddrDataByte>;
 		}
 
 		//---------------------------------------------------------------------------------------
@@ -1630,152 +1637,152 @@ void MOS6510::buildInstructionTable ()
 		{
 			case ADCz:  case ADCzx: case ADCa: case ADCax: case ADCay: case ADCix:
 			case ADCiy: case ADCb:
-				instrTable[ buildCycle++ ].func = &MOS6510::adc_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::adc_instr>;
 				break;
 
 			case ANCb_:
-				instrTable[ buildCycle++ ].func = &MOS6510::anc_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::anc_instr>;
 				break;
 
 			case ANDz:  case ANDzx: case ANDa: case ANDax: case ANDay: case ANDix:
 			case ANDiy: case ANDb:
-				instrTable[ buildCycle++ ].func = &MOS6510::and_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::and_instr>;
 				break;
 
 			case ANEb: // Also known as XAA
-				instrTable[ buildCycle++ ].func = &MOS6510::ane_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ane_instr>;
 				break;
 
 			case ARRb:
-				instrTable[ buildCycle++ ].func = &MOS6510::arr_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::arr_instr>;
 				break;
 
 			case ASLn:
-				instrTable[ buildCycle++ ].func = &MOS6510::asla_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::asla_instr>;
 				break;
 
 			case ASLz: case ASLzx: case ASLa: case ASLax:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::asl_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::asl_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case ASRb: // Also known as ALR
-				instrTable[ buildCycle++ ].func = &MOS6510::alr_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::alr_instr>;
 				break;
 
 			case BCCr:
-				instrTable[ buildCycle++ ].func = &MOS6510::bcc_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bcc_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case BCSr:
-				instrTable[ buildCycle++ ].func = &MOS6510::bcs_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bcs_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case BEQr:
-				instrTable[ buildCycle++ ].func = &MOS6510::beq_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::beq_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case BITz: case BITa:
-				instrTable[ buildCycle++ ].func = &MOS6510::bit_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bit_instr>;
 				break;
 
 			case BMIr:
-				instrTable[ buildCycle++ ].func = &MOS6510::bmi_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bmi_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case BNEr:
-				instrTable[ buildCycle++ ].func = &MOS6510::bne_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bne_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case BPLr:
-				instrTable[ buildCycle++ ].func = &MOS6510::bpl_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bpl_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case BRKn:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PushHighPC;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushHighPC>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::brkPushLowPC;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::brkPushLowPC>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PushSR;
-				instrTable[ buildCycle++ ].func = &MOS6510::IRQLoRequest;
-				instrTable[ buildCycle++ ].func = &MOS6510::IRQHiRequest;
-				instrTable[ buildCycle++ ].func = &MOS6510::fetchNextOpcode;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushSR>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::IRQLoRequest>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::IRQHiRequest>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fetchNextOpcode>;
 				break;
 
 			case BVCr:
-				instrTable[ buildCycle++ ].func = &MOS6510::bvc_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bvc_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case BVSr:
-				instrTable[ buildCycle++ ].func = &MOS6510::bvs_instr;
-				instrTable[ buildCycle++ ].func = &MOS6510::fix_branch;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::bvs_instr>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fix_branch>;
 				break;
 
 			case CLCn:
-				instrTable[ buildCycle++ ].func = &MOS6510::clc_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::clc_instr>;
 				break;
 
 			case CLDn:
-				instrTable[ buildCycle++ ].func = &MOS6510::cld_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::cld_instr>;
 				break;
 
 			case CLIn:
-				instrTable[ buildCycle++ ].func = &MOS6510::cli_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::cli_instr>;
 				break;
 
 			case CLVn:
-				instrTable[ buildCycle++ ].func = &MOS6510::clv_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::clv_instr>;
 				break;
 
 			case CMPz:  case CMPzx: case CMPa: case CMPax: case CMPay: case CMPix:
 			case CMPiy: case CMPb:
-				instrTable[ buildCycle++ ].func = &MOS6510::cmp_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::cmp_instr>;
 				break;
 
 			case CPXz: case CPXa: case CPXb:
-				instrTable[ buildCycle++ ].func = &MOS6510::cpx_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::cpx_instr>;
 				break;
 
 			case CPYz: case CPYa: case CPYb:
-				instrTable[ buildCycle++ ].func = &MOS6510::cpy_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::cpy_instr>;
 				break;
 
 			case DCPz: case DCPzx: case DCPa: case DCPax: case DCPay: case DCPix:
 			case DCPiy: // Also known as DCM
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::dcm_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::dcm_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case DECz: case DECzx: case DECa: case DECax:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::dec_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::dec_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case DEXn:
-				instrTable[ buildCycle++ ].func = &MOS6510::dex_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::dex_instr>;
 				break;
 
 			case DEYn:
-				instrTable[ buildCycle++ ].func = &MOS6510::dey_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::dey_instr>;
 				break;
 
 			case EORz:  case EORzx: case EORa: case EORax: case EORay: case EORix:
 			case EORiy: case EORb:
-				instrTable[ buildCycle++ ].func = &MOS6510::eor_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::eor_instr>;
 				break;
 				#if 0
 				// HLT, also known as JAM
@@ -1788,69 +1795,69 @@ void MOS6510::buildInstructionTable ()
 				#endif
 			case INCz: case INCzx: case INCa: case INCax:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::inc_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::inc_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case INXn:
-				instrTable[ buildCycle++ ].func = &MOS6510::inx_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::inx_instr>;
 				break;
 
 			case INYn:
-				instrTable[ buildCycle++ ].func = &MOS6510::iny_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::iny_instr>;
 				break;
 
 			case ISBz: case ISBzx: case ISBa: case ISBax: case ISBay: case ISBix:
 			case ISBiy: // Also known as INS
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::ins_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ins_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case JSRw:
-				instrTable[ buildCycle++ ].func = &MOS6510::WasteCycle;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PushHighPC;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushHighPC>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PushLowPC;
-				instrTable[ buildCycle++ ].func = &MOS6510::FetchHighAddr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushLowPC>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddr>;
 				[[ fallthrough ]];
 			case JMPw: case JMPi:
-				instrTable[ buildCycle++ ].func = &MOS6510::jmp_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::jmp_instr>;
 				break;
 
 			case LASay:
-				instrTable[ buildCycle++ ].func = &MOS6510::las_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::las_instr>;
 				break;
 
 			case LAXz: case LAXzy: case LAXa: case LAXay: case LAXix: case LAXiy:
-				instrTable[ buildCycle++ ].func = &MOS6510::lax_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::lax_instr>;
 				break;
 
 			case LDAz:  case LDAzx: case LDAa: case LDAax: case LDAay: case LDAix:
 			case LDAiy: case LDAb:
-				instrTable[ buildCycle++ ].func = &MOS6510::lda_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::lda_instr>;
 				break;
 
 			case LDXz: case LDXzy: case LDXa: case LDXay: case LDXb:
-				instrTable[ buildCycle++ ].func = &MOS6510::ldx_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ldx_instr>;
 				break;
 
 			case LDYz: case LDYzx: case LDYa: case LDYax: case LDYb:
-				instrTable[ buildCycle++ ].func = &MOS6510::ldy_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ldy_instr>;
 				break;
 
 			case LSRn:
-				instrTable[ buildCycle++ ].func = &MOS6510::lsra_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::lsra_instr>;
 				break;
 
 			case LSRz: case LSRzx: case LSRa: case LSRax:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::lsr_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::lsr_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case NOPn_: case NOPb_:
@@ -1860,195 +1867,195 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case LXAb: // Also known as OAL
-				instrTable[ buildCycle++ ].func = &MOS6510::oal_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::oal_instr>;
 				break;
 
 			case ORAz:  case ORAzx: case ORAa: case ORAax: case ORAay: case ORAix:
 			case ORAiy: case ORAb:
-				instrTable[ buildCycle++ ].func = &MOS6510::ora_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ora_instr>;
 				break;
 
 			case PHAn:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::pha_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::pha_instr>;
 				break;
 
 			case PHPn:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PushSR;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushSR>;
 				break;
 
 			case PLAn:
 				// should read the value at current stack register.
 				// Truly side-effect free.
-				instrTable[ buildCycle++ ].func = &MOS6510::WasteCycle;
-				instrTable[ buildCycle++ ].func = &MOS6510::pla_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::pla_instr>;
 				break;
 
 			case PLPn:
 				// should read the value at current stack register.
 				// Truly side-effect free.
-				instrTable[ buildCycle++ ].func = &MOS6510::WasteCycle;
-				instrTable[ buildCycle++ ].func = &MOS6510::PopSR;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PopSR>;
 				break;
 
 			case RLAz: case RLAzx: case RLAix: case RLAa: case RLAax: case RLAay:
 			case RLAiy:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::rla_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rla_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case ROLn:
-				instrTable[ buildCycle++ ].func = &MOS6510::rola_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rola_instr>;
 				break;
 
 			case ROLz: case ROLzx: case ROLa: case ROLax:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::rol_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rol_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case RORn:
-				instrTable[ buildCycle++ ].func = &MOS6510::rora_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rora_instr>;
 				break;
 
 			case RORz: case RORzx: case RORa: case RORax:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::ror_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ror_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case RRAa: case RRAax: case RRAay: case RRAz: case RRAzx: case RRAix:
 			case RRAiy:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::rra_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rra_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case RTIn:
 				// should read the value at current stack register.
 				// Truly side-effect free.
-				instrTable[ buildCycle++ ].func = &MOS6510::WasteCycle;
-				instrTable[ buildCycle++ ].func = &MOS6510::PopSR;
-				instrTable[ buildCycle++ ].func = &MOS6510::PopLowPC;
-				instrTable[ buildCycle++ ].func = &MOS6510::PopHighPC;
-				instrTable[ buildCycle++ ].func = &MOS6510::rti_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PopSR>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PopLowPC>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PopHighPC>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rti_instr>;
 				break;
 
 			case RTSn:
 				// should read the value at current stack register.
 				// Truly side-effect free.
-				instrTable[ buildCycle++ ].func = &MOS6510::WasteCycle;
-				instrTable[ buildCycle++ ].func = &MOS6510::PopLowPC;
-				instrTable[ buildCycle++ ].func = &MOS6510::PopHighPC;
-				instrTable[ buildCycle++ ].func = &MOS6510::rts_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PopLowPC>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PopHighPC>;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rts_instr>;
 				break;
 
 			case SAXz: case SAXzy: case SAXa: case SAXix: // Also known as AXS
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::axs_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::axs_instr>;
 				break;
 
 			case SBCz:  case SBCzx: case SBCa: case SBCax: case SBCay: case SBCix:
 			case SBCiy: case SBCb_:
-				instrTable[ buildCycle++ ].func = &MOS6510::sbc_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sbc_instr>;
 				break;
 
 			case SBXb:
-				instrTable[ buildCycle++ ].func = &MOS6510::sbx_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sbx_instr>;
 				break;
 
 			case SECn:
-				instrTable[ buildCycle++ ].func = &MOS6510::sec_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sec_instr>;
 				break;
 
 			case SEDn:
-				instrTable[ buildCycle++ ].func = &MOS6510::sed_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sed_instr>;
 				break;
 
 			case SEIn:
-				instrTable[ buildCycle++ ].func = &MOS6510::sei_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sei_instr>;
 				break;
 
 			case SHAay: case SHAiy: // Also known as AXA
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::axa_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::axa_instr>;
 				break;
 
 			case SHSay: // Also known as TAS
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::shs_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::shs_instr>;
 				break;
 
 			case SHXay: // Also known as XAS
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::xas_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::xas_instr>;
 				break;
 
 			case SHYax: // Also known as SAY
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::say_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::say_instr>;
 				break;
 
 			case SLOz: case SLOzx: case SLOa: case SLOax: case SLOay: case SLOix:
 			case SLOiy: // Also known as ASO
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::aso_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::aso_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case SREz: case SREzx: case SREa: case SREax: case SREay: case SREix:
 			case SREiy: // Also known as LSE
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::lse_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::lse_instr>;
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::PutEffAddrDataByte;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
 				break;
 
 			case STAz: case STAzx: case STAa: case STAax: case STAay: case STAix:
 			case STAiy:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::sta_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sta_instr>;
 				break;
 
 			case STXz: case STXzy: case STXa:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::stx_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::stx_instr>;
 				break;
 
 			case STYz: case STYzx: case STYa:
 				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &MOS6510::sty_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sty_instr>;
 				break;
 
 			case TAXn:
-				instrTable[ buildCycle++ ].func = &MOS6510::tax_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::tax_instr>;
 				break;
 
 			case TAYn:
-				instrTable[ buildCycle++ ].func = &MOS6510::tay_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::tay_instr>;
 				break;
 
 			case TSXn:
-				instrTable[ buildCycle++ ].func = &MOS6510::tsx_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::tsx_instr>;
 				break;
 
 			case TXAn:
-				instrTable[ buildCycle++ ].func = &MOS6510::txa_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::txa_instr>;
 				break;
 
 			case TXSn:
-				instrTable[ buildCycle++ ].func = &MOS6510::txs_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::txs_instr>;
 				break;
 
 			case TYAn:
-				instrTable[ buildCycle++ ].func = &MOS6510::tya_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::tya_instr>;
 				break;
 
 			default:
@@ -2060,10 +2067,10 @@ void MOS6510::buildInstructionTable ()
 		// These are normally called HLT instructions. In the hardware, the
 		// CPU state machine locks up and will never recover.
 		if ( ! ( legalMode && legalInstr ) )
-			instrTable[ buildCycle++ ].func = &MOS6510::invalidOpcode;
+			instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::invalidOpcode>;
 
 		// check for IRQ triggers or fetch next opcode...
-		instrTable[ buildCycle ].func = &MOS6510::interruptsAndNextOpcode;
+		instrTable[ buildCycle ].func = &StaticFuncWrapper<&MOS6510::interruptsAndNextOpcode>;
 	}
 }
 
