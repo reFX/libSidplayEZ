@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 class SidTuneInfo;
 
@@ -35,8 +36,9 @@ private:
 	const SidTuneInfo* m_tuneInfo;
 	std::string	m_errorString;
 
-	uint8_t* reloc_driver;
-	int      reloc_size;
+	std::vector<uint8_t>	psid_driver;
+	uint8_t*				reloc_driver;
+	int						reloc_size;
 
 	uint16_t m_driverAddr;
 	uint16_t m_driverLength;

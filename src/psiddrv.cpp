@@ -37,7 +37,7 @@
 namespace libsidplayfp
 {
 
-uint8_t psid_driver[] =
+const uint8_t PSID_DRIVER[] =
 {
 	#include "psiddrv.bin"
 };
@@ -178,8 +178,9 @@ bool psiddrv::drvReloc ()
 	// Place psid driver into ram
 	const auto	relocAddr = uint16_t ( relocStartPage << 8 );
 
-	reloc_driver = psid_driver;
-	reloc_size = sizeof ( psid_driver );
+	psid_driver.assign ( PSID_DRIVER, PSID_DRIVER + sizeof ( PSID_DRIVER ) );
+	reloc_driver = psid_driver.data ();
+	reloc_size = int ( psid_driver.size () );
 
 	reloc65	relocator ( relocAddr - 10 );
 	if ( ! relocator.reloc ( &reloc_driver, &reloc_size ) )
