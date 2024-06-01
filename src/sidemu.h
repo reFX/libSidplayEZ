@@ -45,10 +45,7 @@ public:
 	/**
 	* Buffer size. 5000 is roughly 5 ms at 96 kHz
 	*/
-	enum
-	{
-		OUTPUTBUFFERSIZE = 5000
-	};
+	static constexpr auto	OUTPUTBUFFERSIZE = 5000u;
 
 protected:
 	EventScheduler*	eventScheduler = nullptr;
