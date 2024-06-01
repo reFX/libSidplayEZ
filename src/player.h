@@ -45,13 +45,12 @@ namespace libsidplayfp
 class Player final
 {
 private:
-	typedef enum
+	enum class state_t
 	{
 		STOPPED,
 		PLAYING,
 		STOPPING
-
-	} state_t;
+	};
 
 	c64			m_c64;				// Commodore 64 emulator
 	Mixer		m_mixer;			// Mixer
@@ -62,8 +61,8 @@ private:
 
 	std::string	m_errorString = "N/A";
 
-	state_t		m_isPlaying = STOPPED;	// Playback status
-	uint8_t		videoSwitch;			// PAL/NTSC switch value
+	state_t		m_isPlaying = state_t::STOPPED;	// Playback status
+	uint8_t		videoSwitch;					// PAL/NTSC switch value
 
 	ChipSelector	chipSelector;
 	std::string		selectedChipProfile;
@@ -100,7 +99,7 @@ public:
 	bool loadTune ( SidTune* tune );
 	uint32_t play ( int16_t* buffer, uint32_t samples );
 	void stop ();
-	[[ nodiscard ]] bool isPlaying () const { return m_isPlaying != STOPPED; }
+	[[ nodiscard ]] bool isPlaying () const { return m_isPlaying != state_t::STOPPED; }
 
 	[[ nodiscard ]] int getNumChips () const { return m_mixer.getNumChips (); }
 

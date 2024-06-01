@@ -59,14 +59,14 @@ struct X00Header
 	// should be 0 for all other types
 };
 
-typedef enum
+enum class X00Format
 {
 	X00_DEL,
 	X00_SEQ,
 	X00_PRG,
 	X00_USR,
 	X00_REL
-} X00Format;
+};
 
 //-----------------------------------------------------------------------------
 
@@ -86,11 +86,11 @@ SidTuneBase* p00::load ( const char* fileName, buffer_t& dataBuf )
 
 	switch ( std::toupper ( ext[ 1 ] ) )
 	{
-		case 'D':		type = X00_DEL;		format = "Unsupported tape image file (DEL)";		break;
-		case 'S':		type = X00_SEQ;		format = "Unsupported tape image file (SEQ)";		break;
-		case 'P':		type = X00_PRG;		format = "Tape image file (PRG)";					break;
-		case 'U':		type = X00_USR;		format = "Unsupported USR file (USR)";				break;
-		case 'R':		type = X00_REL;		format = "Unsupported tape image file (REL)";		break;
+		case 'D':		type = X00Format::X00_DEL;		format = "Unsupported tape image file (DEL)";		break;
+		case 'S':		type = X00Format::X00_SEQ;		format = "Unsupported tape image file (SEQ)";		break;
+		case 'P':		type = X00Format::X00_PRG;		format = "Tape image file (PRG)";					break;
+		case 'U':		type = X00Format::X00_USR;		format = "Unsupported USR file (USR)";				break;
+		case 'R':		type = X00Format::X00_REL;		format = "Unsupported tape image file (REL)";		break;
 
 		default:		return nullptr;
 	}
@@ -110,7 +110,7 @@ SidTuneBase* p00::load ( const char* fileName, buffer_t& dataBuf )
 		return nullptr;
 
 	// File types current supported
-	if ( type != X00_PRG )
+	if ( type != X00Format::X00_PRG )
 		throw loadError ( "Not a PRG inside X00" );
 
 	if ( bufLen < sizeof ( X00Header ) + 2 )

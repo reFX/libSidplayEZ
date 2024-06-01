@@ -189,7 +189,7 @@ void MOS6510::triggerNMI ()
 	calculateInterruptTriggerCycle ();
 
 	/* maybe process 1 clock of interrupt delay. */
-	if ( !rdy )
+	if ( ! rdy )
 	{
 		eventScheduler.cancel ( m_steal );
 		eventScheduler.schedule ( m_steal, 0, EVENT_CLOCK_PHI2 );
@@ -205,7 +205,7 @@ void MOS6510::triggerIRQ ()
 	calculateInterruptTriggerCycle ();
 
 	/* maybe process 1 clock of interrupt delay. */
-	if ( !rdy && interruptCycle == cycleCount )
+	if ( ! rdy && interruptCycle == cycleCount )
 	{
 		eventScheduler.cancel ( m_steal );
 		eventScheduler.schedule ( m_steal, 0, EVENT_CLOCK_PHI2 );
@@ -243,7 +243,7 @@ void MOS6510::fetchNextOpcode ()
 	cycleCount = cpuRead ( Register_ProgramCounter ) << 3;
 	Register_ProgramCounter++;
 
-	if ( !checkInterrupts () )
+	if ( ! checkInterrupts () )
 	{
 		interruptCycle = MAX;
 	}
@@ -310,7 +310,7 @@ void MOS6510::throwAwayRead ()
 void MOS6510::FetchDataByte ()
 {
 	Cycle_Data = cpuRead ( Register_ProgramCounter );
-	if ( !d1x1 )
+	if ( ! d1x1 )
 	{
 		Register_ProgramCounter++;
 	}
@@ -390,7 +390,7 @@ void MOS6510::FetchHighAddrX ()
 void MOS6510::FetchHighAddrX2 ()
 {
 	FetchHighAddrX ();
-	if ( !adl_carry )
+	if ( ! adl_carry )
 		cycleCount++;
 }
 
@@ -414,7 +414,7 @@ void MOS6510::FetchHighAddrY ()
 void MOS6510::FetchHighAddrY2 ()
 {
 	FetchHighAddrY ();
-	if ( !adl_carry )
+	if ( ! adl_carry )
 		cycleCount++;
 }
 
@@ -500,7 +500,7 @@ void MOS6510::FetchHighEffAddrY ()
 void MOS6510::FetchHighEffAddrY2 ()
 {
 	FetchHighEffAddrY ();
-	if ( !adl_carry )
+	if ( ! adl_carry )
 		cycleCount++;
 }
 
@@ -530,7 +530,7 @@ void MOS6510::PutEffAddrDataByte ()
 */
 void MOS6510::Push ( uint8_t data )
 {
-	const uint16_t addr = endian_16 ( SP_PAGE, Register_StackPointer );
+	const auto	addr = endian_16 ( SP_PAGE, Register_StackPointer );
 	cpuWrite ( addr, data );
 	Register_StackPointer--;
 }
@@ -541,7 +541,7 @@ void MOS6510::Push ( uint8_t data )
 uint8_t MOS6510::Pop ()
 {
 	Register_StackPointer++;
-	const uint16_t addr = endian_16 ( SP_PAGE, Register_StackPointer );
+	const auto	addr = endian_16 ( SP_PAGE, Register_StackPointer );
 	return cpuRead ( addr );
 }
 
@@ -664,7 +664,7 @@ void MOS6510::sei_instr ()
 {
 	flags.setI ( true );
 	interruptsAndNextOpcode ();
-	if ( !rstFlag && !nmiFlag && interruptCycle != MAX )
+	if ( ! rstFlag && !nmiFlag && interruptCycle != MAX )
 		interruptCycle = MAX;
 }
 
@@ -712,12 +712,12 @@ void MOS6510::hlt_instr () {}
 */
 void MOS6510::sh_instr ()
 {
-	uint8_t tmp = endian_16hi8 ( Cycle_EffectiveAddress );
+	auto	tmp = endian_16hi8 ( Cycle_EffectiveAddress );
 
 	/*
-		* When the addressing/indexing causes a page boundary crossing
-		* the highbyte of the target address is ANDed with the value stored.
-		*/
+	* When the addressing/indexing causes a page boundary crossing
+	* the highbyte of the target address is ANDed with the value stored.
+	*/
 	if ( adl_carry )
 	{
 		endian_16hi8 ( Cycle_EffectiveAddress, tmp & Cycle_Data );
@@ -726,13 +726,13 @@ void MOS6510::sh_instr ()
 		tmp++;
 
 	/*
-		* When a DMA is going on (the CPU is halted by the VIC-II)
-		* while the instruction sha/shx/shy executes then the last
-		* term of the ANDing (ADH+1) drops off.
-		*
-		* http://sourceforge.net/p/vice-emu/bugs/578/
-		*/
-	if ( !rdyOnThrowAwayRead )
+	* When a DMA is going on (the CPU is halted by the VIC-II)
+	* while the instruction sha/shx/shy executes then the last
+	* term of the ANDing (ADH+1) drops off.
+	*
+	* http://sourceforge.net/p/vice-emu/bugs/578/
+	*/
+	if ( ! rdyOnThrowAwayRead )
 	{
 		Cycle_Data &= tmp;
 	}
@@ -1453,9 +1453,9 @@ void MOS6510::buildInstructionTable ()
 
 		auto	buildCycle = i << 3;
 
-		typedef enum { WRITE, READ } AccessMode;
+		enum class AccessMode { WRITE, READ };
 
-		AccessMode	access = WRITE;
+		AccessMode	access = AccessMode::WRITE;
 		auto	legalMode = true;
 		auto	legalInstr = true;
 
@@ -1485,7 +1485,7 @@ void MOS6510::buildInstructionTable ()
 			case NOPz_: case SBCz:
 			case ASLz: case DCPz: case DECz: case INCz: case ISBz: case LSRz:
 			case ROLz: case RORz: case SREz: case SLOz: case RLAz: case RRAz:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case SAXz: case STAz: case STXz: case STYz:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
@@ -1499,7 +1499,7 @@ void MOS6510::buildInstructionTable ()
 			case NOPzx_: case ORAzx: case SBCzx:
 			case ASLzx: case DCPzx: case DECzx: case INCzx: case ISBzx: case LSRzx:
 			case RLAzx:    case ROLzx: case RORzx: case RRAzx: case SLOzx: case SREzx:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case STAzx: case STYzx:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddrX>;
@@ -1509,7 +1509,7 @@ void MOS6510::buildInstructionTable ()
 
 				// Zero Page with Y Offset Addressing Mode Handler
 			case LDXzy: case LAXzy:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case STXzy: case SAXzy:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddrY>;
@@ -1523,7 +1523,7 @@ void MOS6510::buildInstructionTable ()
 			case ORAa: case SBCa:
 			case ASLa: case DCPa: case DECa: case INCa: case ISBa: case LSRa:
 			case ROLa: case RORa: case SLOa: case SREa: case RLAa: case RRAa:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case JMPw: case SAXa: case STAa: case STXa: case STYa:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
@@ -1537,7 +1537,7 @@ void MOS6510::buildInstructionTable ()
 				// Absolute With X Offset Addressing Mode Handler (Read)
 			case ADCax: case ANDax:  case CMPax: case EORax: case LDAax:
 			case LDYax: case NOPax_: case ORAax: case SBCax:
-				access = READ;
+				access = AccessMode::READ;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddrX2>;
 				// this cycle is skipped if the address is already correct.
@@ -1549,7 +1549,7 @@ void MOS6510::buildInstructionTable ()
 			case ASLax: case DCPax: case DECax: case INCax: case ISBax:
 			case LSRax: case RLAax: case ROLax: case RORax: case RRAax:
 			case SLOax: case SREax:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case SHYax: case STAax:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
@@ -1560,7 +1560,7 @@ void MOS6510::buildInstructionTable ()
 				// Absolute With Y Offset Addressing Mode Handler (Read)
 			case ADCay: case ANDay: case CMPay: case EORay: case LASay:
 			case LAXay: case LDAay: case LDXay: case ORAay: case SBCay:
-				access = READ;
+				access = AccessMode::READ;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddrY2>;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayRead>;
@@ -1569,7 +1569,7 @@ void MOS6510::buildInstructionTable ()
 				// Absolute Y (No page crossing handled)
 			case DCPay: case ISBay: case RLAay: case RRAay: case SLOay:
 			case SREay:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case SHAay: case SHSay: case SHXay: case STAay:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
@@ -1589,7 +1589,7 @@ void MOS6510::buildInstructionTable ()
 			case ADCix: case ANDix: case CMPix: case EORix: case LAXix: case LDAix:
 			case ORAix: case SBCix:
 			case DCPix: case ISBix: case SLOix: case SREix: case RLAix: case RRAix:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case SAXix: case STAix:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointer>;
@@ -1601,7 +1601,7 @@ void MOS6510::buildInstructionTable ()
 				// Indexed with Y Postinc Addressing Mode Handler (Read)
 			case ADCiy: case ANDiy: case CMPiy: case EORiy: case LAXiy:
 			case LDAiy: case ORAiy: case SBCiy:
-				access = READ;
+				access = AccessMode::READ;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointer>;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowEffAddr>;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighEffAddrY2>;
@@ -1611,7 +1611,7 @@ void MOS6510::buildInstructionTable ()
 				// Indexed Y (No page crossing handled)
 			case DCPiy: case ISBiy: case RLAiy: case RRAiy: case SLOiy:
 			case SREiy:
-				access = READ;
+				access = AccessMode::READ;
 				[[ fallthrough ]];
 			case SHAiy: case STAiy:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowPointer>;
@@ -1625,7 +1625,7 @@ void MOS6510::buildInstructionTable ()
 				break;
 		}
 
-		if ( access == READ )
+		if ( access == AccessMode::READ )
 		{
 			instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchEffAddrDataByte>;
 		}

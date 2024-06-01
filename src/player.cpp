@@ -96,7 +96,7 @@ void Player::setChargen ( const uint8_t* rom )
 
 void Player::initialise ()
 {
-	m_isPlaying = STOPPED;
+	m_isPlaying = state_t::STOPPED;
 
 	m_c64.reset ();
 
@@ -148,10 +148,10 @@ uint32_t Player::play ( int16_t* buffer, uint32_t count )
 		return 0;
 
 	// Start the player loop
-	if ( m_isPlaying == STOPPED )
-		m_isPlaying = PLAYING;
+	if ( m_isPlaying == state_t::STOPPED )
+		m_isPlaying = state_t::PLAYING;
 
-	if ( m_isPlaying == PLAYING )
+	if ( m_isPlaying == state_t::PLAYING )
 	{
 		m_mixer.init ( buffer, count );
 
@@ -191,14 +191,14 @@ uint32_t Player::play ( int16_t* buffer, uint32_t count )
 		}
 	}
 
-	if ( m_isPlaying == STOPPING )
+	if ( m_isPlaying == state_t::STOPPING )
 	{
 		try
 		{
 			initialise ();
 		}
 		catch ( configError const& ) {}
-		m_isPlaying = STOPPED;
+		m_isPlaying = state_t::STOPPED;
 	}
 
 	return count;
@@ -207,8 +207,8 @@ uint32_t Player::play ( int16_t* buffer, uint32_t count )
 
 void Player::stop ()
 {
-	if ( m_tune && m_isPlaying == PLAYING )
-		m_isPlaying = STOPPING;
+	if ( m_tune && m_isPlaying == state_t::PLAYING )
+		m_isPlaying = state_t::STOPPING;
 }
 //-----------------------------------------------------------------------------
 
