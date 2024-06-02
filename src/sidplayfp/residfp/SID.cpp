@@ -188,7 +188,10 @@ void SID::setDacLeakage ( const double leakage )
 
 void SID::recalculateDACs ()
 {
-	const auto	dacLeakFactor = model == MOS6581 ? dacLeakage : dacLeakage / 2.0;
+	constexpr auto	MOSFET_LEAKAGE_6581 = 0.0075;
+	constexpr auto	MOSFET_LEAKAGE_8580 = 0.0035;
+
+	const auto	dacLeakFactor = ( model == MOS6581 ? MOSFET_LEAKAGE_6581 : MOSFET_LEAKAGE_8580 ) * dacLeakage;
 
 	// calculate envelope DAC table
 	{
