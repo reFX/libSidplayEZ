@@ -49,6 +49,7 @@
 { "Russell Lieblich",					{	.folder = "/MUSICIANS/L/Lieblich_Russell/",			.filter = 0.25,	.digi = 1.1,	.zeroDac = 0.7	} },
 { "Steve Turner",						{	.folder = "/MUSICIANS/T/Turner_Steve/",				.filter = 0.6,	.exceptions = { { "Bushido", "Jason Page"	} } } },	// Only Jason Page used the filter for subtune 2
 { "Tim Follin",							{	.folder = "/MUSICIANS/F/Follin_Tim/",				.filter = 0.5	} },
+{ "Geoff Follin",						{	.folder = "/MUSICIANS/F/Follin_Geoff/",				.filter = 0.85	} },
 { "Jori Olkkonen (Yip)",				{	.folder = "/MUSICIANS/Y/Yip/",						.filter = 0.35,	.zeroDac = 0.6	} },
 { "Zoci-Joe",							{	.folder = "/MUSICIANS/Z/Zoci-Joe/",					.filter = 0.3	} },
 { "Paul Hannay (Feekzoid)",				{	.folder = "/MUSICIANS/F/Feekzoid/",					.digi = 1.1 } },
