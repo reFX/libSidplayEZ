@@ -178,7 +178,7 @@ bool psiddrv::drvReloc ()
 	// Place psid driver into ram
 	const auto	relocAddr = uint16_t ( relocStartPage << 8 );
 
-	psid_driver.assign ( PSID_DRIVER, PSID_DRIVER + sizeof ( PSID_DRIVER ) );
+	psid_driver.assign ( std::begin ( PSID_DRIVER ), std::end ( PSID_DRIVER ) );
 	reloc_driver = psid_driver.data ();
 	reloc_size = int ( psid_driver.size () );
 
