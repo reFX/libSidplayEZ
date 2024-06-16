@@ -146,7 +146,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 
 		buildResonanceTable ( opampModel, resonance_n );
 	};
-	auto clFilterSomething1 = [ this ]
+	auto clFilterVcrVg = [ this ]
 	{
 		const auto  nVddt = N16 * ( Vddt - vmin );
 
@@ -159,7 +159,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 			vcr_nVg[ i ] = uint16_t ( tmp + 0.5 );
 		}
 	};
-	auto clFilterSomething2 = [ this ]
+	auto clFilterVcrIds = [ this ]
 	{
 		//  EKV model:
 		//
@@ -186,12 +186,12 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 		}
 	};
 
-	auto    thdSummer = std::jthread ( clBuildSummerTable );
-	auto    thdMixer = std::jthread ( clBuildMixerTable );
-	auto    thdVolume = std::jthread ( clBuildVolumeTable );
-	auto    thdResonance = std::jthread ( clBuildResonanceTable );
-	auto    thdSomething1 = std::jthread ( clFilterSomething1 );
-	auto    thdSomething2 = std::jthread ( clFilterSomething2 );
+	auto	thdSummer = std::jthread ( clBuildSummerTable );
+	auto	thdMixer = std::jthread ( clBuildMixerTable );
+	auto	thdVolume = std::jthread ( clBuildVolumeTable );
+	auto	thdResonance = std::jthread ( clBuildResonanceTable );
+	auto	thdFilterVcrVg = std::jthread ( clFilterVcrVg );
+	auto	thdFilterVcrIds = std::jthread ( clFilterVcrIds );
 }
 //-----------------------------------------------------------------------------
 
