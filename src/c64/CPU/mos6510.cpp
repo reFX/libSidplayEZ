@@ -1416,8 +1416,9 @@ void MOS6510::rra_instr ()
 * @param context
 *            The Event Context
 */
-MOS6510::MOS6510 ( EventScheduler& scheduler )
+MOS6510::MOS6510 ( EventScheduler& scheduler, CPUDataBus& bus )
 	: eventScheduler ( scheduler )
+	, dataBus ( bus )
 	, m_nosteal ( "CPU-nosteal", *this )
 	, m_steal ( "CPU-steal", *this )
 	, clearInt ( "Remove IRQ", *this )

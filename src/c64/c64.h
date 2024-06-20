@@ -96,9 +96,6 @@ private:
 	/// System event context
 	EventScheduler eventScheduler;
 
-	/// CPU
-	c64cpu cpu;
-
 	/// CIA1
 	c64cia1 cia1;
 
@@ -126,59 +123,49 @@ private:
 	/// MMU chip
 	MMU mmu;
 
+	/// CPUBus
+	c64cpubus cpubus;
+
+	/// CPU
+	MOS6510 cpu;
+
 private:
 	static double getCpuFreq ( model_t model );
 
 private:
 	/**
-		* Access memory as seen by CPU.
-		*
-		* @param addr the address where to read from
-		* @return value at address
-		*/
-	uint8_t cpuRead ( uint16_t addr ) override { return mmu.cpuRead ( addr ); }
-
-	/**
-		* Access memory as seen by CPU.
-		*
-		* @param addr the address where to write to
-		* @param data the value to write
-		*/
-	void cpuWrite ( uint16_t addr, uint8_t data ) override { mmu.cpuWrite ( addr, data ); }
-
-	/**
-		* IRQ trigger signal.
-		*
-		* Calls permitted any time, but normally originated by chips at PHI1.
-		*
-		* @param state
-		*/
+	* IRQ trigger signal.
+	*
+	* Calls permitted any time, but normally originated by chips at PHI1.
+	*
+	* @param state
+	*/
 	inline void interruptIRQ ( bool state ) override;
 
 	/**
-		* NMI trigger signal.
-		*
-		* Calls permitted any time, but normally originated by chips at PHI1.
-		*/
+	* NMI trigger signal.
+	*
+	* Calls permitted any time, but normally originated by chips at PHI1.
+	*/
 	inline void interruptNMI () override { cpu.triggerNMI (); }
 
 	/**
-		* Reset signal.
-		*/
+	* Reset signal.
+	*/
 	inline void interruptRST () override { cpu.triggerRST (); }
 
 	/**
-		* BA signal.
-		*
-		* Calls permitted during PHI1.
-		*
-		* @param state
-		*/
+	* BA signal.
+	*
+	* Calls permitted during PHI1.
+	*
+	* @param state
+	*/
 	inline void setBA ( bool state ) override;
 
 	/**
-		* @param state fire pressed, active low
-		*/
+	* @param state fire pressed, active low
+	*/
 	inline void lightpen ( bool state ) override;
 
 	void resetIoBank ();

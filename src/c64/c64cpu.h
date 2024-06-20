@@ -19,7 +19,7 @@
 *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "c64env.h"
+#include "mmu.h"
 #include "CPU/mos6510.h"
 
 namespace libsidplayfp
@@ -27,21 +27,20 @@ namespace libsidplayfp
 
 //-----------------------------------------------------------------------------
 
-class c64cpu final : public MOS6510
+class c64cpubus final : public CPUDataBus
 {
 public:
-	c64cpu ( c64env& env )
-		: MOS6510 ( env.scheduler () )
-		, m_env ( env )
+	c64cpubus ( MMU& mmu )
+		: m_mmu ( mmu )
 	{
 	}
 
 protected:
-	uint8_t cpuRead ( uint16_t addr ) override				{	return m_env.cpuRead ( addr );	}
-	void cpuWrite ( uint16_t addr, uint8_t data ) override	{	m_env.cpuWrite ( addr, data );	}
+	uint8_t cpuRead ( uint16_t addr ) const override		{	return m_mmu.cpuRead ( addr );	}
+	void cpuWrite ( uint16_t addr, uint8_t data ) override	{	m_mmu.cpuWrite ( addr, data );	}
 
 private:
-	c64env&	m_env;
+	MMU&	m_mmu;
 };
 //-----------------------------------------------------------------------------
 

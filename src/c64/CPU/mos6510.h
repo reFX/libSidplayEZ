@@ -33,6 +33,13 @@ class EventContext;
 namespace libsidplayfp
 {
 
+class CPUDataBus
+{
+public:
+	virtual ~CPUDataBus () = default;
+	virtual uint8_t cpuRead ( uint16_t addr ) const = 0;
+	virtual void cpuWrite ( uint16_t addr, uint8_t data ) = 0;
+};
 /**
 * Cycle-exact 6502/6510 emulation core.
 *
@@ -72,6 +79,9 @@ private:
 private:
 	/// Event scheduler
 	EventScheduler& eventScheduler;
+
+	/// Data bus
+	CPUDataBus&		dataBus;
 
 	/// Current instruction and subcycle within instruction
 	int cycleCount;
@@ -263,9 +273,9 @@ private:
 
 	inline void buildInstructionTable ();
 
-protected:
-	MOS6510 ( EventScheduler& scheduler );
-	~MOS6510 () {}
+public:
+	MOS6510 ( EventScheduler& scheduler, CPUDataBus& bus );
+	~MOS6510 () = default;
 
 	/**
 	* Get data from system environment.
@@ -273,7 +283,7 @@ protected:
 	* @param address
 	* @return data byte CPU requested
 	*/
-	virtual uint8_t cpuRead ( uint16_t addr ) = 0;
+	inline uint8_t cpuRead ( uint16_t addr ) const				{	return dataBus.cpuRead ( addr );	}
 
 	/**
 	* Write data to system environment.
@@ -281,9 +291,8 @@ protected:
 	* @param address
 	* @param data
 	*/
-	virtual void cpuWrite ( uint16_t addr, uint8_t data ) = 0;
+	inline void cpuWrite ( uint_least16_t addr, uint8_t data )	{	dataBus.cpuWrite ( addr, data );	}
 
-public:
 	void reset ();
 
 	static const char* credits ();
