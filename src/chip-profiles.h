@@ -10,7 +10,7 @@
 { "Antony Crowther (Ratt)",				{	.folder = "/MUSICIANS/C/Crowther_Antony/",			.filter = 1.1,	} },
 { "Ben Daglish",						{	.folder = "/MUSICIANS/D/Daglish_Ben/",				.filter = 0.6,	.exceptions = { { "Last_Ninja", "Anthony Lees" } } } },	// Only Anthony Lees used the filter
 { "Charles Deenen",						{	.folder = "/MUSICIANS/D/Deenen_Charles/",			.filter = 0.2	} },
-{ "Chris Hülsbeck",						{	.folder = "/MUSICIANS/H/Huelsbeck_Chris/",			.filter = 0.9,	.digi = 0.8,	.zeroDac = 0.2	} },
+{ "Chris Hülsbeck",						{	.folder = "/MUSICIANS/H/Huelsbeck_Chris/",			.filter = 0.9,	.digi = 0.75,	.zeroDac = 0.2	} },
 { "Clever Music",						{	.folder = "/MUSICIANS/C/Clever_Music/",				.filter = 0.25	} },
 { "Mitch & Dane",						{	.folder = "/MUSICIANS/M/Mitch_and_Dane/",			.filter = 0.85,	.zeroDac = 0.3,	.cwsThreshold = 0.5	} },
 { "Michael Nilsson-Vonderburgh (Mitch)",{	.folder = "/MUSICIANS/M/Mitch_and_Dane/Mitch/",		.filter = 0.3,	.zeroDac = 0.2	} },
@@ -59,3 +59,4 @@
 { "Mark Wilson",						{	.folder = "/MUSICIANS/W/Wilson_Mark/",				.filter = 0.2,	.digi = 1.1	} },
 { "Wally Beben",						{	.folder = "/MUSICIANS/B/Beben_Wally/",				.digi = 1.2	} },
 { "NM156",								{	.folder = "/MUSICIANS/N/NM156/",					.filter = 0.7,	.zeroDac = 0.8	} },
+{ "Carsten Berggreen (Scarzix)",		{	.folder = "/MUSICIANS/S/Scarzix/",					.filter = 0.7	} },
