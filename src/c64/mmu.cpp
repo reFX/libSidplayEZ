@@ -28,6 +28,18 @@
 namespace libsidplayfp
 {
 
+// Use static type to allow compiler to optimize virtual function call
+template<class BankType, BankType MMU::* Bank>
+uint8_t readBank ( MMU& self, uint16_t addr )
+{
+	return ( self.*Bank ).peek ( addr );
+}
+//-----------------------------------------------------------------------------
+
+uint8_t readIO ( MMU& self, uint16_t addr )
+{
+	return self.ioBank->peek ( addr );
+}
 //-----------------------------------------------------------------------------
 
 MMU::MMU ( EventScheduler& scheduler, IOBank* _ioBank )
@@ -35,11 +47,14 @@ MMU::MMU ( EventScheduler& scheduler, IOBank* _ioBank )
 	, ioBank ( _ioBank )
 	, zeroRAMBank ( *this, ramBank )
 {
-	std::fill_n ( cpuReadMap, std::size ( cpuReadMap ), &ramBank );
-	std::fill_n ( cpuWriteMap, std::size ( cpuWriteMap ), &ramBank );
-
-	cpuReadMap[ 0 ] = &zeroRAMBank;
+	cpuReadMap[ 0 ] = &readBank<ZeroRAMBank, &MMU::zeroRAMBank>;
 	cpuWriteMap[ 0 ] = &zeroRAMBank;
+
+	for ( auto i = 1; i < 16; i++ )
+	{
+		cpuReadMap[ i ] = &readBank<SystemRAMBank, &MMU::ramBank>;
+		cpuWriteMap[ i ] = &ramBank;
+	}
 }
 //-----------------------------------------------------------------------------
 
@@ -55,16 +70,18 @@ void MMU::setCpuPort ( uint8_t state )
 
 void MMU::updateMappingPHI2 ()
 {
-	cpuReadMap[ 0xe ] = cpuReadMap[ 0xf ] = hiram ? (Bank*)&kernalRomBank : &ramBank;
-	cpuReadMap[ 0xa ] = cpuReadMap[ 0xb ] = ( loram && hiram ) ? (Bank*)&basicRomBank : &ramBank;
+	ReadFunc	readRAM = &readBank<SystemRAMBank, &MMU::ramBank>;
+	cpuReadMap[ 0xe ] = cpuReadMap[ 0xf ] = hiram ? &readBank<KernalRomBank, &MMU::kernalRomBank> : readRAM;
+	cpuReadMap[ 0xa ] = cpuReadMap[ 0xb ] = ( loram && hiram ) ? &readBank<BasicRomBank, &MMU::basicRomBank> : readRAM;
 
 	if ( charen && ( loram || hiram ) )
 	{
-		cpuReadMap[ 0xd ] = cpuWriteMap[ 0xd ] = ioBank;
+		cpuReadMap[ 0xd ] = &readIO;
+		cpuWriteMap[ 0xd ] = ioBank;
 	}
 	else
 	{
-		cpuReadMap[ 0xd ] = ( ! charen && ( loram || hiram ) ) ? (Bank*)&characterRomBank : &ramBank;
+		cpuReadMap[ 0xd ] = ( ! charen && ( loram || hiram ) ) ? &readBank<CharacterRomBank, &MMU::characterRomBank> : readRAM;
 		cpuWriteMap[ 0xd ] = &ramBank;
 	}
 }

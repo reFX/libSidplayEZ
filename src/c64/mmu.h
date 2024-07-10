@@ -53,8 +53,11 @@ private:
 	bool	hiram = false;
 	bool	charen = false;
 
+	friend uint8_t readIO ( MMU& self, uint16_t addr );
+	using ReadFunc = uint8_t ( * )( MMU& self, uint16_t addr );
+
 	/// CPU read memory mapping in 4k chunks
-	Bank* cpuReadMap[ 16 ];
+	ReadFunc cpuReadMap[ 16 ];
 
 	/// CPU write memory mapping in 4k chunks
 	Bank* cpuWriteMap[ 16 ];
@@ -126,7 +129,7 @@ public:
 	* @param addr the address where to read from
 	* @return value at address
 	*/
-	uint8_t cpuRead ( uint16_t addr ) const		{	return cpuReadMap[ addr >> 12 ]->peek ( addr );	}
+	uint8_t cpuRead ( uint16_t addr ) { return ( cpuReadMap[ addr >> 12 ] )( *this, addr ); }
 
 	/**
 	* Access memory as seen by CPU.
