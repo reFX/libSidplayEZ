@@ -35,7 +35,7 @@ sidemu::sidemu ()
 
 void sidemu::reset ( uint8_t volume )
 {
-	c64sid::reset ();
+	std::fill_n ( lastpoke, std::size ( lastpoke ), 0 );
 
 	m_accessClk = 0;
 	m_sid.reset ();

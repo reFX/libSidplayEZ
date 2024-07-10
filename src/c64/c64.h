@@ -43,7 +43,7 @@
 namespace libsidplayfp
 {
 
-class c64sid;
+class sidemu;
 class sidmemory;
 
 /**
@@ -218,7 +218,7 @@ public:
 	*
 	* @param s the sid emu to set
 	*/
-	void setBaseSid ( c64sid* s );
+	void setBaseSid ( sidemu* s );
 
 	/**
 	* Add an extra SID.
@@ -229,7 +229,7 @@ public:
 	*
 	* @return false if address is unsupported
 	*/
-	bool addExtraSid ( c64sid* s, uint16_t address );
+	bool addExtraSid ( sidemu* s, uint16_t address );
 
 	/**
 	* Remove all the SIDs.

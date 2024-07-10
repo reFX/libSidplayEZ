@@ -68,7 +68,7 @@ public:
 
 	void poke ( uint16_t address, uint8_t value ) override
 	{
-		const	uint8_t addr = endian_16lo8 ( address );
+		const auto	addr = uint8_t ( address );
 		write ( addr, value );
 
 		// Save the value written to Timer A

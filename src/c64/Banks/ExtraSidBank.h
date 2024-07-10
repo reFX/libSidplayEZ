@@ -23,7 +23,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../c64sid.h"
+#include "../../sidemu.h"
 
 namespace libsidplayfp
 {
@@ -44,7 +44,7 @@ private:
 	*/
 	Bank*	mapper[ MAPPER_SIZE ] = {};
 
-	std::vector<c64sid*>	sids;
+	std::vector<sidemu*>	sids;
 
 public:
 	void reset ()
@@ -64,7 +64,7 @@ public:
 	* @param s the emulation
 	* @param address the address where to put the chip
 	*/
-	void addSID ( c64sid* s, uint16_t address )
+	void addSID ( sidemu* s, uint16_t address )
 	{
 		sids.push_back ( s );
 		mapper[ address >> 5 & ( MAPPER_SIZE - 1 ) ] = s;

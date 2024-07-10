@@ -155,13 +155,13 @@ void c64::setCiaModel ( cia_model_t model )
 }
 //-----------------------------------------------------------------------------
 
-void c64::setBaseSid ( c64sid* s )
+void c64::setBaseSid ( sidemu* s )
 {
 	sidBank.setSID ( s );
 }
 //-----------------------------------------------------------------------------
 
-bool c64::addExtraSid ( c64sid* s, uint16_t address )
+bool c64::addExtraSid ( sidemu* s, uint16_t address )
 {
 	// Check for valid address in the IO area range ($Dxxx)
 	if ( ( address & 0xF000 ) != 0xD000 )

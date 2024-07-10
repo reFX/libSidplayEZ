@@ -21,7 +21,7 @@
 */
 
 #include "Bank.h"
-#include "../c64sid.h"
+#include "../../sidemu.h"
 
 namespace libsidplayfp
 {
@@ -44,11 +44,11 @@ public:
 	*
 	* @param s the emulation, nullptr to remove current sid
 	*/
-	void setSID ( c64sid* s )	{	sid = s;	}
+	void setSID ( sidemu* s )	{	sid = s;	}
 
 private:
 	// SID chip
-	c64sid*	sid = nullptr;
+	sidemu*	sid = nullptr;
 };
 
 }
