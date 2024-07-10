@@ -52,7 +52,7 @@ typedef enum
 * event to be moved to the next phi1 cycle. Correspondingly, requesting
 * a phi1 time when system is in phi2 returns the value of the next phi1.
 */
-class EventScheduler
+class EventScheduler final
 {
 private:
 	// The first event of the chain.

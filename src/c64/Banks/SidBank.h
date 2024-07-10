@@ -23,8 +23,6 @@
 #include "Bank.h"
 #include "../c64sid.h"
 
-#include "NullSid.h"
-
 namespace libsidplayfp
 {
 
@@ -46,13 +44,11 @@ public:
 	*
 	* @param s the emulation, nullptr to remove current sid
 	*/
-	void setSID ( c64sid* s )	{	sid = s ? s : &nullSID;	}
+	void setSID ( c64sid* s )	{	sid = s;	}
 
 private:
-	NullSid	nullSID;
-
 	// SID chip
-	c64sid*	sid = &nullSID;
+	c64sid*	sid = nullptr;
 };
 
 }
