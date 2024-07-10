@@ -28,7 +28,6 @@
 
 #include "../sidplayfp/SidTuneInfo.h"
 
-#include "../sidendian.h"
 #include "../MD5/MD5.h"
 
 namespace libsidplayfp
@@ -127,6 +126,8 @@ SidTuneBase* PSID::load ( buffer_t& dataBuf )
 	if ( dataBuf.size () < 4 )
 		return nullptr;
 
+	auto endian_big32 = [] ( const uint8_t ptr[ 4 ] ) { return uint32_t ( ( ptr[ 0 ] << 24 ) | ( ptr[ 1 ] << 16 ) | ( ptr[ 2 ] << 8 ) | ptr[ 3 ] ); };
+
 	const auto	magic = endian_big32 ( &dataBuf[ 0 ] );
 	if ( magic != PSID_ID && magic != RSID_ID )
 		return nullptr;
@@ -149,15 +150,18 @@ void PSID::readHeader ( const buffer_t& dataBuf, psidHeader& hdr )
 	if ( dataBuf.size () < ( psid_headerSize + 2 ) )
 		throw loadError ( ERR_TRUNCATED );
 
+	auto get_big16 = [] ( const uint8_t ptr[ 2 ] ) -> uint16_t { return uint16_t ( ( ptr[ 0 ] << 8 ) | ptr[ 1 ] ); };
+	auto endian_big32 = [] ( const uint8_t ptr[ 4 ] ) ->uint32_t { return uint32_t ( ( ptr[ 0 ] << 24 ) | ( ptr[ 1 ] << 16 ) | ( ptr[ 2 ] << 8 ) | ptr[ 3 ] ); };
+
 	// Read v1 fields
 	hdr.id = endian_big32 ( &dataBuf[ 0 ] );
-	hdr.version = endian_big16 ( &dataBuf[ 4 ] );
-	hdr.data = endian_big16 ( &dataBuf[ 6 ] );
-	hdr.load = endian_big16 ( &dataBuf[ 8 ] );
-	hdr.init = endian_big16 ( &dataBuf[ 10 ] );
-	hdr.play = endian_big16 ( &dataBuf[ 12 ] );
-	hdr.songs = endian_big16 ( &dataBuf[ 14 ] );
-	hdr.start = endian_big16 ( &dataBuf[ 16 ] );
+	hdr.version = get_big16 ( &dataBuf[ 4 ] );
+	hdr.data = get_big16 ( &dataBuf[ 6 ] );
+	hdr.load = get_big16 ( &dataBuf[ 8 ] );
+	hdr.init = get_big16 ( &dataBuf[ 10 ] );
+	hdr.play = get_big16 ( &dataBuf[ 12 ] );
+	hdr.songs = get_big16 ( &dataBuf[ 14 ] );
+	hdr.start = get_big16 ( &dataBuf[ 16 ] );
 	hdr.speed = endian_big32 ( &dataBuf[ 18 ] );
 	memcpy ( hdr.name, &dataBuf[ 22 ], PSID_MAXSTRLEN );
 	memcpy ( hdr.author, &dataBuf[ 54 ], PSID_MAXSTRLEN );
@@ -169,7 +173,7 @@ void PSID::readHeader ( const buffer_t& dataBuf, psidHeader& hdr )
 			throw loadError ( ERR_TRUNCATED );
 
 		// Read v2/3/4 fields
-		hdr.flags = endian_big16 ( &dataBuf[ 118 ] );
+		hdr.flags = get_big16 ( &dataBuf[ 118 ] );
 		hdr.relocStartPage = dataBuf[ 120 ];
 		hdr.relocPages = dataBuf[ 121 ];
 		hdr.sidChipBase2 = dataBuf[ 122 ];
@@ -350,7 +354,7 @@ const char* PSID::createMD5 ( char* md5 )
 	if ( ! md5 )
 		md5 = m_md5;
 
-	*md5 = '\0';
+	*md5 = 0;
 
 	// Include C64 data
 	MD5	myMD5;
@@ -358,16 +362,18 @@ const char* PSID::createMD5 ( char* md5 )
 
 	uint8_t tmp[ 2 ];
 
+	auto set_little16 = [] ( uint8_t ptr[ 2 ], uint16_t word ) ->void { ptr[ 0 ] = uint8_t ( word );	ptr[ 1 ] = uint8_t ( word >> 8 ); };
+
 	// Include INIT address
-	endian_little16 ( tmp, info.m_initAddr );
+	set_little16 ( tmp, info.m_initAddr );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	// Include PLAY address
-	endian_little16 ( tmp, info.m_playAddr );
+	set_little16 ( tmp, info.m_playAddr );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	// Include number of songs
-	endian_little16 ( tmp, uint16_t ( info.m_songs ) );
+	set_little16 ( tmp, uint16_t ( info.m_songs ) );
 	myMD5.append ( tmp, sizeof ( tmp ) );
 
 	{

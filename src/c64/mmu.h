@@ -23,7 +23,6 @@
 
 #include <stdint.h>
 
-#include "../sidendian.h"
 #include "../sidmemory.h"
 #include "../EventScheduler.h"
 
@@ -101,20 +100,17 @@ public:
 	void setChargen ( const uint8_t* rom ) override { characterRomBank.set ( rom ); }
 
 	// RAM access methods
-	uint8_t readMemByte ( uint16_t addr ) override { return ramBank.peek ( addr ); }
-	uint16_t readMemWord ( uint16_t addr ) override { return endian_little16 ( ramBank.ram + addr ); }
+	uint8_t readMemByte ( uint16_t addr ) override { return ramBank.ram[addr]; }
+	uint16_t readMemWord ( uint16_t addr ) override { return uint16_t ( ramBank.ram[ addr + 1 ] << 8 | ramBank.ram[ addr ] );	}
 
-	void writeMemByte ( uint16_t addr, uint8_t value ) override { ramBank.poke ( addr, value ); }
-	void writeMemWord ( uint16_t addr, uint16_t value ) override { endian_little16 ( ramBank.ram + addr, value ); }
+	void writeMemByte ( uint16_t addr, uint8_t value ) override { ramBank.ram[ addr ] = value; }
+	void writeMemWord ( uint16_t addr, uint16_t value ) override {
+		ramBank.ram[ addr ] = uint8_t ( value );
+		ramBank.ram[ addr + 1 ] = uint8_t ( value >> 8 );
+	}
 
-	void fillRam ( uint16_t start, uint8_t value, unsigned int size ) override
-	{
-		memset ( ramBank.ram + start, value, size );
-	}
-	void fillRam ( uint16_t start, const uint8_t* source, unsigned int size ) override
-	{
-		memcpy ( ramBank.ram + start, source, size );
-	}
+	void fillRam ( uint16_t start, uint8_t value, unsigned int size ) override			{	std::fill_n ( ramBank.ram + start, size, value );	}
+	void fillRam ( uint16_t start, const uint8_t* source, unsigned int size ) override	{	std::copy_n ( source, size, ramBank.ram + start );	}
 
 	// SID specific hacks
 	void installResetHook ( uint16_t addr ) override { kernalRomBank.installResetHook ( addr ); }

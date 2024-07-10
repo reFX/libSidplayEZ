@@ -25,6 +25,7 @@
 
 #include "Bank.h"
 #include "../CPU/opcodes.h"
+#include "../../sidendian.h"
 
 namespace libsidplayfp
 {
@@ -133,8 +134,8 @@ public:
 		*/
 	void installResetHook ( uint16_t addr )
 	{
-		setVal ( 0xfffc, endian_16lo8 ( addr ) );
-		setVal ( 0xfffd, endian_16hi8 ( addr ) );
+		setVal ( 0xfffc, get_16lo8 ( addr ) );
+		setVal ( 0xfffd, get_16hi8 ( addr ) );
 	}
 };
 
@@ -174,8 +175,8 @@ public:
 	void installTrap ( uint16_t addr )
 	{
 		setVal ( 0xa7ae, JMPw );
-		setVal ( 0xa7af, endian_16lo8 ( addr ) );
-		setVal ( 0xa7b0, endian_16hi8 ( addr ) );
+		setVal ( 0xa7af, get_16lo8 ( addr ) );
+		setVal ( 0xa7b0, get_16hi8 ( addr ) );
 	}
 
 	void setSubtune ( uint8_t tune )

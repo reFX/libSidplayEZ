@@ -137,14 +137,14 @@ void Timer::reset ()
 
 void Timer::latchLo ( uint8_t data )
 {
-	endian_16lo8 ( latch, data );
+	set_16lo8 ( latch, data );
 	if ( ( state & CIAT_LOAD ) != 0 )
 		timer = latch;
 }
 
 void Timer::latchHi ( uint8_t data )
 {
-	endian_16hi8 ( latch, data );
+	set_16hi8 ( latch, data );
 	if ( ( state & CIAT_LOAD ) != 0 )
 		timer = latch;
 	// Reload timer if stopped

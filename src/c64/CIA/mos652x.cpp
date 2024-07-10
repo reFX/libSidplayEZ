@@ -191,10 +191,10 @@ uint8_t MOS652X::read ( uint8_t addr )
 	{
 		case PRA:		return ( regs[ PRA ] | ~regs[ DDRA ] );			// Simulate a serial port
 		case PRB:		return adjustDataPort ( regs[ PRB ] | ~regs[ DDRB ] );
-		case TAL:		return endian_16lo8 ( timerA.getTimer () );
-		case TAH:		return endian_16hi8 ( timerA.getTimer () );
-		case TBL:		return endian_16lo8 ( timerB.getTimer () );
-		case TBH:		return endian_16hi8 ( timerB.getTimer () );
+		case TAL:		return get_16lo8 ( timerA.getTimer () );
+		case TAH:		return get_16hi8 ( timerA.getTimer () );
+		case TBL:		return get_16lo8 ( timerB.getTimer () );
+		case TBH:		return get_16hi8 ( timerB.getTimer () );
 
 		case TOD_TEN:
 		case TOD_SEC:
