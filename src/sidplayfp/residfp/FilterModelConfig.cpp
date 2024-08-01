@@ -99,11 +99,14 @@ void FilterModelConfig::buildSummerTable ( OpAmp& opampModel )
 	// entirely accurate, since the input for each transistor is different,
 	// and transistors are not linear components. However modeling all
 	// transistors separately would be extremely costly.
+	const auto	r_N16 = 1.0 / N16;
+
 	for ( auto i = 0; i < 5; i++ )
 	{
 		const auto  idiv = 2 + i;        // 2 - 6 input "resistors"
 		const auto  size = idiv << 16;
 		const auto  n = double ( idiv );
+		const auto	r_idiv = 1.0 / idiv;
 
 		opampModel.reset ();
 
@@ -111,7 +114,7 @@ void FilterModelConfig::buildSummerTable ( OpAmp& opampModel )
 
 		for ( auto vi = 0; vi < size; vi++ )
 		{
-			const auto  vin = vmin + vi / N16 / idiv; // vmin .. vmax
+			const auto	vin = vmin + vi * r_N16 * r_idiv;	// vmin .. vmax
 			summer[ i ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
 		}
 	}
@@ -125,17 +128,22 @@ void FilterModelConfig::buildMixerTable ( OpAmp& opampModel, double nRatio )
 	//
 	// All "on", transistors are modeled as one - see comments above for
 	// the filter summer.
+	const auto	r_N16 = 1.0 / N16;
+
 	for ( auto i = 0; i < 8; i++ )
 	{
 		const auto  idiv = std::max ( 1, i );
 		const auto  size = std::max ( 1, i << 16 );
 		const auto  n = i * nRatio;
+		const auto	r_idiv = 1.0 / idiv;
+
 		opampModel.reset ();
+
 		mixer[ i ] = new uint16_t[ size ];
 
 		for ( auto vi = 0; vi < size; vi++ )
 		{
-			const auto  vin = vmin + vi / N16 / idiv; // vmin .. vmax
+			const auto	vin = vmin + vi * r_N16 * r_idiv;	// vmin .. vmax
 			mixer[ i ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
 		}
 	}
@@ -149,16 +157,20 @@ void FilterModelConfig::buildVolumeTable ( OpAmp& opampModel, double nDivisor )
 	// From die photographs of the volume "resistor" ladders
 	// it follows that gain ~ vol/12 (assuming ideal
 	// op-amps and ideal "resistors").
+	const auto	r_N16 = 1.0 / N16;
+
 	for ( auto n8 = 0; n8 < 16; n8++ )
 	{
 		const auto  size = 1 << 16;
 		const auto  n = n8 / nDivisor;
+
 		opampModel.reset ();
+
 		volume[ n8 ] = new uint16_t[ size ];
 
 		for ( auto vi = 0; vi < size; vi++ )
 		{
-			const auto  vin = vmin + vi / N16; // vmin .. vmax
+			const auto	vin = vmin + vi * r_N16; // vmin .. vmax
 			volume[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( n, vin ) );
 		}
 	}
@@ -167,6 +179,8 @@ void FilterModelConfig::buildVolumeTable ( OpAmp& opampModel, double nDivisor )
 
 void FilterModelConfig::buildResonanceTable ( OpAmp& opampModel, const double resonance_n[ 16 ] )
 {
+	const auto	r_N16 = 1.0 / N16;
+
 	for ( auto n8 = 0; n8 < 16; n8++ )
 	{
 		const auto	size = 1 << 16;
@@ -175,7 +189,7 @@ void FilterModelConfig::buildResonanceTable ( OpAmp& opampModel, const double re
 
 		for ( auto vi = 0; vi < size; vi++ )
 		{
-			const double vin = vmin + vi / N16;	// vmin .. vmax
+			const auto	vin = vmin + vi * r_N16;	// vmin .. vmax
 			resonance[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( resonance_n[ n8 ], vin ) );
 		}
 	}
