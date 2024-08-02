@@ -126,6 +126,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 	const auto	beta = 0.1102 * ( A - 8.7 );
 	const auto	I0beta = I0 ( beta );
 	const auto	cyclesPerSampleD = clockFrequency / samplingFrequency;
+	const auto	r_cyclesPerSampleD = 1.0 / cyclesPerSampleD;
 
 	{
 		// The filter order will maximally be 124 with the current constraints.
@@ -144,7 +145,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 		assert ( firN < RINGSIZE );
 
 		// Error is bounded by err < 1.234 / L^2, so L = sqrt(1.234 / (2^-16)) = sqrt(1.234 * 2^16).
-		firRES = int ( std::ceil ( std::sqrt ( 1.234 * ( 1 << BITS ) ) / cyclesPerSampleD ) );
+		firRES = int ( std::ceil ( std::sqrt ( 1.234 * ( 1 << BITS ) ) * r_cyclesPerSampleD ) );
 
 		// firN*firRES represent the total resolution of the sinc sampling. JOS
 		// recommends a length of 2^BITS, but we don't quite use that good a filter.
@@ -158,7 +159,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 	const auto	wc = M_PI;
 
 	// Calculate the sinc tables
-	const auto	scale = 32768.0 * wc / cyclesPerSampleD / M_PI;
+	const auto	scale = 32768.0 * wc * r_cyclesPerSampleD / M_PI;
 
 	// We're not interested in the fractional part so use int division before converting to double
 	const auto	tmp = firN / 2;
@@ -176,7 +177,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 			const auto	xt = x / firN_2;
 			const auto	kaiserXt = std::fabs ( xt ) < 1.0 ? I0 ( beta * std::sqrt ( 1. - xt * xt ) ) / I0beta : 0.0;
 
-			const auto	wt = wc * x / cyclesPerSampleD;
+			const auto	wt = wc * x * r_cyclesPerSampleD;
 			const auto	sincWt = std::fabs ( wt ) >= 1e-8 ? std::sin ( wt ) / wt : 1.0;
 
 			*dst++ = int16_t ( scale * sincWt * kaiserXt );
