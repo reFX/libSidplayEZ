@@ -337,7 +337,7 @@ public:
 	{
 		const auto	V1 = fmc.getNormalizedVoice ( voice1 );
 		const auto	V2 = fmc.getNormalizedVoice ( voice2 );
-		// Voice 3 is silenced by voice3off if it is not routed through the filter.
+		// Voice 3 is silenced by voice3off if it is not routed through the filter
 		const auto	V3 = ( filt3 || ! voice3off ) ? fmc.getNormalizedVoice ( voice3 ) : 0;
 
 		auto	Vsum = 0;
@@ -352,9 +352,17 @@ public:
 		Vbp = hpIntegrator.solve ( Vhp );
 		Vlp = bpIntegrator.solve ( Vbp );
 
-		if ( lp )	Vmix += Vlp;
-		if ( bp )	Vmix += Vbp;
-		if ( hp )	Vmix += Vhp;
+		#if 0
+			constexpr auto	filterGainOut = int ( 0.8 * 256 );
+
+			if ( lp )	Vmix += ( Vlp * filterGainOut ) >> 8;
+			if ( bp )	Vmix += ( Vbp * filterGainOut ) >> 8;
+			if ( hp )	Vmix += ( Vhp * filterGainOut ) >> 8;
+		#else
+			if ( lp )	Vmix += Vlp;
+			if ( bp )	Vmix += Vbp;
+			if ( hp )	Vmix += Vhp;
+		#endif
 
 		return currentVolume[ currentMixer[ Vmix ] ];
 	}

@@ -32,12 +32,10 @@ Filter6581::Filter6581 ()
 	, hpIntegrator ( FilterModelConfig6581::getInstance () )
 	, bpIntegrator ( FilterModelConfig6581::getInstance () )
 {
-	mixer = FilterModelConfig6581::getInstance ()->getMixer ();
-	summer = FilterModelConfig6581::getInstance ()->getSummer ();
-	resonance = FilterModelConfig6581::getInstance ()->getResonance ();
-	volume = FilterModelConfig6581::getInstance ()->getVolume ();
-
-	setDigiVolume ( 1.0 );
+	mixer = fmc.getMixer ();
+	summer = fmc.getSummer ();
+	resonance = fmc.getResonance ();
+	volume = fmc.getVolume ();
 }
 //-----------------------------------------------------------------------------
 
@@ -66,7 +64,10 @@ void Filter6581::setFilterRange ( double adjustment )
 
 void Filter6581::setDigiVolume ( double adjustment )
 {
-	input ( int ( ( adjustment - 1.0 ) * 65536.0 ) );
+	const auto	voltage = 5.075 + ( ( adjustment - 1.0 ) * 0.5 );
+
+	fmc.setVoiceDCVoltage ( voltage );
+	Ve = fmc.getNormalizedVoice ( 0.0f / 65536.0f );
 }
 //-----------------------------------------------------------------------------
 

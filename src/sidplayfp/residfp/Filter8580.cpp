@@ -39,12 +39,10 @@ Filter8580::Filter8580 ()
 	, hpIntegrator ( FilterModelConfig8580::getInstance () )
 	, bpIntegrator ( FilterModelConfig8580::getInstance () )
 {
-	mixer = FilterModelConfig8580::getInstance ()->getMixer ();
-	summer = FilterModelConfig8580::getInstance ()->getSummer ();
-	resonance = FilterModelConfig8580::getInstance ()->getResonance ();
-	volume = FilterModelConfig8580::getInstance ()->getVolume ();
-
-	Ve = mixer[ 0 ][ 0 ];
+	mixer = fmc.getMixer ();
+	summer = fmc.getSummer ();
+	resonance = fmc.getResonance ();
+	volume = fmc.getVolume ();
 
 	setFilterCurve ( 0.5 );
 }

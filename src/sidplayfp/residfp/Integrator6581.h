@@ -32,7 +32,7 @@
 //#define SLOPE_FACTOR
 
 #ifdef SLOPE_FACTOR
-#  include <cmath>
+	#include <cmath>
 #endif
 
 namespace reSIDfp

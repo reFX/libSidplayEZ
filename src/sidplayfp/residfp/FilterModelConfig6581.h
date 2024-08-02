@@ -82,7 +82,7 @@ public:
 	inline uint16_t getVcr_nVg ( const int i ) const		{	return vcr_nVg[ i ];	}
 	inline uint16_t getVcr_n_Ids_term ( const int i ) const	{	return uint16_t ( vcr_n_Ids_term[ i ] * uCox + 0.5 );	}
 
-	#ifdef SLOPE_FACTOR
+	#if 1
 		inline double getUt () const { return Ut; }
 		inline double getN16 () const { return N16; }
 	#endif

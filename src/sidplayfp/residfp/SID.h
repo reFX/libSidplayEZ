@@ -114,7 +114,7 @@ private:
 		const auto	v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
 		const auto	v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
 
-		const auto	input = int ( filter->clock ( v1, v2, v3 ) );
+		const auto	input = filter->clock ( v1, v2, v3 );
 		return externalFilter.clock ( input );
 	}
 

@@ -69,13 +69,13 @@ FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double 
 
 FilterModelConfig::~FilterModelConfig ()
 {
-	for ( int i = 0; i < 8; i++ )
+	for ( auto i = 0; i < 8; i++ )
 		delete[] mixer[ i ];
 
-	for ( int i = 0; i < 5; i++ )
+	for ( auto i = 0; i < 5; i++ )
 		delete[] summer[ i ];
 
-	for ( int i = 0; i < 16; i++ )
+	for ( auto i = 0; i < 16; i++ )
 	{
 		delete[] volume[ i ];
 		delete[] resonance[ i ];
@@ -193,6 +193,12 @@ void FilterModelConfig::buildResonanceTable ( OpAmp& opampModel, const double re
 			resonance[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( resonance_n[ n8 ], vin ) );
 		}
 	}
+}
+//-----------------------------------------------------------------------------
+
+void FilterModelConfig::setVoiceDCVoltage ( double voltage )
+{
+	voice_DC_voltage = voltage;
 }
 //-----------------------------------------------------------------------------
 

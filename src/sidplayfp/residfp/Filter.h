@@ -151,13 +151,6 @@ public:
 	* @param mode_vol Filter Mode/Volume
 	*/
 	void writeMODE_VOL ( uint8_t mode_vol );
-
-	/**
-	* Apply a signal to EXT-IN
-	*
-	* @param input a 16 bit sample
-	*/
-	inline void input ( int input )	{	Ve = fmc.getNormalizedVoice ( input / 65536.0f );	}
 };
 
 } // namespace reSIDfp

@@ -56,7 +56,7 @@ protected:
 	double currFactorCoeff;
 
 	const double voice_voltage_range;
-	const double voice_DC_voltage;
+	double voice_DC_voltage;
 
 	// Lookup tables for gain and summer op-amps in output stage / filter
 	//@{
@@ -101,6 +101,8 @@ public:
 	uint16_t** getResonance () { return resonance; }
 	uint16_t** getSummer () { return summer; }
 	uint16_t** getMixer () { return mixer; }
+
+	void setVoiceDCVoltage ( double voltage );
 
 	inline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }
 	inline double getVddt () const { return Vddt; }
