@@ -167,8 +167,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 		//  Is = (2 * u*Cox * Ut^2)/k * W/L
 		//  if = ln^2(1 + e^((k*(Vg - Vt) - Vs)/(2*Ut))
 		//  ir = ln^2(1 + e^((k*(Vg - Vt) - Vd)/(2*Ut))
-		const auto	r_N16 = 1.0 / N16;
-		const auto  r_2Ut = 1.0 / ( 2.0 * Ut );
+
 		// moderate inversion characteristic current
 		const auto  Is = ( 2.0 * Ut * Ut ) * WL_vcr;
 
@@ -178,10 +177,12 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 
 		// kVgt_Vx = k*(Vg - Vt) - Vx
 		// I.e. if k != 1.0, Vg must be scaled accordingly
+		const auto	r_N16_2Ut = 1.0 / ( N16 * 2.0 * Ut );
+
 		for ( auto i = 0; i < ( 1 << 16 ); i++ )
 		{
 			const auto	kVgt_Vx = i - ( 1 << 15 );
-			const auto  log_term = std::log1p ( std::exp ( ( kVgt_Vx * r_N16 ) * r_2Ut ) );
+			const auto	log_term = std::log1p ( std::exp ( kVgt_Vx * r_N16_2Ut ) );
 			// Scaled by m*2^15
 			vcr_n_Ids_term[ i ] = n_Is * log_term * log_term;
 		}
