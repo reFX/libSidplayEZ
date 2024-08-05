@@ -257,8 +257,7 @@ uint8_t SID::read ( int offset )
 			break;
 
 		default:
-			// Reading from a write-only or non-existing register
-			// makes the bus discharge faster.
+			// Reading from a write-only or non-existing register makes the bus discharge faster.
 			// Emulate this by halving the residual TTL.
 			busValueTtl /= 2;
 			break;
