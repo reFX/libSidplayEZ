@@ -197,10 +197,7 @@ bool c64::addExtraSid ( sidemu* s, uint16_t address )
 
 c64::~c64 ()
 {
-	for ( auto bck : extraSidBanks )
-		delete bck.second;
-
-	extraSidBanks.clear ();
+	clearSids ();
 }
 //-----------------------------------------------------------------------------
 

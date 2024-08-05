@@ -27,7 +27,8 @@ namespace libsidplayfp
 
 //-----------------------------------------------------------------------------
 
-sidemu::sidemu ()
+sidemu::sidemu ( EventScheduler& _eventScheduler )
+	: eventScheduler ( _eventScheduler )
 {
 	reset ( 0xF );
 }
@@ -40,25 +41,6 @@ void sidemu::reset ( uint8_t volume )
 	m_accessClk = 0;
 	m_sid.reset ();
 	m_sid.write ( 0x18, volume );
-}
-//-----------------------------------------------------------------------------
-
-bool sidemu::lock ( EventScheduler* scheduler )
-{
-	if ( isLocked )
-		return false;
-
-	isLocked = true;
-	eventScheduler = scheduler;
-
-	return true;
-}
-//-----------------------------------------------------------------------------
-
-void sidemu::unlock ()
-{
-	isLocked = false;
-	eventScheduler = nullptr;
 }
 //-----------------------------------------------------------------------------
 

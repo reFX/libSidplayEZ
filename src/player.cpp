@@ -403,11 +403,6 @@ c64::model_t Player::c64model ( SidConfig::c64_model_t defaultModel, bool forced
 void Player::sidRelease ()
 {
 	m_c64.clearSids ();
-
-	for ( auto i = 0; i < 3; i++ )
-		if ( auto s = m_mixer.getSid ( i ) )
-				s->unlock ();
-
 	m_mixer.clearSids ();
 }
 //-----------------------------------------------------------------------------
@@ -430,7 +425,6 @@ void Player::sidCreate ( SidConfig::sid_model_t defaultModel, bool forced, const
 		defaultModel = getSidModel ( tuneInfo->sidModel ( i ), defaultModel, forced );
 
 		auto	s = &m_sidEmu[ i ];
-		s->lock ( m_c64.getEventScheduler () );
 		s->model ( defaultModel );
 
 		if ( i++ == 0 )

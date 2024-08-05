@@ -62,22 +62,20 @@ public:
 	static constexpr auto	OUTPUTBUFFERSIZE = 5000u;
 
 protected:
-	EventScheduler*	eventScheduler = nullptr;
+	EventScheduler&	eventScheduler;
 
 	event_clock_t	m_accessClk = 0;
 
-	/// The sample buffer
+	// The sample buffer
 	int16_t		m_buffer[ OUTPUTBUFFERSIZE ];
 
-	/// Current position in buffer
+	// Current position in buffer
 	int	m_bufferpos = 0;
-
-	bool isLocked = false;
 
 	std::string m_error = "N/A";
 
 public:
-	sidemu ();
+	sidemu ( EventScheduler& eventScheduler );
 
 	void reset ( uint8_t volume );
 
@@ -86,25 +84,14 @@ public:
 	*/
 	inline void clock ()
 	{
-		const event_clock_t	cycles = eventScheduler->getTime ( EVENT_CLOCK_PHI1 ) - m_accessClk;
+		const event_clock_t	cycles = eventScheduler.getTime ( EVENT_CLOCK_PHI1 ) - m_accessClk;
 		m_accessClk += cycles;
 		m_bufferpos += m_sid.clock ( (unsigned int)cycles, m_buffer + m_bufferpos );
 	}
 
 	/**
-	* Set execution environment and lock sid to it
-	*/
-	bool lock ( EventScheduler* scheduler );
-
-	/**
-	* Unlock sid
-	*/
-	void unlock ();
-
-	/**
 	* Set SID model.
 	*/
-
 	void model ( SidConfig::sid_model_t _model )	{	m_sid.setChipModel ( _model == SidConfig::MOS6581 ? reSIDfp::MOS6581 : reSIDfp::MOS8580 );	}
 
 	/**

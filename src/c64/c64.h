@@ -81,7 +81,7 @@ public:
 	} cia_model_t;
 
 private:
-	typedef std::unordered_map<int, ExtraSidBank*> sidBankMap_t;
+	using sidBankMap_t = std::unordered_map<int, ExtraSidBank*>;
 
 private:
 	/// System clock frequency
@@ -179,7 +179,7 @@ public:
 		*
 		* @return the scheduler
 		*/
-	EventScheduler* getEventScheduler () { return &eventScheduler; }
+	EventScheduler& getEventScheduler () { return eventScheduler; }
 
 	uint32_t getTimeMs () const
 	{
