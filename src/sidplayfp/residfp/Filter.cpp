@@ -66,7 +66,7 @@ void Filter::reset ()
 
 void Filter::writeFC_LO ( uint8_t fc_lo )
 {
-	fc = ( fc & 0x7F8 ) | ( fc_lo & 0x007 );
+	fc = ( fc & 0x7F8 ) | ( fc_lo & 7 );
 
 	updatedCenterFrequency ();
 }
@@ -74,7 +74,7 @@ void Filter::writeFC_LO ( uint8_t fc_lo )
 
 void Filter::writeFC_HI ( uint8_t fc_hi )
 {
-	fc = ( ( fc_hi << 3 ) & 0x7F8 ) | ( fc & 0x007 );
+	fc = ( ( fc_hi << 3 ) & 0x7F8 ) | ( fc & 7 );
 
 	updatedCenterFrequency ();
 }
@@ -82,14 +82,9 @@ void Filter::writeFC_HI ( uint8_t fc_hi )
 
 void Filter::writeRES_FILT ( uint8_t res_filt )
 {
-	filtResMode = ( filtResMode & 0xF0 ) | ( res_filt & 0x0F );
+	filterModeRouting = ( filterModeRouting & 0xF0 ) | ( res_filt & 0x0F );
 
 	currentResonance = resonance[ res_filt >> 4 ];
-
-	filt1 = res_filt & 0x01;
-	filt2 = res_filt & 0x02;
-	filt3 = res_filt & 0x04;
-	filtE = res_filt & 0x08;
 
 	updateMixing ();
 }
@@ -97,15 +92,9 @@ void Filter::writeRES_FILT ( uint8_t res_filt )
 
 void Filter::writeMODE_VOL ( uint8_t mode_vol )
 {
-	filtResMode = ( filtResMode & 0x0F ) | ( mode_vol & 0xF0 );
+	filterModeRouting = ( filterModeRouting & 0x0F ) | ( mode_vol & 0xF0 );
 
-	vol = mode_vol & 0x0F;
-
-	lp = mode_vol & 0x10;
-	bp = mode_vol & 0x20;
-	hp = mode_vol & 0x40;
-
-	voice3off = mode_vol & 0x80;
+	currentVolume = volume[ mode_vol & 0x0F ];
 
 	updateMixing ();
 }

@@ -335,36 +335,36 @@ public:
 
 	inline uint16_t clock ( float voice1, float voice2, float voice3 ) override
 	{
-		const auto	V1 = fmc.getNormalizedVoice ( voice1 );
-		const auto	V2 = fmc.getNormalizedVoice ( voice2 );
-		// Voice 3 is silenced by voice3off if it is not routed through the filter
-		const auto	V3 = ( filt3 || ! voice3off ) ? fmc.getNormalizedVoice ( voice3 ) : 0;
+		// index 0 = unfiltered, index 1 = filtered
+		int		Vsum[ 2 ] = { 0, 0 };
 
-		auto	Vsum = 0;
-		auto	Vmix = 0;
+		// Mix the voices according to the filter mode
+		{
+			const auto	fltMd = filterModeRouting & 0xF;
 
-		( filt1 ? Vsum : Vmix ) += V1;
-		( filt2 ? Vsum : Vmix ) += V2;
-		( filt3 ? Vsum : Vmix ) += V3;
-		( filtE ? Vsum : Vmix ) += Ve;
+			Vsum[ fltMd & 1 ]			+= fmc.getNormalizedVoice ( voice1 );
+			Vsum[ ( fltMd >> 1 ) & 1 ]	+= fmc.getNormalizedVoice ( voice2 );
+			Vsum[ ( fltMd >> 2 ) & 1 ]	+= fmc.getNormalizedVoice ( voice3 ) & voice3Mask;
+			Vsum[ fltMd >> 3 ]			+= Ve;
+		}
 
-		Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vsum ];
-		Vbp = hpIntegrator.solve ( Vhp );
-		Vlp = bpIntegrator.solve ( Vbp );
+		// Apply filter
+		{
+			Vhp = currentSummer[ currentResonance[ Vbp ] + Vlp + Vsum[ 1 ] ];
+			Vbp = hpIntegrator.solve ( Vhp );
+			Vlp = bpIntegrator.solve ( Vbp );
+		}
 
-		#if 0
-			constexpr auto	filterGainOut = int ( 0.8 * 256 );
+		// Mix filter outputs
+		{
+			const auto	fltMd = ( ( filterModeRouting >> 4 ) & 7 ) ^ 7;
 
-			if ( lp )	Vmix += ( Vlp * filterGainOut ) >> 8;
-			if ( bp )	Vmix += ( Vbp * filterGainOut ) >> 8;
-			if ( hp )	Vmix += ( Vhp * filterGainOut ) >> 8;
-		#else
-			if ( lp )	Vmix += Vlp;
-			if ( bp )	Vmix += Vbp;
-			if ( hp )	Vmix += Vhp;
-		#endif
+			Vsum[ fltMd & 1 ]			+= Vlp;
+			Vsum[ ( fltMd >> 1 ) & 1 ]	+= Vbp;
+			Vsum[ fltMd >> 2 ]			+= Vhp;
+		}
 
-		return currentVolume[ currentMixer[ Vmix ] ];
+		return currentVolume[ currentMixer[ Vsum[ 0 ] ] ];
 	}
 
 	/**

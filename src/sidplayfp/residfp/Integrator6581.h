@@ -193,7 +193,10 @@ public:
 	{
 	}
 
-	void setVw ( uint16_t Vw ) { nVddt_Vw_2 = ( ( nVddt - Vw ) * ( nVddt - Vw ) ) >> 1; }
+	inline void setVw ( uint16_t Vw )
+	{
+		nVddt_Vw_2 = ( ( nVddt - Vw ) * ( nVddt - Vw ) ) >> 1;
+	}
 
 	inline int solve ( int vi )
 	{

@@ -44,29 +44,36 @@ Filter8580::Filter8580 ()
 	resonance = fmc.getResonance ();
 	volume = fmc.getVolume ();
 
+	// Pre-calculate all possible filter DAC values
+	for ( auto fc = 0; fc < 2048; ++fc )
+	{
+		auto	wl = 0.0;
+		auto	dacWL = DAC_WL0;
+
+		if ( fc )
+		{
+			for ( auto i = 0u; i < 11; i++ )
+			{
+				if ( fc & ( 1 << i ) )
+					wl += dacWL;
+
+				dacWL *= 2.0;
+			}
+		}
+		else
+		{
+			wl = dacWL / 2.0;
+		}
+
+		fltDac[ fc ] = wl;
+	}
 	setFilterCurve ( 0.5 );
 }
 //-----------------------------------------------------------------------------
 
 void Filter8580::updatedCenterFrequency ()
 {
-	auto	wl = 0.0;
-	auto	dacWL = DAC_WL0;
-
-	if ( fc )
-	{
-		for ( auto i = 0u; i < 11; i++ )
-		{
-			if ( fc & ( 1 << i ) )
-				wl += dacWL;
-
-			dacWL *= 2.0;
-		}
-	}
-	else
-	{
-		wl = dacWL / 2.0;
-	}
+	const auto	wl = fltDac[ fc ];
 
 	hpIntegrator.setFc ( wl );
 	bpIntegrator.setFc ( wl );
@@ -75,12 +82,11 @@ void Filter8580::updatedCenterFrequency ()
 
 void Filter8580::setFilterCurve ( double curvePosition )
 {
-	// Adjust cp
-	// 1.2 <= cp <= 1.8
-	cp = 1.2 + curvePosition * 3.0 / 5.0;
+	// Adjust curvePosition (1.2 <= curvePosition <= 1.8)
+ 	curvePosition = 1.2 + curvePosition * 0.6;
 
-	hpIntegrator.setV ( cp );
-	bpIntegrator.setV ( cp );
+	hpIntegrator.setV ( curvePosition );
+	bpIntegrator.setV ( curvePosition );
 }
 //-----------------------------------------------------------------------------
 

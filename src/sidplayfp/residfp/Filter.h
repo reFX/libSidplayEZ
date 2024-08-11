@@ -67,25 +67,11 @@ protected:
 	// Filter cutoff frequency
 	unsigned int fc = 0;
 
-	// Routing to filter or outside filter
-	bool	filt1 = false;
-	bool	filt2 = false;
-	bool	filt3 = false;
-	bool	filtE = false;
-
 	// Switch voice 3 off
-	bool	voice3off = false;
+	int		voice3Mask = UINT_MAX;
 
-	// Highpass, bandpass, and lowpass filter modes
-	bool	hp = false;
-	bool	bp = false;
-	bool	lp = false;
-
-	// Current volume.
-	uint8_t	vol = 0;
-
-	uint8_t	filtResMode = 0;		// Selects which inputs to route through filter
-	uint8_t	sumFltResults[ 256 ];	// Precalculate all possible summers and filter mixers
+	uint8_t	filterModeRouting = 0;		// bits = mute vce3, hp, bp, lp, fltE, flt3, flt2, flt1
+	uint8_t	sumFltResults[ 256 ];		// Precalculate all possible summers and filter mixers
 
 	/**
 	* Set filter cutoff frequency.
@@ -97,9 +83,10 @@ protected:
 	*/
 	inline void updateMixing ()
 	{
-		currentVolume = volume[ vol ];
+		// Voice 3 is silenced by voice3off if it is not routed through the filter
+		voice3Mask = ( filterModeRouting & 0x84 ) == 0x80 ? 0 : -1;
 
-		const auto	Nsum_Nmix = sumFltResults[ filtResMode ];
+		const auto	Nsum_Nmix = sumFltResults[ filterModeRouting ];
 
 		currentSummer = summer[ Nsum_Nmix >> 4 ];
 		currentMixer = mixer[ Nsum_Nmix & 0xF ];

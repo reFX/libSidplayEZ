@@ -68,7 +68,7 @@ public:
 	/**
 	* Set Filter Cutoff resistor ratio.
 	*/
-	void setFc ( double wl )
+	inline void setFc ( double wl )
 	{
 		// Normalized current factor, 1 cycle at 1MHz.
 		// Fit in 5 bits.
