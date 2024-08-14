@@ -27,7 +27,6 @@
 #include "Event.h"
 #include "EventScheduler.h"
 
-//#include "c64/c64sid.h"
 #include "c64/Banks/Bank.h"
 
 #include "sidplayfp/residfp/SID.h"

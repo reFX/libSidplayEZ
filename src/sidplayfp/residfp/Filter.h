@@ -104,7 +104,15 @@ public:
 	* @param v3 voice 3 in
 	* @return filtered output
 	*/
-	virtual uint16_t clock ( float v1, float v2, float v3 ) = 0;
+	virtual inline uint16_t clock ( float voice1, float voice2, float voice3 )
+	{
+		const auto	Vsum	= fmc.getNormalizedVoice ( voice1 )
+							+ fmc.getNormalizedVoice ( voice2 )
+							+ ( fmc.getNormalizedVoice ( voice3 ) & voice3Mask )
+							+ Ve;
+
+		return currentVolume[ currentMixer[ Vsum ] ];
+	}
 
 	/**
 	* SID reset.
