@@ -357,11 +357,12 @@ public:
 
 		// Mix filter outputs
 		{
-			const auto	fltMd = ( ( filterModeRouting >> 4 ) & 7 ) ^ 7;
+			constexpr auto	multiplier = int ( 0.85 * ( 1 << 8 ) );
+			const auto		fltMd = ( ( filterModeRouting >> 4 ) & 7 ) ^ 7;
 
-			Vsum[ fltMd & 1 ]			+= Vlp;
-			Vsum[ ( fltMd >> 1 ) & 1 ]	+= Vbp;
-			Vsum[ fltMd >> 2 ]			+= Vhp;
+			Vsum[ fltMd & 1 ]			+= ( Vlp * multiplier ) >> 8;
+			Vsum[ ( fltMd >> 1 ) & 1 ]	+= ( Vbp * multiplier ) >> 8;
+			Vsum[ fltMd >> 2 ]			+= ( Vhp * multiplier ) >> 8;
 		}
 
 		return currentVolume[ currentMixer[ Vsum[ 0 ] ] ];
