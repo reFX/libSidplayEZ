@@ -37,7 +37,6 @@ class FilterModelConfig8580 final : public FilterModelConfig
 {
 public:
 	FilterModelConfig8580 ();
-	~FilterModelConfig8580 () = default;
 
 	static FilterModelConfig8580* getInstance ();
 };

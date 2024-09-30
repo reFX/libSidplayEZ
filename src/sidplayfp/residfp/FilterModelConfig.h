@@ -60,10 +60,27 @@ protected:
 
 	// Lookup tables for gain and summer op-amps in output stage / filter
 	//@{
-	uint16_t*	mixer[ 8 ];				//-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	summer[ 5 ];			//-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	volume[ 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
-	uint16_t*	resonance[ 16 ];		//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer0[ 1 ];				//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer1[ 1 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer2[ 2 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer3[ 3 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer4[ 4 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer5[ 5 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer6[ 6 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	mixer7[ 7 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+
+	uint16_t*	mixer[ 8 ] = { mixer0, mixer1, mixer2, mixer3, mixer4, mixer5, mixer6, mixer7 };
+
+	uint16_t	summer2[ 2 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	summer3[ 3 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	summer4[ 4 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	summer5[ 5 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	summer6[ 6 << 16 ];			//-V730_NOINIT this is initialized in the derived class constructor
+
+	uint16_t*	summer[ 5 ] = { summer2, summer3, summer4, summer5, summer6 };
+
+	uint16_t	volume[ 16 ][1 << 16];		//-V730_NOINIT this is initialized in the derived class constructor
+	uint16_t	resonance[ 16 ][ 1 << 16];	//-V730_NOINIT this is initialized in the derived class constructor
 	//@}
 
 	// Reverse op-amp transfer function
@@ -87,7 +104,7 @@ protected:
 	* @param omaxv opamp max voltage
 	*/
 	FilterModelConfig ( double vvr, double vdv, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size );
-	~FilterModelConfig ();
+	~FilterModelConfig () = default;
 
 	void setUCox ( double new_uCox );
 
@@ -97,8 +114,8 @@ protected:
 	void buildResonanceTable ( OpAmp& opampModel, const double resonance_n[ 16 ] );
 
 public:
-	uint16_t** getVolume () { return volume; }
-	uint16_t** getResonance () { return resonance; }
+	uint16_t* getVolume () { return &volume[ 0 ][ 0 ]; }
+	uint16_t* getResonance () { return &resonance[ 0 ][ 0 ]; }
 	uint16_t** getSummer () { return summer; }
 	uint16_t** getMixer () { return mixer; }
 

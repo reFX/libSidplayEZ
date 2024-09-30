@@ -84,7 +84,7 @@ void Filter::writeRES_FILT ( uint8_t res_filt )
 {
 	filterModeRouting = ( filterModeRouting & 0xF0 ) | ( res_filt & 0x0F );
 
-	currentResonance = resonance[ res_filt >> 4 ];
+	currentResonance = resonance + ( ( res_filt >> 4 ) << 16 );
 
 	updateMixing ();
 }
@@ -94,7 +94,7 @@ void Filter::writeMODE_VOL ( uint8_t mode_vol )
 {
 	filterModeRouting = ( filterModeRouting & 0x0F ) | ( mode_vol & 0xF0 );
 
-	currentVolume = volume[ mode_vol & 0x0F ];
+	currentVolume = volume + ( ( mode_vol & 0x0F ) << 16 );
 
 	updateMixing ();
 }

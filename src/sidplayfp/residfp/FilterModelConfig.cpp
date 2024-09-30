@@ -67,22 +67,6 @@ FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double 
 }
 //-----------------------------------------------------------------------------
 
-FilterModelConfig::~FilterModelConfig ()
-{
-	for ( auto i = 0; i < 8; i++ )
-		delete[] mixer[ i ];
-
-	for ( auto i = 0; i < 5; i++ )
-		delete[] summer[ i ];
-
-	for ( auto i = 0; i < 16; i++ )
-	{
-		delete[] volume[ i ];
-		delete[] resonance[ i ];
-	}
-}
-//-----------------------------------------------------------------------------
-
 void FilterModelConfig::setUCox ( double new_uCox )
 {
 	uCox = new_uCox;
@@ -109,8 +93,6 @@ void FilterModelConfig::buildSummerTable ( OpAmp& opampModel )
 		const auto	r_idiv = 1.0 / idiv;
 
 		opampModel.reset ();
-
-		summer[ i ] = new uint16_t[ size ];
 
 		for ( auto vi = 0; vi < size; vi++ )
 		{
@@ -139,8 +121,6 @@ void FilterModelConfig::buildMixerTable ( OpAmp& opampModel, double nRatio )
 
 		opampModel.reset ();
 
-		mixer[ i ] = new uint16_t[ size ];
-
 		for ( auto vi = 0; vi < size; vi++ )
 		{
 			const auto	vin = vmin + vi * r_N16 * r_idiv;	// vmin .. vmax
@@ -152,11 +132,9 @@ void FilterModelConfig::buildMixerTable ( OpAmp& opampModel, double nRatio )
 
 void FilterModelConfig::buildVolumeTable ( OpAmp& opampModel, double nDivisor )
 {
-	// 4 bit "resistor" ladders in the audio output gain
-	// necessitate 16 gain tables.
-	// From die photographs of the volume "resistor" ladders
-	// it follows that gain ~ vol/12 (assuming ideal
-	// op-amps and ideal "resistors").
+	// 4 bit "resistor" ladders in the audio output gain necessitate 16 gain tables.
+	// From die photographs of the volume "resistor" ladders it follows that
+	// gain ~ vol/12 (assuming ideal op-amps and ideal "resistors").
 	const auto	r_N16 = 1.0 / N16;
 
 	for ( auto n8 = 0; n8 < 16; n8++ )
@@ -165,8 +143,6 @@ void FilterModelConfig::buildVolumeTable ( OpAmp& opampModel, double nDivisor )
 		const auto  n = n8 / nDivisor;
 
 		opampModel.reset ();
-
-		volume[ n8 ] = new uint16_t[ size ];
 
 		for ( auto vi = 0; vi < size; vi++ )
 		{
@@ -185,7 +161,6 @@ void FilterModelConfig::buildResonanceTable ( OpAmp& opampModel, const double re
 	{
 		const auto	size = 1 << 16;
 		opampModel.reset ();
-		resonance[ n8 ] = new uint16_t[ size ];
 
 		for ( auto vi = 0; vi < size; vi++ )
 		{

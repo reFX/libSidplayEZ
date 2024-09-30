@@ -62,7 +62,6 @@ private:
 
 public:
 	FilterModelConfig6581 ();
-	~FilterModelConfig6581 () = default;
 
 	static FilterModelConfig6581* getInstance ();
 

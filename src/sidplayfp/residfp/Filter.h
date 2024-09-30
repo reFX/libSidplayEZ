@@ -37,8 +37,8 @@ protected:
 
 	uint16_t**	mixer = nullptr;
 	uint16_t**	summer = nullptr;
-	uint16_t**	resonance = nullptr;
-	uint16_t**	volume = nullptr;
+	uint16_t*	resonance = nullptr;
+	uint16_t*	volume = nullptr;
 
 	// Current volume amplifier setting.
 	uint16_t*	currentVolume = nullptr;

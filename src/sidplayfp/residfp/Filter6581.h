@@ -22,6 +22,7 @@
 */
 
 #include <memory>
+#include <smmintrin.h>
 
 #include "Filter.h"
 #include "Integrator6581.h"
@@ -357,8 +358,8 @@ public:
 
 		// Mix filter outputs
 		{
-			constexpr auto	multiplier = int ( 0.85 * ( 1 << 8 ) );
 			const auto		fltMd = ( ( filterModeRouting >> 4 ) & 7 ) ^ 7;
+			constexpr auto	multiplier = int ( 0.9 * ( 1 << 8 ) );
 
 			Vsum[ fltMd & 1 ]			+= ( Vlp * multiplier ) >> 8;
 			Vsum[ ( fltMd >> 1 ) & 1 ]	+= ( Vbp * multiplier ) >> 8;
