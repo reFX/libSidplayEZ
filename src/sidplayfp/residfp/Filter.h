@@ -76,7 +76,7 @@ protected:
 	/**
 	* Set filter cutoff frequency.
 	*/
-	virtual void updatedCenterFrequency () = 0;
+	virtual void updatedCenterFrequency () {}
 
 	/**
 	* Mixing configuration modified (offsets change)

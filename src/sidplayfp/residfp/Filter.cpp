@@ -52,6 +52,11 @@ Filter::Filter ( FilterModelConfig& _fmc )
 	}
 
 	Ve = fmc.getNormalizedVoice ( 0.0f / 65536.0f );
+
+	mixer = fmc.getMixer ();
+	summer = fmc.getSummer ();
+	volume = fmc.getVolume ();
+	resonance = fmc.getResonance ();
 }
 //-----------------------------------------------------------------------------
 

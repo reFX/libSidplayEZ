@@ -36,7 +36,7 @@ public:
 	}
 
 protected:
-	uint8_t cpuRead ( uint16_t addr ) const override		{	return m_mmu.cpuRead ( addr );	}
+	uint8_t cpuRead ( uint16_t addr ) override				{	return m_mmu.cpuRead ( addr );	}
 	void cpuWrite ( uint16_t addr, uint8_t data ) override	{	m_mmu.cpuWrite ( addr, data );	}
 
 private:

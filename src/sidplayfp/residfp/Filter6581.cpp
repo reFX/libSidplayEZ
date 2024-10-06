@@ -32,10 +32,6 @@ Filter6581::Filter6581 ()
 	, hpIntegrator ( FilterModelConfig6581::getInstance () )
 	, bpIntegrator ( FilterModelConfig6581::getInstance () )
 {
-	mixer = fmc.getMixer ();
-	summer = fmc.getSummer ();
-	resonance = fmc.getResonance ();
-	volume = fmc.getVolume ();
 }
 //-----------------------------------------------------------------------------
 

@@ -39,11 +39,6 @@ Filter8580::Filter8580 ()
 	, hpIntegrator ( FilterModelConfig8580::getInstance () )
 	, bpIntegrator ( FilterModelConfig8580::getInstance () )
 {
-	mixer = fmc.getMixer ();
-	summer = fmc.getSummer ();
-	resonance = fmc.getResonance ();
-	volume = fmc.getVolume ();
-
 	// Pre-calculate all possible filter DAC values
 	for ( auto fc = 0; fc < 2048; ++fc )
 	{

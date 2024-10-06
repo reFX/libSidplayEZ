@@ -37,7 +37,7 @@ class CPUDataBus
 {
 public:
 	virtual ~CPUDataBus () = default;
-	virtual uint8_t cpuRead ( uint16_t addr ) const = 0;
+	virtual uint8_t cpuRead ( uint16_t addr ) = 0;
 	virtual void cpuWrite ( uint16_t addr, uint8_t data ) = 0;
 };
 /**
@@ -283,7 +283,7 @@ public:
 	* @param address
 	* @return data byte CPU requested
 	*/
-	inline uint8_t cpuRead ( uint16_t addr ) const				{	return dataBus.cpuRead ( addr );	}
+	inline uint8_t cpuRead ( uint16_t addr )					{	return dataBus.cpuRead ( addr );	}
 
 	/**
 	* Write data to system environment.

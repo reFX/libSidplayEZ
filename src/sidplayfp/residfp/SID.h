@@ -47,8 +47,12 @@ namespace reSIDfp
 class SID final
 {
 private:
+	Filter		noFilter6581 { *FilterModelConfig6581::getInstance () };
+	Filter		noFilter8580 { *FilterModelConfig8580::getInstance () };
+
 	// Currently active filter
-	Filter*	filter;
+	Filter*		filter;
+	Filter*		modelFilter;
 
 	// Filter used, if model is set to 6581
 	Filter6581	filter6581;
@@ -91,6 +95,10 @@ private:
 
 	// Last written value
 	uint8_t	busValue;
+
+	// Last written FC/LO/HI
+	uint8_t	lastFC_LO = 0;
+	uint8_t	lastFC_HI = 0;
 
 	/**
 	* Emulated nonlinearity of the envelope DAC

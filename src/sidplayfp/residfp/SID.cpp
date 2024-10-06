@@ -144,13 +144,15 @@ void SID::setChipModel ( ChipModel _model )
 
 	if ( model == MOS6581 )
 	{
-		filter = &filter6581;
+		filter = &noFilter6581;
+		modelFilter = &filter6581;
 		scaleFactor = 3;
 		modelTTL = BUS_TTL_6581;
 	}
 	else
 	{
-		filter = &filter8580;
+		filter = &noFilter8580;
+		modelFilter = &filter8580;
 		scaleFactor = 5;
 		modelTTL = BUS_TTL_8580;
 	}
@@ -220,6 +222,11 @@ void SID::reset ()
 	for ( auto& vce : voice )
 		vce.reset ();
 
+	lastFC_LO = 0;
+	lastFC_HI = 0;
+
+	noFilter6581.reset ();
+	noFilter8580.reset ();
 	filter6581.reset ();
 	filter8580.reset ();
 	externalFilter.reset ();
@@ -271,6 +278,26 @@ void SID::write ( int offset, uint8_t value )
 {
 	busValue = value;
 	busValueTtl = modelTTL;
+
+	// If *ANY* registers related to the filter get touched, we switch to the real filter
+	if ( filter != modelFilter )
+	{
+		// Filter control and filter mode
+		if ( ( offset == 0x17 && value ) || ( offset == 0x18 && ( value & 0x70 ) ) )
+		{
+			filter = modelFilter;
+			filter->writeFC_LO ( lastFC_LO );
+			filter->writeFC_HI ( lastFC_HI );
+		}
+		else if ( offset == 0x15 )
+		{
+			lastFC_LO = value;
+		}
+		else if ( offset == 0x16 )
+		{
+			lastFC_HI = value;
+		}
+	}
 
 	switch ( offset )
 	{
