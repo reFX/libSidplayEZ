@@ -37,6 +37,11 @@ class Integrator6581;
 class FilterModelConfig6581 final : public FilterModelConfig
 {
 private:
+	/**
+	* Power bricks generate voltages slightly out of spec
+	*/
+	static constexpr auto	VOLTAGE_SKEW = 1.015;
+
 	// Transistor parameters.
 	//@{
 	const double WL_vcr;        ///< W/L for VCR
@@ -58,7 +63,7 @@ private:
 	double		vcr_n_Ids_term[ 1 << 16 ];
 	//@}
 
-	inline double getDacZero ( double adjustment ) const	{	return dac_zero + adjustment;	}
+	[[ nodiscard ]] inline double getDacZero ( double adjustment ) const	{	return dac_zero + adjustment;	}
 
 public:
 	FilterModelConfig6581 ();

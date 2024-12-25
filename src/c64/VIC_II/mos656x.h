@@ -24,7 +24,6 @@
 
 #include <stdint.h>
 
-
 #include "lightpen.h"
 #include "sprites.h"
 #include "../../Event.h"
@@ -41,24 +40,24 @@ namespace libsidplayfp
 class MOS656X : private Event
 {
 public:
-	typedef enum
+	enum class model_t
 	{
 		MOS6567R56A = 0,  ///< OLD NTSC CHIP
 		MOS6567R8,       ///< NTSC-M
 		MOS6569,         ///< PAL-B
 		MOS6572,         ///< PAL-N
 		MOS6573,         ///< PAL-M
-	} model_t;
+	};
 
 private:
-	typedef event_clock_t ( MOS656X::* ClockFunc )( );
+	using ClockFunc = event_clock_t ( MOS656X::* )( );
 
-	typedef struct
+	using model_data_t = struct
 	{
 		unsigned int rasterLines;
 		unsigned int cyclesPerLine;
 		ClockFunc clock;
-	} model_data_t;
+	};
 
 private:
 	static const model_data_t modelData[];

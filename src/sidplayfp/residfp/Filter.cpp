@@ -51,7 +51,7 @@ Filter::Filter ( FilterModelConfig& _fmc )
 		sumFltResults[ i ] = uint8_t ( Nsum | Nmix );
 	}
 
-	Ve = fmc.getNormalizedVoice ( 0.0f / 65536.0f );
+	input ( 0 );
 
 	mixer = fmc.getMixer ();
 	summer = fmc.getSummer ();

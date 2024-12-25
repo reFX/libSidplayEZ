@@ -118,11 +118,19 @@ private:
 	*/
 	inline int output ()
 	{
-		const auto	v1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
-		const auto	v2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
-		const auto	v3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
+		const auto	o1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
+		const auto	o2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
+		const auto	o3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
 
-		const auto	input = filter->clock ( v1, v2, v3 );
+		const auto	env1 = voice[ 0 ].envelopeGenerator.output ();
+		const auto	env2 = voice[ 1 ].envelopeGenerator.output ();
+		const auto	env3 = voice[ 2 ].envelopeGenerator.output ();
+
+		const auto	v1 = filter->getNormalizedVoice ( o1, env1 );
+		const auto	v2 = filter->getNormalizedVoice ( o2, env2 );
+		const auto	v3 = filter->getNormalizedVoice ( o3, env3 );
+
+		const auto	input = int ( filter->clock ( v1, v2, v3 ) );
 		return externalFilter.clock ( input );
 	}
 
@@ -248,7 +256,7 @@ public:
 	* @param highestAccurateFrequency
 	* @throw SIDError
 	*/
-	void setSamplingParameters ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency );
+	void setSamplingParameters ( double clockFrequency, double samplingFrequency );
 
 	/**
 	* Clock SID forward using chosen output sampling algorithm.

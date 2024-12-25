@@ -46,7 +46,7 @@ void Mixer::resetBufs ()
 
 void Mixer::doMix ()
 {
-	auto	buf = m_sampleBuffer + m_sampleIndex;
+	auto	outputBuffer = m_sampleBuffer + m_sampleIndex;
 
 	// extract buffer info now that the SID is updated
 	// clock() may update bufferpos
@@ -60,7 +60,7 @@ void Mixer::doMix ()
 	{
 		const auto	toCopy = std::min ( sampleCount, int ( m_sampleCount - m_sampleIndex ) );
 
-		std::copy_n ( m_buffers[ 0 ], toCopy, buf );
+		std::copy_n ( m_buffers[ 0 ], toCopy, outputBuffer );
 
 		m_sampleIndex += toCopy;
 		i = toCopy;
@@ -69,16 +69,12 @@ void Mixer::doMix ()
 	{
 		const auto	channels = m_stereo ? 2u : 1u;
 
-		while ( i < sampleCount )
+		while (
+			   ( i < sampleCount )
+			&& ( m_sampleIndex < m_sampleCount )	// Handle whatever output the sid has generated so far
+			&& ( ( i + 1 ) < sampleCount )			// Are there enough samples to generate the next one?
+			)
 		{
-			// Handle whatever output the sid has generated so far
-			if ( m_sampleIndex >= m_sampleCount )
-				break;
-
- 			// Are there enough samples to generate the next one?
-			if ( ( i + 1 ) >= sampleCount )
-				break;
-
 			m_iSamples[ 0 ] = m_buffers[ 0 ][ i ];
 
 			for ( auto k = 1; k < int ( m_buffers.size () ); k++ )
@@ -87,9 +83,9 @@ void Mixer::doMix ()
 			// increment i to mark we ate some samples
 			i++;
 
-			*buf++ = int16_t ( ( this->*( m_mix[ 0 ] ) ) () );
+			*outputBuffer++ = int16_t ( ( this->*( m_mix[ 0 ] ) ) () );
 			if ( channels == 2 )
-				*buf++ = int16_t ( ( this->*( m_mix[ 1 ] ) ) () );
+				*outputBuffer++ = int16_t ( ( this->*( m_mix[ 1 ] ) ) () );
 
 			m_sampleIndex += channels;
 		}
@@ -99,14 +95,16 @@ void Mixer::doMix ()
 	const auto	samplesLeft = sampleCount - i;
 
 	for ( auto bfr : m_buffers )
-		std::copy_n ( bfr + i, samplesLeft, bfr );
+		std::memmove ( bfr, bfr + i, samplesLeft * sizeof ( int16_t ) );
 
 	for ( auto chp : m_chips )
 		chp->bufferpos ( samplesLeft );
+
+	m_wait = uint32_t ( samplesLeft ) > m_sampleCount;
 }
 //-----------------------------------------------------------------------------
 
-void Mixer::init ( int16_t* buffer, uint32_t count )
+void Mixer::begin ( int16_t* buffer, uint32_t count )
 {
 	// don't allow odd counts for stereo playback
 	assert ( m_stereo == false || ( count & 1 ) == 0 );
@@ -117,6 +115,8 @@ void Mixer::init ( int16_t* buffer, uint32_t count )
 	m_sampleIndex = 0;
 	m_sampleCount = count;
 	m_sampleBuffer = buffer;
+
+	m_wait = false;
 }
 //-----------------------------------------------------------------------------
 

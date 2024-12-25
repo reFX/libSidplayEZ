@@ -71,7 +71,7 @@ MOS656X::MOS656X ( EventScheduler& scheduler )
 	, rasterYIRQEdgeDetectorEvent ( "RasterY changed", *this, &MOS656X::rasterYIRQEdgeDetector )
 	, lightpenTriggerEvent ( "Trigger lightpen", *this, &MOS656X::lightpenTrigger )
 {
-	chip ( MOS6569 );
+	chip ( model_t::MOS6569 );
 }
 //-----------------------------------------------------------------------------
 
@@ -101,9 +101,11 @@ void MOS656X::reset ()
 
 void MOS656X::chip ( model_t model )
 {
-	maxRasters = modelData[ model ].rasterLines;
-	cyclesPerLine = modelData[ model ].cyclesPerLine;
-	clock = modelData[ model ].clock;
+	const auto	model_idx = static_cast<std::underlying_type_t<model_t>>( model );
+
+	maxRasters = modelData[ model_idx ].rasterLines;
+	cyclesPerLine = modelData[ model_idx ].cyclesPerLine;
+	clock = modelData[ model_idx ].clock;
 
 	lp.setScreenSize ( maxRasters, cyclesPerLine );
 

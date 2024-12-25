@@ -100,10 +100,6 @@ constexpr auto	OSC_DAC_BITS = 12u;
 * whereas that digi-compatible 8580 has it very narrow.
 * On my 6581R4AR has 0x3A as the only value giving the same output level as 1.prg
 */
-//@{
-constexpr auto	OFFSET_6581 = 0x380u;
-constexpr auto	OFFSET_8580 = 0x9C0u;
-//@}
 
 /**
 * Bus value stays alive for some time after each operation.
@@ -209,7 +205,8 @@ void SID::recalculateDACs ()
 		Dac dacBuilder ( OSC_DAC_BITS, dacLeakFactor );
 		dacBuilder.kinkedDac ( model == MOS6581 );
 
-		const auto	offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
+		//const auto	offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
+		const auto	offset = dacBuilder.getOutput ( 0x7FF );
 
 		for ( auto i = 0u; i < ( 1 << OSC_DAC_BITS ); i++ )
 			oscDAC[ i ] = float ( dacBuilder.getOutput ( i ) - offset );
@@ -336,11 +333,11 @@ void SID::write ( int offset, uint8_t value )
 }
 //-----------------------------------------------------------------------------
 
-void SID::setSamplingParameters ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency )
+void SID::setSamplingParameters ( double clockFrequency, double samplingFrequency )
 {
 	externalFilter.setClockFrequency ( clockFrequency );
 
-	resampler.setup ( clockFrequency, samplingFrequency, highestAccurateFrequency );
+	resampler.setup ( clockFrequency, samplingFrequency );
 }
 //-----------------------------------------------------------------------------
 

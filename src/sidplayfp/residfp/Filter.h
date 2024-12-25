@@ -104,14 +104,9 @@ public:
 	* @param v3 voice 3 in
 	* @return filtered output
 	*/
-	virtual inline uint16_t clock ( float voice1, float voice2, float voice3 )
+	[[ nodiscard ]] virtual inline uint16_t clock ( int voice1, int voice2, int voice3 )
 	{
-		const auto	Vsum	= fmc.getNormalizedVoice ( voice1 )
-							+ fmc.getNormalizedVoice ( voice2 )
-							+ ( fmc.getNormalizedVoice ( voice3 ) & voice3Mask )
-							+ Ve;
-
-		return currentVolume[ currentMixer[ Vsum ] ];
+		return currentVolume[ currentMixer[ voice1 + voice2 + ( voice3 & voice3Mask ) + Ve ] ];
 	}
 
 	/**
@@ -146,6 +141,15 @@ public:
 	* @param mode_vol Filter Mode/Volume
 	*/
 	void writeMODE_VOL ( uint8_t mode_vol );
+
+	/**
+	* Apply a signal to EXT-IN
+	*
+	* @param input a signed 16 bit sample
+	*/
+	void input ( int16_t _input )	{ Ve = fmc.getNormalizedVoice ( _input / 32768.0f,  0 ); }
+
+	[[ nodiscard ]] inline int getNormalizedVoice ( float value, unsigned int env ) const { return fmc.getNormalizedVoice ( value, env ); }
 };
 
 } // namespace reSIDfp

@@ -26,7 +26,7 @@
 #include <cassert>
 #include <cmath>
 
-#if !defined __APPLE__
+#if ! defined __APPLE__
 constexpr auto	M_PI = 3.14159265358979323846;
 #endif
 
@@ -188,7 +188,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 
 void SincResampler::reset ()
 {
-	std::fill_n ( sample, std::size ( sample ), 0 );
+	std::fill ( std::begin ( sample ), std::end ( sample ), 0 );
 	sampleOffset = 0;
 }
 //-----------------------------------------------------------------------------

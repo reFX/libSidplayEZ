@@ -81,9 +81,9 @@ public:
 	void setV ( double v )
 	{
 		// Gate voltage is controlled by the switched capacitor voltage divider
-		// Ua = Ue * v = 4.76v  1<v<2
+		// Ua = Ue * v = 4.75v  1<v<2
 		assert ( v > 1.0 && v < 2.0 );
-		const auto	Vg = 4.76 * v;
+		const auto	Vg = fmc.getVref () * v;
 		const auto	Vgt = Vg - fmc.getVth ();
 
 		// Vg - Vth, normalized so that translated values can be subtracted:

@@ -35,7 +35,7 @@ namespace libsidplayfp
 class romCheck
 {
 private:
-	typedef std::unordered_map<std::string, const char*> md5map;
+	using md5map = std::unordered_map<std::string, const char*>;
 
 private:
 	/**

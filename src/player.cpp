@@ -143,6 +143,8 @@ bool Player::loadTune ( SidTune* tune )
 
 uint32_t Player::play ( int16_t* buffer, uint32_t count )
 {
+	static constexpr auto	CYCLES = 3000u;
+
 	// Make sure a tune is loaded
 	if ( ! m_tune )
 		return 0;
@@ -153,7 +155,7 @@ uint32_t Player::play ( int16_t* buffer, uint32_t count )
 
 	if ( m_isPlaying == state_t::PLAYING )
 	{
-		m_mixer.init ( buffer, count );
+		m_mixer.begin ( buffer, count );
 
 		if ( m_mixer.getSid ( 0 ) )
 		{
@@ -162,7 +164,8 @@ uint32_t Player::play ( int16_t* buffer, uint32_t count )
 				// Clock chips and mix into output buffer
 				while ( m_mixer.notFinished () )
 				{
-					run ( sidemu::OUTPUTBUFFERSIZE );
+					if ( ! m_mixer.wait () )
+						run ( CYCLES );
 
 					m_mixer.clockChips ();
 					m_mixer.doMix ();
@@ -175,7 +178,7 @@ uint32_t Player::play ( int16_t* buffer, uint32_t count )
 				auto	size = int ( m_c64.getMainCpuSpeed () / m_cfg.frequency );
 				while ( --size )
 				{
-					run ( sidemu::OUTPUTBUFFERSIZE );
+					run ( CYCLES );
 
 					m_mixer.clockChips ();
 					m_mixer.resetBufs ();
@@ -187,7 +190,7 @@ uint32_t Player::play ( int16_t* buffer, uint32_t count )
 			// Clock the machine
 			auto	size = int ( m_c64.getMainCpuSpeed () / m_cfg.frequency );
 			while ( --size )
-				run ( sidemu::OUTPUTBUFFERSIZE );
+				run ( CYCLES );
 		}
 	}
 
@@ -320,7 +323,7 @@ c64::model_t Player::c64model ( SidConfig::c64_model_t defaultModel, bool forced
 	c64::model_t model;
 
 	// Use preferred speed if forced or if song speed is unknown
-	if ( forced || clockSpeed == SidTuneInfo::CLOCK_UNKNOWN || clockSpeed == SidTuneInfo::CLOCK_ANY )
+	if ( forced || ( clockSpeed == SidTuneInfo::CLOCK_UNKNOWN ) || ( clockSpeed == SidTuneInfo::CLOCK_ANY ) )
 	{
 		switch ( defaultModel )
 		{

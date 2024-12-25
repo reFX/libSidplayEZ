@@ -31,8 +31,8 @@
 namespace reSIDfp
 {
 
-constexpr unsigned int	DAC_BITS = 11;
-constexpr unsigned int	OPAMP_SIZE_6581 = 33;
+constexpr auto	DAC_BITS = 11u;
+constexpr auto	OPAMP_SIZE_6581 = 33u;
 
 /**
 * This is the SID 6581 op-amp voltage transfer function, measured on
@@ -40,7 +40,7 @@ constexpr unsigned int	OPAMP_SIZE_6581 = 33;
 * All measured chips have op-amps with output voltages (and thus input
 * voltages) within the range of 0.81V - 10.31V.
 */
-const Spline::Point opamp_voltage_6581[ OPAMP_SIZE_6581 ] =
+constexpr Spline::Point opamp_voltage_6581[ OPAMP_SIZE_6581 ] =
 {
 	{  0.81, 10.31 },  // Approximate start of actual range
 	{  2.40, 10.31 },
@@ -102,12 +102,11 @@ void FilterModelConfig6581::setFilterRange ( double adjustment )
 
 FilterModelConfig6581::FilterModelConfig6581 ()
 	: FilterModelConfig (
-		1.5,		// voice voltage range
-		5.075,		// voice DC voltage
-		470e-12,	// capacitor value
-		12.18,		// Vdd
-		1.31,		// Vth
-		20e-6,		// uCox
+		1.5,					// voice voltage range FIXME should theoretically be ~3,571V
+		470e-12,				// capacitor value
+		12.0 * VOLTAGE_SKEW,	// Vdd
+		1.31,					// Vth
+		20e-6,					// uCox
 		opamp_voltage_6581,
 		OPAMP_SIZE_6581
 	)
@@ -118,6 +117,18 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 	, dac ( DAC_BITS )
 {
 	dac.kinkedDac ( true );
+
+	{
+		/**
+		* On 6581 the DC offset varies between ~5.0V and ~5.214V depending on
+		* the envelope value.
+		*/
+		Dac	envDac ( 8 );
+		envDac.kinkedDac ( true );
+
+		for ( auto i = 0; i < 256; ++i )
+			voiceDC[ i ] = 5.0 * VOLTAGE_SKEW + ( 0.2143 * envDac.getOutput ( i ) );
+	}
 
 	// Create lookup tables for gains / summers
 	auto clBuildSummerTable = [ this ]

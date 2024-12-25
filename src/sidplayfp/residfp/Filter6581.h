@@ -334,7 +334,7 @@ public:
 		delete[] f0_dac;
 	}
 
-	inline uint16_t clock ( float voice1, float voice2, float voice3 ) override
+	[[ nodiscard ]] inline uint16_t clock ( int voice1, int voice2, int voice3 ) override
 	{
 		// index 0 = unfiltered, index 1 = filtered
 		int		Vsum[ 2 ] = { 0, 0 };
@@ -343,9 +343,9 @@ public:
 		{
 			const auto	fltMd = filterModeRouting & 0xF;
 
-			Vsum[ fltMd & 1 ]			+= fmc.getNormalizedVoice ( voice1 );
-			Vsum[ ( fltMd >> 1 ) & 1 ]	+= fmc.getNormalizedVoice ( voice2 );
-			Vsum[ ( fltMd >> 2 ) & 1 ]	+= fmc.getNormalizedVoice ( voice3 ) & voice3Mask;
+			Vsum[ fltMd & 1 ]			+= voice1;
+			Vsum[ ( fltMd >> 1 ) & 1 ]	+= voice2;
+			Vsum[ ( fltMd >> 2 ) & 1 ]	+= voice3 & voice3Mask;
 			Vsum[ fltMd >> 3 ]			+= Ve;
 		}
 

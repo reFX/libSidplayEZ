@@ -23,9 +23,10 @@
 
 #include <stdint.h>
 
-namespace libsidplayfp {
+namespace libsidplayfp
+{
 
-typedef int64_t event_clock_t;
+using event_clock_t = int_fast64_t;
 
 //-----------------------------------------------------------------------------
 

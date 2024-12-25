@@ -98,10 +98,8 @@ public:
 	*
 	* @param systemfreq
 	* @param outputfreq
-	* @param method
-	* @param fast
 	*/
-	void sampling ( float systemfreq, float outputfreq );
+	void sampling ( float systemfreq, float outputfreq )	{	m_sid.setSamplingParameters ( systemfreq, outputfreq );		}
 
 	/**
 	* Get a detailed error message.

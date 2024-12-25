@@ -32,6 +32,7 @@ Filter6581::Filter6581 ()
 	, hpIntegrator ( FilterModelConfig6581::getInstance () )
 	, bpIntegrator ( FilterModelConfig6581::getInstance () )
 {
+	setDigiVolume ( 1.0f );
 }
 //-----------------------------------------------------------------------------
 
@@ -60,10 +61,8 @@ void Filter6581::setFilterRange ( double adjustment )
 
 void Filter6581::setDigiVolume ( double adjustment )
 {
-	const auto	voltage = 5.075 + ( ( adjustment - 1.0 ) * 0.5 );
-
-	fmc.setVoiceDCVoltage ( voltage );
-	Ve = fmc.getNormalizedVoice ( 0.0f / 65536.0f );
+	constexpr auto range = int ( 32767 * 0.75 );
+	input ( int16_t ( int ( adjustment * range ) - range ) );
 }
 //-----------------------------------------------------------------------------
 

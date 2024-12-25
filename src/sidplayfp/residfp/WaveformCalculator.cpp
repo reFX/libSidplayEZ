@@ -33,9 +33,9 @@ namespace reSIDfp
 /**
 * Combined waveform model parameters
 */
-typedef float ( *distance_t )( float, int );
+using distance_t = float ( * )( float, int );
 
-typedef struct
+using CombinedWaveformConfig = struct
 {
 	distance_t distFunc;
 	float threshold;
@@ -43,7 +43,7 @@ typedef struct
 	float pulsestrength;
 	float distance1;
 	float distance2;
-} CombinedWaveformConfig;
+};
 
 // Distance functions
 static float exponentialDistance ( float distance, int i )
@@ -196,10 +196,10 @@ std::vector<int16_t> WaveformCalculator::buildWaveTable ()
 */
 static int16_t calculatePulldown ( float distancetable[], float topbit, float pulsestrength, float threshold, unsigned int accumulator )
 {
-	uint8_t	bit[ 12 ];
+	float	bit[ 12 ];
 
 	for ( auto i = 0u; i < 12; i++ )
-		bit[ i ] = ( accumulator & ( 1 << i ) ) ? 1 : 0;
+		bit[ i ] = ( accumulator & ( 1 << i ) ) ? 1.0f : 0.0f;
 
 	bit[ 11 ] = uint8_t ( bit[ 11 ] * topbit );
 
@@ -216,7 +216,7 @@ static int16_t calculatePulldown ( float distancetable[], float topbit, float pu
 				continue;
 
 			const auto  weight = distancetable[ sb - cb + 12 ];
-			avg += float ( 1 - bit[ cb ] ) * weight;
+			avg += ( 1.0f - bit[ cb ] ) * weight;
 			n += weight;
 		}
 
@@ -230,7 +230,7 @@ static int16_t calculatePulldown ( float distancetable[], float topbit, float pu
 
 	for ( auto i = 0; i < 12; i++ )
 	{
-		const auto  bitValue = bit[ i ] ? 1.0f - pulldown[ i ] : 0.0f;
+		const auto	bitValue = bit[ i ] > 0.0f ? 1.0f - pulldown[ i ] : 0.0f;
 
 		if ( bitValue > threshold )
 			value |= 1u << i;

@@ -40,10 +40,10 @@ public:
 	// Maximum number of supported SIDs
 	static constexpr unsigned int MAX_SIDS = 3;
 
-	static const int32_t SCALE_FACTOR = 1 << 16;
+	static constexpr int32_t SCALE_FACTOR = 1 << 16;
 	static constexpr double SQRT_0_5 = 0.70710678118654746;
-	static const int32_t C1 = static_cast<int32_t>( 1.0 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
-	static const int32_t C2 = static_cast<int32_t>( SQRT_0_5 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
+	static constexpr auto C1 = static_cast<int32_t>( 1.0 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
+	static constexpr auto C2 = static_cast<int32_t>( SQRT_0_5 / ( 1.0 + SQRT_0_5 ) * SCALE_FACTOR );
 
 private:
 	std::vector<sidemu*>			m_chips;
@@ -64,8 +64,12 @@ private:
 	int32_t stereo_ch1_ThreeChips () const { return ( C1 * m_iSamples[ 0 ] + C2 * m_iSamples[ 1 ] ) / SCALE_FACTOR; }
 	int32_t stereo_ch2_ThreeChips () const { return ( C2 * m_iSamples[ 1 ] + C1 * m_iSamples[ 2 ] ) / SCALE_FACTOR; }
 
-	typedef int32_t ( Mixer::* mixer_func_t )( ) const;
+	using mixer_func_t = int32_t ( Mixer::* )( ) const;
 	mixer_func_t	m_mix[ 2 ] = { &Mixer::mono1, nullptr };
+
+	using scale_func_t = int ( Mixer::* )( unsigned int );
+
+	static constexpr int32_t	VOLUME_MAX = 1024;
 
 	// Mixer settings
 	int16_t*	m_sampleBuffer = nullptr;
@@ -75,6 +79,7 @@ private:
 	uint32_t	m_sampleRate = 0;
 
 	bool	m_stereo = false;
+	bool	m_wait = false;
 
 	void updateParams ();
 
@@ -117,10 +122,8 @@ public:
 	*
 	* @param buffer output buffer
 	* @param count size of the buffer in samples
-	*
-	* @throws badBufferSize
 	*/
-	void init ( int16_t* buffer, uint32_t count );
+	void begin ( int16_t* buffer, uint32_t count );
 
 	/**
 	* Remove all SIDs from the mixer
@@ -159,12 +162,17 @@ public:
 	/**
 	* Check if the buffer have been filled
 	*/
-	[[ nodiscard ]] inline bool notFinished () const { return m_sampleIndex != m_sampleCount; }
+	[[ nodiscard ]] inline bool notFinished () const { return m_sampleIndex < m_sampleCount; }
 
 	/**
 	* Get the number of samples generated up to now
 	*/
 	[[ nodiscard ]] inline uint32_t samplesGenerated () const { return m_sampleIndex; }
+
+	/*
+	 * Wait till we consume the buffer.
+	 */
+	[[ nodiscard ]] inline bool wait () const { return m_wait; }
 
 	[[ nodiscard ]] int getNumChips () const { return int ( m_chips.size () ); }
 };

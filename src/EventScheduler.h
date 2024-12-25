@@ -23,7 +23,8 @@
 
 #include "Event.h"
 
-namespace libsidplayfp {
+namespace libsidplayfp
+{
 
 /**
 * C64 system runs actions at system clock high and low
@@ -31,11 +32,11 @@ namespace libsidplayfp {
 * and PHI2 to CPU activity. For any clock, PHI1s are before
 * PHI2s.
 */
-typedef enum
+using event_phase_t = enum
 {
 	EVENT_CLOCK_PHI1 = 0,
 	EVENT_CLOCK_PHI2 = 1
-} event_phase_t;
+};
 
 
 /**

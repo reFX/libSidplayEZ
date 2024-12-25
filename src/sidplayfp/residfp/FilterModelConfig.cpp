@@ -27,7 +27,7 @@
 namespace reSIDfp
 {
 
-FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size )
+FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double vth, double ucox, const Spline::Point* opamp_voltage, int opamp_size )
 	: C ( c )
 	, Vdd ( vdd )
 	, Vth ( vth )
@@ -39,7 +39,6 @@ FilterModelConfig::FilterModelConfig ( double vvr, double vdv, double c, double 
 	, norm ( 1.0 / denorm )
 	, N16 ( norm * ( ( 1 << 16 ) - 1 ) )
 	, voice_voltage_range ( vvr )
-	, voice_DC_voltage ( vdv )
 {
 	setUCox ( ucox );
 
@@ -168,12 +167,6 @@ void FilterModelConfig::buildResonanceTable ( OpAmp& opampModel, const double re
 			resonance[ n8 ][ vi ] = getNormalizedValue ( opampModel.solve ( resonance_n[ n8 ], vin ) );
 		}
 	}
-}
-//-----------------------------------------------------------------------------
-
-void FilterModelConfig::setVoiceDCVoltage ( double voltage )
-{
-	voice_DC_voltage = voltage;
 }
 //-----------------------------------------------------------------------------
 

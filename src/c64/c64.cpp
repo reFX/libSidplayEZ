@@ -30,19 +30,18 @@
 namespace libsidplayfp
 {
 
-typedef struct
+using model_data_t = struct
 {
 	double				colorBurst;		// Colorburst frequency in Herz
 	double				divider;		// Clock frequency divider
 	double				powerFreq;		// Power line frequency in Herz
 	MOS656X::model_t	vicModel;		// Video chip model
+};
 
-} model_data_t;
-
-typedef struct
+using cia_model_data_t = struct
 {
 	MOS652X::model_t	ciaModel;		// CIA chip model
-} cia_model_data_t;
+};
 
 /*
 * Color burst frequencies:
@@ -54,18 +53,18 @@ typedef struct
 */
 const model_data_t modelData[] =
 {
-	{	4'433'618.75,  18.0, 50.0, MOS656X::MOS6569		},	// PAL-B
-	{	3'579'545.455, 14.0, 60.0, MOS656X::MOS6567R8	},	// NTSC-M
-	{	3'579'545.455, 14.0, 60.0, MOS656X::MOS6567R56A	},	// Old NTSC-M
-	{	3'582'056.25,  14.0, 50.0, MOS656X::MOS6572		},	// PAL-N
-	{	3'575'611.49,  14.0, 50.0, MOS656X::MOS6573		},	// PAL-M
+	{	4'433'618.75,  18.0, 50.0, MOS656X::model_t::MOS6569		},	// PAL-B
+	{	3'579'545.455, 14.0, 60.0, MOS656X::model_t::MOS6567R8		},	// NTSC-M
+	{	3'579'545.455, 14.0, 60.0, MOS656X::model_t::MOS6567R56A	},	// Old NTSC-M
+	{	3'582'056.25,  14.0, 50.0, MOS656X::model_t::MOS6572		},	// PAL-N
+	{	3'575'611.49,  14.0, 50.0, MOS656X::model_t::MOS6573		},	// PAL-M
 };
 //-----------------------------------------------------------------------------
 
 const cia_model_data_t ciaModelData[] =
 {
-	{	MOS652X::MOS6526		},	// Old
-	{	MOS652X::MOS8521		},	// New
+	{	MOS652X::model_t::MOS6526		},	// Old
+	{	MOS652X::model_t::MOS8521		},	// New
 };
 //-----------------------------------------------------------------------------
 

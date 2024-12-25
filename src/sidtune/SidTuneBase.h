@@ -56,7 +56,7 @@ protected:
 	using buffer_t = std::vector<uint8_t>;
 
 public:
-	typedef void ( *LoaderFunc )( const char* fileName, buffer_t& bufferRef );
+	using LoaderFunc = void ( * )( const char* fileName, buffer_t& bufferRef );
 
 	/**
 	* Load a sidtune from a file.

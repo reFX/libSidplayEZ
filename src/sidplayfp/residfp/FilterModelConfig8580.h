@@ -35,10 +35,24 @@ class Integrator8580;
 */
 class FilterModelConfig8580 final : public FilterModelConfig
 {
+private:
+	/**
+	 * Reference voltage generated from Vcc by a voltage divider
+	 */
+	static constexpr auto	Vref = 4.75;
+
+	/**
+	 * Power bricks generate voltages slightly out of spec
+	 */
+	static constexpr auto	VOLTAGE_SKEW = 1.01;
+
 public:
 	FilterModelConfig8580 ();
 
 	static FilterModelConfig8580* getInstance ();
+
+public:
+	[[ nodiscard ]] inline constexpr double getVref () const { return Vref * VOLTAGE_SKEW; }
 };
 
 } // namespace reSIDfp

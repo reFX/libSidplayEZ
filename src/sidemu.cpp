@@ -36,18 +36,11 @@ sidemu::sidemu ( EventScheduler& _eventScheduler )
 
 void sidemu::reset ( uint8_t volume )
 {
-	std::fill_n ( lastpoke, std::size ( lastpoke ), 0 );
+	std::fill ( std::begin ( lastpoke ), std::end ( lastpoke ), 0 );
 
 	m_accessClk = 0;
 	m_sid.reset ();
 	m_sid.write ( 0x18, volume );
-}
-//-----------------------------------------------------------------------------
-
-void sidemu::sampling ( float systemfreq, float outputfreq )
-{
-	const auto  halfFreq = int ( std::min ( outputfreq * ( 20000.0f / 44100.0f ), 20000.0f ) );
-	m_sid.setSamplingParameters ( systemfreq, outputfreq, halfFreq );
 }
 //-----------------------------------------------------------------------------
 
