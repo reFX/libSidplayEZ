@@ -63,6 +63,10 @@ Filter8580::Filter8580 ()
 		fltDac[ fc ] = wl;
 	}
 	setFilterCurve ( 0.5 );
+
+	updatedCenterFrequency ();
+	hpIntegrator.solve ( 16384 );
+	bpIntegrator.solve ( 16384 );
 }
 //-----------------------------------------------------------------------------
 

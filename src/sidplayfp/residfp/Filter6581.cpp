@@ -33,6 +33,11 @@ Filter6581::Filter6581 ()
 	, bpIntegrator ( FilterModelConfig6581::getInstance () )
 {
 	setDigiVolume ( 1.0f );
+
+	setFilterCurve ( 0.5f );
+
+	hpIntegrator.solve ( 16384 );
+	bpIntegrator.solve ( 16384 );
 }
 //-----------------------------------------------------------------------------
 
