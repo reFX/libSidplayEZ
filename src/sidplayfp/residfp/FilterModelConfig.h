@@ -33,35 +33,6 @@ namespace reSIDfp
 
 class FilterModelConfig
 {
-private:
-	/*
-	* Hack to add quick dither when converting values from float to int
-	* and avoid quantization noise.
-	* Hopefully this can be removed the day we move all the analog part
-	* processing to floats.
-	*
-	* Not sure about the effect of using such small buffer of numbers
-	* since the random sequence repeats every 1024 values but for
-	* now it seems to do the job.
-	*/
-	class Randomnoise
-	{
-	private:
-		double	buffer[ 1024 ];
-		mutable int		index = 0;
-
-	public:
-		Randomnoise ()
-		{
-			std::uniform_real_distribution<double> unif ( 0.0, 1.0 );
-			std::default_random_engine	re;
-
-			for ( auto& buf : buffer )
-				buf = unif ( re );
-		}
-		[[ nodiscard ]] inline double getNoise () const { index = ( index + 1 ) & int ( std::ssize ( buffer ) - 1 ); return buffer[ index ]; }
-	};
-
 protected:
 	// Capacitor value.
 	const double C;
@@ -118,7 +89,8 @@ protected:
 	uint16_t	opamp_rev[ 1 << 16 ];	//-V730_NOINIT this is initialized in the derived class constructor
 
 private:
-	Randomnoise	rnd;
+// 	double			rndBuffer[ 1024 ];
+// 	mutable int		rndIndex = 0;
 
 	FilterModelConfig ( const FilterModelConfig& ) = delete;
 	FilterModelConfig& operator= ( const FilterModelConfig& ) = delete;
@@ -164,11 +136,8 @@ public:
 	{
 		const auto	tmp = N16 * ( value - vmin );
 
-// 		assert ( tmp >= 0.0 && tmp <= 65535.0 );
-// 		return uint16_t ( tmp + rnd.getNoise () );
-
-		assert ( tmp > -0.5 && tmp < 65535.5 );
-		return uint16_t ( tmp + 0.5 );
+ 		assert ( tmp > -0.5 && tmp < 65535.5 );
+ 		return uint16_t ( tmp + 0.5 );
 	}
 
 	[[ nodiscard ]] sidinline uint16_t getNormalizedCurrentFactor ( double wl ) const
@@ -187,13 +156,10 @@ public:
 
 	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const
 	{
-		const auto	tmp = N16 * ( ( value * voice_voltage_range + voiceDC[ env ] ) - vmin );
-
-// 		assert ( tmp >= 0.0 && tmp <= 65535.0 );
-// 		return int ( tmp + rnd.getNoise () );
-
-		assert ( tmp > -0.5 && tmp < 65535.5 );
-		return int ( tmp + 0.5 );
+ 		const auto	tmp = N16 * ( ( value * voice_voltage_range + voiceDC[ env ] ) - vmin );
+ 
+ 		assert ( tmp > -0.5 && tmp < 65535.5 );
+ 		return int ( tmp + 0.5 );
 	}
 };
 
