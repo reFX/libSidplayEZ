@@ -68,11 +68,13 @@ protected:
 
 	// Transistor parameters.
 	//@{
-	const double Vdd;
+	/// Thermal voltage: Ut = kT/q = 8.61734315e-5*T ~ 26mV
+	static constexpr double Ut = 26.0e-3;
+
+	const double Vdd;			//< Positive supply voltage
 	const double Vth;			//< Threshold voltage
-	const double Ut;			//< Thermal voltage: Ut = kT/q = 8.61734315e-5*T ~ 26mV
-	double uCox;				//< Transconductance coefficient: u*Cox
 	const double Vddt;			//< Vdd - Vth
+	double uCox;				//< Transconductance coefficient: u*Cox
 	//@}
 
 	// Derived stuff
@@ -82,10 +84,10 @@ protected:
 	// Fixed point scaling for 16 bit op-amp output.
 	const double N16;
 
+	const double voice_voltage_range;
+
 	// Current factor coefficient for op-amp integrators
 	double currFactorCoeff;
-
-	const double voice_voltage_range;
 
 	// Lookup tables for gain and summer op-amps in output stage / filter
 	//@{

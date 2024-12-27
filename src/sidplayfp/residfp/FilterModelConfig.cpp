@@ -31,7 +31,6 @@ FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double 
 	: C ( c )
 	, Vdd ( vdd )
 	, Vth ( vth )
-	, Ut ( 26.0e-3 )
 	, Vddt ( Vdd - Vth )
 	, vmin ( opamp_voltage[ 0 ].x )
 	, vmax ( std::max ( Vddt, opamp_voltage[ 0 ].y ) )
@@ -47,8 +46,10 @@ FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double 
 
 	for ( auto i = 0; i < opamp_size; i++ )
 	{
+		scaled_voltage[ i ].x = N16 * ( opamp_voltage[ i ].x - opamp_voltage[ i ].y ) / 2.0;
 		// We add 32768 to get a positive number in the range [0-65535]
-		scaled_voltage[ i ].x = ( N16 * ( opamp_voltage[ i ].x - opamp_voltage[ i ].y ) / 2.0 ) + double ( 1u << 15 );
+		scaled_voltage[ i ].x += double ( 1u << 15 );
+
 		scaled_voltage[ i ].y = N16 * ( opamp_voltage[ i ].x - vmin );
 	}
 
@@ -59,7 +60,7 @@ FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double 
 	{
 		const auto	out = s.evaluate ( x );
 		// When interpolating outside range the first elements may be negative
-		const auto	tmp = std::max ( out.x, 0.0 );
+		const auto	tmp = out.x > 0.0 ? out.x : 0.0;
 		assert ( tmp < 65535.5 );
 		opamp_rev[ x ] = uint16_t ( tmp + 0.5 );
 	}
