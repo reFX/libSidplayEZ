@@ -193,12 +193,12 @@ public:
 	{
 	}
 
-	inline void setVw ( uint16_t Vw )
+	sidinline void setVw ( uint16_t Vw )
 	{
 		nVddt_Vw_2 = ( ( nVddt - Vw ) * ( nVddt - Vw ) ) >> 1;
 	}
 
-	inline int solve ( int vi )
+	sidinline int solve ( int vi )
 	{
 		// Make sure Vgst>0 so we're not in subthreshold mode
 		assert ( vx < nVddt );

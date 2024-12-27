@@ -77,7 +77,7 @@ public:
 	*
 	* @param input
 	*/
-	inline int clock ( int input )
+	[[ nodiscard ]] sidinline int clock ( int input )
 	{
 		const auto	Vi = ( input << 11 ) - ( 1 << ( 11 + 15 ) );
 		const auto	dVlp = ( w0lp_1_s7 * ( Vi - Vlp ) ) >> 7;

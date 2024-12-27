@@ -24,6 +24,8 @@
 #include <memory>
 #include <algorithm>
 
+#include "../../helpers.h"
+
 namespace reSIDfp
 {
 	typedef enum { MOS6581 = 1, MOS8580 } ChipModel;
@@ -116,7 +118,7 @@ private:
 	*
 	* @return the output sample
 	*/
-	inline int output ()
+	sidinline int output ()
 	{
 		const auto	o1 = voice[ 0 ].output ( voice[ 2 ].waveformGenerator );
 		const auto	o2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
@@ -140,7 +142,7 @@ private:
 	*
 	* @param sync whether to do the actual voice synchronization
 	*/
-	inline void voiceSync ( bool sync )
+	sidinline void voiceSync ( bool sync )
 	{
 		// Synchronize the 3 waveform generators
 		if ( sync )
@@ -265,7 +267,7 @@ public:
 	* @param buf audio output buffer
 	* @return number of samples produced
 	*/
-	inline int clock ( unsigned int cycles, int16_t* buf )
+	inline __attribute__((always_inline)) int clock ( unsigned int cycles, int16_t* buf )
 	{
 		// ageBusValue
 		if ( busValueTtl )

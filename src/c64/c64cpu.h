@@ -20,14 +20,13 @@
 */
 
 #include "mmu.h"
-#include "CPU/mos6510.h"
 
 namespace libsidplayfp
 {
 
 //-----------------------------------------------------------------------------
 
-class c64cpubus final : public CPUDataBus
+class c64cpubus final
 {
 public:
 	c64cpubus ( MMU& mmu )
@@ -35,9 +34,8 @@ public:
 	{
 	}
 
-protected:
-	uint8_t cpuRead ( uint16_t addr ) override				{	return m_mmu.cpuRead ( addr );	}
-	void cpuWrite ( uint16_t addr, uint8_t data ) override	{	m_mmu.cpuWrite ( addr, data );	}
+	sidinline uint8_t cpuRead ( uint16_t addr ) 				{	return m_mmu.cpuRead ( addr );	}
+	sidinline void cpuWrite ( uint16_t addr, uint8_t data ) 	{	m_mmu.cpuWrite ( addr, data );	}
 
 private:
 	MMU&	m_mmu;

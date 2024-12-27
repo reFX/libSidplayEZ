@@ -53,8 +53,8 @@ public:
 	{
 	}
 
-	void poke ( uint16_t address, uint8_t value ) override	{	write ( uint8_t ( address ), value );	}
-	uint8_t peek ( uint16_t address ) override				{	return read ( uint8_t ( address ) );	}
+	sidinline void poke ( uint16_t address, uint8_t value ) override	{	write ( uint8_t ( address ), value );	}
+	sidinline uint8_t peek ( uint16_t address ) override				{	return read ( uint8_t ( address ) );	}
 };
 
 }

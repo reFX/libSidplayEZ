@@ -68,7 +68,7 @@ public:
 	/**
 	* Set Filter Cutoff resistor ratio.
 	*/
-	inline void setFc ( double wl )
+	sidinline void setFc ( double wl )
 	{
 		// Normalized current factor, 1 cycle at 1MHz.
 		// Fit in 5 bits.
@@ -91,7 +91,7 @@ public:
 		nVgt = fmc.getNormalizedValue ( Vgt );
 	}
 
-	inline int solve ( int vi )
+	sidinline int solve ( int vi )
 	{
 		// Make sure we're not in subthreshold mode
 		assert ( vx < nVgt );

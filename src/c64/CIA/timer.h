@@ -27,6 +27,8 @@
 #include "../../EventCallback.h"
 #include "../../EventScheduler.h"
 
+#include "../../helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -106,7 +108,7 @@ private:
 	* If CIA timer is stopped or is programmed to just count down,
 	* the events are paused.
 	*/
-	inline void reschedule ();
+	sidinline void reschedule ();
 
 	/**
 	* Timer ticking event.
@@ -188,21 +190,21 @@ public:
 	* @param state
 	*            PB6/PB7 flipflop state
 	*/
-	inline void setPbToggle ( bool _state ) { pbToggle = _state; }
+	sidinline void setPbToggle ( bool _state ) { pbToggle = _state; }
 
 	/**
 	* Get current state value.
 	*
 	* @return current state value
 	*/
-	inline int32_t getState () const { return state; }
+	sidinline int32_t getState () const { return state; }
 
 	/**
 	* Get current timer value.
 	*
 	* @return current timer value
 	*/
-	inline uint16_t getTimer () const { return timer; }
+	sidinline uint16_t getTimer () const { return timer; }
 
 	/**
 	* Get PB6/PB7 Flipflop state.
@@ -210,7 +212,7 @@ public:
 	* @param reg value of the control register
 	* @return PB6/PB7 flipflop state
 	*/
-	inline bool getPb ( uint8_t reg ) const { return ( reg & 0x04 ) ? pbToggle : ( state & CIAT_OUT ); }
+	sidinline bool getPb ( uint8_t reg ) const { return ( reg & 0x04 ) ? pbToggle : ( state & CIAT_OUT ); }
 };
 
 void Timer::reschedule ()

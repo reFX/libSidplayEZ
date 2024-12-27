@@ -1414,7 +1414,7 @@ void MOS6510::rra_instr ()
 * @param context
 *            The Event Context
 */
-MOS6510::MOS6510 ( EventScheduler& scheduler, CPUDataBus& bus )
+MOS6510::MOS6510 ( EventScheduler& scheduler, c64cpubus& bus )
 	: eventScheduler ( scheduler )
 	, dataBus ( bus )
 	, m_nosteal ( "CPU-nosteal", *this )

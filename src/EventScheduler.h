@@ -23,6 +23,8 @@
 
 #include "Event.h"
 
+#include "helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -67,7 +69,7 @@ private:
 	*
 	* @param event The event to add
 	*/
-	void schedule ( Event& event )
+	sidinline void schedule ( Event& event )
 	{
 		// find the right spot where to tuck this new event
 		Event** scan = &firstEvent;
@@ -93,7 +95,7 @@ public:
 	* @param cycles how many cycles from now to fire
 	* @param phase the phase when to fire the event
 	*/
-	void schedule ( Event& event, unsigned int cycles, event_phase_t phase )
+	sidinline void schedule ( Event& event, unsigned int cycles, event_phase_t phase )
 	{
 		// this strange formulation always selects the next available slot regardless of specified phase.
 		event.triggerTime = currentTime + ( ( currentTime & 1 ) ^ phase ) + ( cycles << 1 );
@@ -106,7 +108,7 @@ public:
 	* @param event the event to add
 	* @param cycles how many cycles from now to fire
 	*/
-	void schedule ( Event& event, unsigned int cycles )
+	sidinline void schedule ( Event& event, unsigned int cycles )
 	{
 		event.triggerTime = currentTime + ( cycles << 1 );
 		schedule ( event );
@@ -117,19 +119,36 @@ public:
 	*
 	* @param event the event to cancel
 	*/
-	void cancel ( Event& event );
+	sidinline void cancel ( Event& event )
+	{
+		auto    scan = &firstEvent;
+
+		while ( *scan )
+		{
+			if ( &event == *scan )
+			{
+				*scan = ( *scan )->next;
+				break;
+			}
+			scan = &( ( *scan )->next );
+		}
+	}
 
 	/**
 	* Cancel all pending events and reset time.
 	*/
-	void reset ();
+	void reset ()
+	{
+		firstEvent = nullptr;
+		currentTime = 0;
+	}
 
 	/**
 	* Fire next event, advance system time to that event.
 	*/
-	void clock ()
+	sidinline void clock ()
 	{
-		Event&	event = *firstEvent;
+		auto&	event = *firstEvent;
 		firstEvent = firstEvent->next;
 		currentTime = event.triggerTime;
 		event.event ();
@@ -141,7 +160,19 @@ public:
 	* @param event the event
 	* @return true when pending
 	*/
-	[[ nodiscard ]] bool isPending ( Event& event ) const;
+	[[ nodiscard ]] sidinline bool isPending ( Event& event ) const
+	{
+		auto	scan = firstEvent;
+		while ( scan )
+		{
+			if ( &event == scan )
+				return true;
+
+			scan = scan->next;
+		}
+
+		return false;
+	}
 
 	/**
 	* Get time with respect to a specific clock phase.
@@ -149,14 +180,14 @@ public:
 	* @param phase the phase
 	* @return the time according to specified phase.
 	*/
-	[[ nodiscard ]] event_clock_t getTime ( event_phase_t phase ) const	{	return ( currentTime + ( phase ^ 1 ) ) >> 1;	}
+	[[ nodiscard ]] sidinline event_clock_t getTime ( event_phase_t phase ) const	{	return ( currentTime + ( phase ^ 1 ) ) >> 1;	}
 
 	/**
 	* Return current clock phase.
 	*
 	* @return The current phase
 	*/
-	[[ nodiscard ]] event_phase_t phase () const { return static_cast<event_phase_t>( currentTime & 1 ); }
-	[[ nodiscard ]] event_clock_t remaining ( Event& event ) const { return event.triggerTime - currentTime; }
+	[[ nodiscard ]] sidinline event_phase_t phase () const { return static_cast<event_phase_t>( currentTime & 1 ); }
+	[[ nodiscard ]] sidinline event_clock_t remaining ( Event& event ) const { return event.triggerTime - currentTime; }
 };
 }

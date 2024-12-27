@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include "../../EventScheduler.h"
+#include "../../helpers.h"
 
 namespace libsidplayfp
 {
@@ -68,8 +69,8 @@ private:
 	uint8_t alarm[ 4 ];
 
 private:
-	inline void checkAlarm ();
-	inline void updateCounters ();
+	sidinline void checkAlarm ();
+	sidinline void updateCounters ();
 
 	void event () override;
 

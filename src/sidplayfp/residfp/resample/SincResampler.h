@@ -25,6 +25,8 @@
 #include <cmath>
 #include <vector>
 
+#include "../../../helpers.h"
+
 namespace reSIDfp
 {
 
@@ -88,7 +90,7 @@ public:
 	*/
 	void setup ( double clockFrequency, double samplingFrequency, double highestAccurateFrequency );
 
-	inline bool input ( const int input )
+	[[ nodiscard ]] sidinline bool input ( const int input )
 	{
 		auto	ready = false;
 
@@ -107,7 +109,7 @@ public:
 		return ready;
 	}
 
-	inline int output () const { return outputValue; }
+	[[ nodiscard ]] sidinline int output () const { return outputValue; }
 
 	void reset ();
 };

@@ -27,6 +27,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include "../../helpers.h"
+
 constexpr auto  SPRITES = 8;
 
 namespace libsidplayfp
@@ -53,7 +55,7 @@ public:
 		reset ();
 	}
 
-	void reset ()
+	sidinline void reset ()
 	{
 		exp_flop = 0xff;
 		dma = 0;
@@ -66,7 +68,7 @@ public:
      * Update mc values in one pass
      * after the dma has been processed
      */
-	void updateMc ()
+	sidinline void updateMc ()
 	{
 		uint8_t mask = 1;
 		for ( auto i = 0u; i < SPRITES; i++, mask <<= 1 )
@@ -77,7 +79,7 @@ public:
     /**
      * Update mc base value.
      */
-    void updateMcBase()
+	sidinline void updateMcBase()
     {
 		uint8_t mask = 1;
 		for ( auto i = 0u; i < SPRITES; i++, mask <<= 1 )
@@ -94,7 +96,7 @@ public:
     /**
      * Calculate sprite expansion.
      */
-    void checkExp()
+	sidinline void checkExp()
     {
         exp_flop ^= dma & y_expansion;
     }
@@ -102,7 +104,7 @@ public:
     /**
      * Check if sprite is displayed.
      */
-    void checkDisplay()
+	sidinline void checkDisplay()
     {
         std::copy_n ( mc_base, SPRITES, mc );
     }
@@ -113,7 +115,7 @@ public:
      * @rasterY y raster position
      * @regs the VIC registers
      */
-	void checkDma ( unsigned int rasterY, uint8_t regs[ 0x40 ] )
+	sidinline void checkDma ( unsigned int rasterY, uint8_t regs[ 0x40 ] )
 	{
 		const uint8_t y = rasterY & 0xff;
 		uint8_t mask = 1;
@@ -134,7 +136,7 @@ public:
      * @param data the data written to the register
      * @param lineCycle current line cycle
      */
-	void lineCrunch ( uint8_t data, unsigned int lineCycle )
+	sidinline void lineCrunch ( uint8_t data, unsigned int lineCycle )
 	{
 		uint8_t mask = 1;
 		for ( auto i = 0u; i < SPRITES; i++, mask <<= 1 )
@@ -162,7 +164,7 @@ public:
      *
      * @param val bitmask for selected sprites
      */
-	[[ nodiscard ]] inline bool isDma ( unsigned int val ) const
+	[[ nodiscard ]] sidinline bool isDma ( unsigned int val ) const
 	{
 		return dma & val;
 	}

@@ -81,7 +81,7 @@ protected:
 	/**
 	* Mixing configuration modified (offsets change)
 	*/
-	inline void updateMixing ()
+	sidinline void updateMixing ()
 	{
 		// Voice 3 is silenced by voice3off if it is not routed through the filter
 		voice3Mask = ( filterModeRouting & 0x84 ) == 0x80 ? 0 : -1;
@@ -104,7 +104,7 @@ public:
 	* @param v3 voice 3 in
 	* @return filtered output
 	*/
-	[[ nodiscard ]] virtual inline uint16_t clock ( int voice1, int voice2, int voice3 )
+	[[ nodiscard ]] virtual sidinline uint16_t clock ( int voice1, int voice2, int voice3 )
 	{
 		return currentVolume[ currentMixer[ voice1 + voice2 + ( voice3 & voice3Mask ) + Ve ] ];
 	}
@@ -149,7 +149,7 @@ public:
 	*/
 	void input ( int16_t _input )	{ Ve = fmc.getNormalizedVoice ( _input / 32768.0f,  0 ); }
 
-	[[ nodiscard ]] inline int getNormalizedVoice ( float value, unsigned int env ) const { return fmc.getNormalizedVoice ( value, env ); }
+	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const { return fmc.getNormalizedVoice ( value, env ); }
 };
 
 } // namespace reSIDfp

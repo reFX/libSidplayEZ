@@ -157,7 +157,7 @@ private:
 	{
 		const bool oldRasterYIRQCondition = rasterYIRQCondition;
 		rasterYIRQCondition = rasterY == readRasterLineIRQ ();
-		if ( !oldRasterYIRQCondition && rasterYIRQCondition )
+		if ( ! oldRasterYIRQCondition && rasterYIRQCondition )
 			activateIRQFlag ( IRQ_RASTER );
 	}
 
@@ -192,9 +192,9 @@ private:
 	*
 	* @return true if DEN is set, otherwise false
 	*/
-	bool readDEN () const { return ( regs[ 0x11 ] & 0x10 ) != 0; }
+	sidinline bool readDEN () const { return ( regs[ 0x11 ] & 0x10 ) != 0; }
 
-	bool evaluateIsBadLine () const
+	sidinline bool evaluateIsBadLine () const
 	{
 		return		areBadLinesEnabled
 				&&	rasterY >= FIRST_DMA_LINE
@@ -205,9 +205,9 @@ private:
 	/**
 	* Get previous value of Y raster
 	*/
-	inline unsigned int oldRasterY () const		{	return ( rasterY > 0 ? rasterY : maxRasters ) - 1;	}
+	sidinline unsigned int oldRasterY () const		{	return ( rasterY > 0 ? rasterY : maxRasters ) - 1;	}
 
-	inline void sync ()
+	sidinline void sync ()
 	{
 		eventScheduler.cancel ( *this );
 		event ();
@@ -216,7 +216,7 @@ private:
 	/**
 	* Check for vertical blanking.
 	*/
-	inline void checkVblank ()
+	sidinline void checkVblank ()
 	{
 		// IRQ occurred (xraster != 0)
 		if ( rasterY == ( maxRasters - 1 ) )
@@ -247,7 +247,7 @@ private:
 	/**
 	* Vertical blank (line 0).
 	*/
-	inline void vblank ()
+	sidinline void vblank ()
 	{
 		if ( vblanking )
 		{
@@ -265,7 +265,7 @@ private:
 	* Start DMA for sprite n.
 	*/
 	template<int n>
-	inline void startDma ()
+	sidinline void startDma ()
 	{
 		if ( sprites.isDma ( 0x01 << n ) )
 			setBA ( false );
@@ -275,7 +275,7 @@ private:
 	* End DMA for sprite n.
 	*/
 	template<int n>
-	inline void endDma ()
+	sidinline void endDma ()
 	{
 		if ( ! sprites.isDma ( 0x06 << n ) )
 			setBA ( true );
@@ -284,7 +284,7 @@ private:
 	/**
 	* Start bad line.
 	*/
-	inline void startBadline ()
+	sidinline void startBadline ()
 	{
 		if ( isBadLine )
 			setBA ( false );
@@ -348,7 +348,7 @@ public:
 * Start DMA for sprite 0.
 */
 template<>
-inline void MOS656X::startDma<0> ()
+sidinline void MOS656X::startDma<0> ()
 {
 	setBA ( ! sprites.isDma ( 0x01 ) );
 }
@@ -357,7 +357,7 @@ inline void MOS656X::startDma<0> ()
 * End DMA for sprite 7.
 */
 template<>
-inline void MOS656X::endDma<7> ()
+sidinline void MOS656X::endDma<7> ()
 {
 	setBA ( true );
 }

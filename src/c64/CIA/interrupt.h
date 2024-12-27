@@ -25,6 +25,8 @@
 #include "../../EventScheduler.h"
 #include "../../EventCallback.h"
 
+#include "../../helpers.h"
+
 #include <stdint.h>
 
 namespace libsidplayfp
@@ -83,9 +85,9 @@ private:
 	EventCallback<InterruptSource> clearIrqEvent;
 
 protected:
-	inline bool interruptTriggered () const { return idr & INTERRUPT_REQUEST; }
+	sidinline bool interruptTriggered () const { return idr & INTERRUPT_REQUEST; }
 
-	inline bool interruptMasked ( uint8_t interruptMask ) const
+	sidinline bool interruptMasked ( uint8_t interruptMask ) const
 	{
 		return ( ( interruptMask != INTERRUPT_NONE ) ? interruptMask : idr ) & icr;
 	}
@@ -95,8 +97,8 @@ protected:
 	/**
 	* Check if interrupts were ackowledged during previous cycle.
 	*/
-	inline bool ack0 () const { return eventScheduler.getTime ( EVENT_CLOCK_PHI2 ) == ( last_clear + 1 ); }
-	inline bool write0 () const { return eventScheduler.getTime ( EVENT_CLOCK_PHI2 ) == ( last_set + 1 ); }
+	sidinline bool ack0 () const { return eventScheduler.getTime ( EVENT_CLOCK_PHI2 ) == ( last_clear + 1 ); }
+	sidinline bool write0 () const { return eventScheduler.getTime ( EVENT_CLOCK_PHI2 ) == ( last_set + 1 ); }
 
 	/**
 	* Signal interrupt to CPU.

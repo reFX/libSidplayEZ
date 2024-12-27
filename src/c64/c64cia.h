@@ -66,7 +66,7 @@ public:
 	{
 	}
 
-	void poke ( uint16_t address, uint8_t value ) override
+	sidinline void poke ( uint16_t address, uint8_t value ) override
 	{
 		const auto	addr = uint8_t ( address );
 		write ( addr, value );
@@ -77,7 +77,7 @@ public:
 				last_ta = timerA.getTimer ();
 	}
 
-	uint8_t peek ( uint16_t address ) override		{		return read ( get_16lo8 ( address ) );	}
+	sidinline uint8_t peek ( uint16_t address ) override		{		return read ( get_16lo8 ( address ) );	}
 
 	void reset () override
 	{
@@ -85,7 +85,7 @@ public:
 		MOS652X::reset ();
 	}
 
-	uint16_t getTimerA () const { return last_ta; }
+	sidinline uint16_t getTimerA () const { return last_ta; }
 };
 
 /**

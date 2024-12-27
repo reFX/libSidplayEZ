@@ -22,6 +22,8 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "../../helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -96,12 +98,12 @@ public:
 	/**
 	* Return the low byte of x coordinate.
 	*/
-	uint8_t getX () const { return uint8_t ( lpx ); }
+	sidinline uint8_t getX () const { return uint8_t ( lpx ); }
 
 	/**
 	* Return the low byte of y coordinate.
 	*/
-	uint8_t getY () const { return uint8_t ( lpy ); }
+	sidinline uint8_t getY () const { return uint8_t ( lpy ); }
 
 	/**
 	* Retrigger lightpen on vertical blank.
@@ -161,8 +163,8 @@ public:
 	}
 
 	/**
-		* Untrigger lightpen from CIA.
-		*/
+	* Untrigger lightpen from CIA.
+	*/
 	void untrigger () { isTriggered = false; }
 };
 

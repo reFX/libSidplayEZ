@@ -63,12 +63,12 @@ private:
 	double		vcr_n_Ids_term[ 1 << 16 ];
 	//@}
 
-	[[ nodiscard ]] inline double getDacZero ( double adjustment ) const	{	return dac_zero + adjustment;	}
+	[[ nodiscard ]] sidinline double getDacZero ( double adjustment ) const	{	return dac_zero + adjustment;	}
 
 public:
 	FilterModelConfig6581 ();
 
-	static FilterModelConfig6581* getInstance ();
+	[[ nodiscard ]] static FilterModelConfig6581* getInstance ();
 
 	void setFilterRange ( double adjustment );
 
@@ -80,15 +80,15 @@ public:
 	* @param adjustment
 	* @return the DAC table
 	*/
-	uint16_t* getDAC ( double adjustment ) const;
-	double getWL_snake () const { return WL_snake; }
+	[[ nodiscard ]] uint16_t* getDAC ( double adjustment ) const;
+	[[ nodiscard ]] double getWL_snake () const { return WL_snake; }
 
-	inline uint16_t getVcr_nVg ( const int i ) const		{	return vcr_nVg[ i ];	}
-	inline uint16_t getVcr_n_Ids_term ( const int i ) const	{	return uint16_t ( vcr_n_Ids_term[ i ] * uCox + 0.5 );	}
+	[[ nodiscard ]] sidinline uint16_t getVcr_nVg ( const int i ) const { return vcr_nVg[ i ]; }
+	[[ nodiscard ]] sidinline uint16_t getVcr_n_Ids_term ( const int i ) const	{	return uint16_t ( vcr_n_Ids_term[ i ] * uCox + 0.5 );	}
 
 	#if 0
-		inline double getUt () const { return Ut; }
-		inline double getN16 () const { return N16; }
+		[[ nodiscard ]] sidinline double getUt () const { return Ut; }
+		[[ nodiscard ]] sidinline double getN16 () const { return N16; }
 	#endif
 };
 

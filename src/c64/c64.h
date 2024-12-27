@@ -40,6 +40,8 @@
 #include "c64vic.h"
 #include "mmu.h"
 
+#include "CPU/mos6510.h"
+
 namespace libsidplayfp
 {
 
@@ -140,19 +142,19 @@ private:
 	*
 	* @param state
 	*/
-	inline void interruptIRQ ( bool state ) override;
+	sidinline void interruptIRQ ( bool state ) override;
 
 	/**
 	* NMI trigger signal.
 	*
 	* Calls permitted any time, but normally originated by chips at PHI1.
 	*/
-	inline void interruptNMI () override { cpu.triggerNMI (); }
+	sidinline void interruptNMI () override { cpu.triggerNMI (); }
 
 	/**
 	* Reset signal.
 	*/
-	inline void interruptRST () override { cpu.triggerRST (); }
+	sidinline void interruptRST () override { cpu.triggerRST (); }
 
 	/**
 	* BA signal.
@@ -161,12 +163,12 @@ private:
 	*
 	* @param state
 	*/
-	inline void setBA ( bool state ) override;
+	sidinline void setBA ( bool state ) override;
 
 	/**
 	* @param state fire pressed, active low
 	*/
-	inline void lightpen ( bool state ) override;
+	sidinline void lightpen ( bool state ) override;
 
 	void resetIoBank ();
 
@@ -175,10 +177,10 @@ public:
 	~c64 ();
 
 	/**
-		* Get C64's event scheduler
-		*
-		* @return the scheduler
-		*/
+	* Get C64's event scheduler
+	*
+	* @return the scheduler
+	*/
 	EventScheduler& getEventScheduler () { return eventScheduler; }
 
 	uint32_t getTimeMs () const

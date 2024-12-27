@@ -25,6 +25,8 @@
 #include <memory>
 #include <vector>
 
+#include "../../helpers.h"
+
 #include "Spline.h"
 
 namespace reSIDfp
@@ -109,7 +111,7 @@ public:
      * @param vi input voltage
      * @return vo output voltage
      */
-	double solve ( double n, double vi )
+	sidinline double solve ( double n, double vi )
 	{
 		constexpr auto	EPSILON = 1e-8;
 

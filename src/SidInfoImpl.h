@@ -35,7 +35,7 @@ class SidInfoImpl final : public SidInfo
 {
 public:
 	const std::string	m_name = "libsidplayEZ";
-	const std::string	m_version = "2.9.0";
+	const std::string	m_version = "2.12.0";
 
 	std::vector<std::string>	m_credits = {
 		m_name + " " + m_version + " Engine:\n",

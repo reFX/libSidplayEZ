@@ -21,17 +21,19 @@
 
 #include <stdint.h>
 
+#include "helpers.h"
+
 // Set the lo byte (8 bit) in a word (16 bit)
-inline void set_16lo8 ( uint16_t& word, uint8_t byte )		{	word = ( word & 0xff00 ) | byte;	}
+sidinline void set_16lo8 ( uint16_t& word, uint8_t byte )		{	word = ( word & 0xff00 ) | byte;	}
 
 // Get the lo byte (8 bit) in a word (16 bit)
-[[ nodiscard ]] inline uint8_t get_16lo8 ( uint16_t word )	{	return uint8_t ( word );			}
+[[ nodiscard ]] sidinline uint8_t get_16lo8 ( uint16_t word )	{	return uint8_t ( word );			}
 
 // Set the hi byte (8 bit) in a word (16 bit)
-inline void set_16hi8 ( uint16_t& word, uint8_t byte )		{	word = ( word & 0x00FF ) | uint16_t ( byte << 8 );	}
+sidinline void set_16hi8 ( uint16_t& word, uint8_t byte )		{	word = ( word & 0x00FF ) | uint16_t ( byte << 8 );	}
 
 // Get the hi byte (8 bit) in a word (16 bit)
-[[ nodiscard ]] inline uint8_t get_16hi8 ( uint16_t word )	{	return uint8_t ( word >> 8 );		}
+[[ nodiscard ]] sidinline uint8_t get_16hi8 ( uint16_t word )	{	return uint8_t ( word >> 8 );		}
 
 // Convert high-byte and low-byte to 16-bit little endian word
-[[ nodiscard ]] inline uint16_t get_little16 ( const uint8_t ptr[ 2 ] )	{	return uint16_t ( ( ptr[ 1 ] << 8 ) | ptr[ 0 ] );	}
+[[ nodiscard ]] sidinline uint16_t get_little16 ( const uint8_t ptr[ 2 ] )	{	return uint16_t ( ( ptr[ 1 ] << 8 ) | ptr[ 0 ] );	}

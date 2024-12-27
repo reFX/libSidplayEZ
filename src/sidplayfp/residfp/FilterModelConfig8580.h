@@ -49,10 +49,10 @@ private:
 public:
 	FilterModelConfig8580 ();
 
-	static FilterModelConfig8580* getInstance ();
+	[[ nodiscard ]] static FilterModelConfig8580* getInstance ();
 
 public:
-	[[ nodiscard ]] inline constexpr double getVref () const { return Vref * VOLTAGE_SKEW; }
+	[[ nodiscard ]] sidinline constexpr double getVref () const { return Vref * VOLTAGE_SKEW; }
 };
 
 } // namespace reSIDfp

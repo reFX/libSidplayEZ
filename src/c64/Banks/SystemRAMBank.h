@@ -25,6 +25,8 @@
 
 #include "Bank.h"
 
+#include "../../helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -65,8 +67,8 @@ public:
 		}
 	}
 
-	uint8_t peek ( uint16_t address ) override				{	return ram[ address ];	}
-	void poke ( uint16_t address, uint8_t value ) override	{	ram[ address ] = value;	}
+	sidinline uint8_t peek ( uint16_t address ) override				{	return ram[ address ];	}
+	sidinline void poke ( uint16_t address, uint8_t value ) override	{	ram[ address ] = value;	}
 };
 
 }

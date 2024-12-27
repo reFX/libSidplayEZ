@@ -55,12 +55,12 @@ public:
 		s2.setup ( intermediateFrequency, samplingFrequency, halfFreq );
 	}
 
-	inline bool input ( const int sample )
+	[[ nodiscard ]] sidinline bool input ( const int sample )
 	{
 		return s1.input ( sample ) && s2.input ( s1.output () );
 	}
 
-	inline int16_t output ( const int scaleFactor ) const
+	[[ nodiscard ]] sidinline int16_t output ( const int scaleFactor ) const
 	{
 		/*
 		* Clip the input as it may overflow the 16 bit range.

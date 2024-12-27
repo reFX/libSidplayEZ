@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <cstdio>
 
+#include "../c64cpu.h"
+
 #include "flags.h"
 #include "../../EventCallback.h"
 #include "../../EventScheduler.h"
@@ -33,13 +35,6 @@ class EventContext;
 namespace libsidplayfp
 {
 
-class CPUDataBus
-{
-public:
-	virtual ~CPUDataBus () = default;
-	virtual uint8_t cpuRead ( uint16_t addr ) = 0;
-	virtual void cpuWrite ( uint16_t addr, uint8_t data ) = 0;
-};
 /**
 * Cycle-exact 6502/6510 emulation core.
 *
@@ -81,7 +76,7 @@ private:
 	EventScheduler& eventScheduler;
 
 	/// Data bus
-	CPUDataBus&		dataBus;
+	c64cpubus&		dataBus;
 
 	/// Current instruction and subcycle within instruction
 	int cycleCount;
@@ -138,127 +133,127 @@ private:
 
 	FastEventCallback<MOS6510, &MOS6510::removeIRQ>				clearInt;
 
-	inline void Initialise ();
+	sidinline void Initialise ();
 
 	// Declare Interrupt Routines
-	inline void IRQLoRequest ();
-	inline void IRQHiRequest ();
-	inline void interruptsAndNextOpcode ();
-	inline void calculateInterruptTriggerCycle ();
+	sidinline void IRQLoRequest ();
+	sidinline void IRQHiRequest ();
+	sidinline void interruptsAndNextOpcode ();
+	sidinline void calculateInterruptTriggerCycle ();
 
 	// Declare Instruction Routines
-	inline void fetchNextOpcode ();
-	inline void throwAwayFetch ();
-	inline void throwAwayRead ();
-	inline void FetchDataByte ();
-	inline void FetchLowAddr ();
-	inline void FetchLowAddrX ();
-	inline void FetchLowAddrY ();
-	inline void FetchHighAddr ();
-	inline void FetchHighAddrX ();
-	inline void FetchHighAddrX2 ();
-	inline void FetchHighAddrY ();
-	inline void FetchHighAddrY2 ();
-	inline void FetchLowEffAddr ();
-	inline void FetchHighEffAddr ();
-	inline void FetchHighEffAddrY ();
-	inline void FetchHighEffAddrY2 ();
-	inline void FetchLowPointer ();
-	inline void FetchLowPointerX ();
-	inline void FetchHighPointer ();
-	inline void FetchEffAddrDataByte ();
-	inline void PutEffAddrDataByte ();
-	inline void PushLowPC ();
-	inline void PushHighPC ();
-	inline void PushSR ();
-	inline void PopLowPC ();
-	inline void PopHighPC ();
-	inline void PopSR ();
-	inline void brkPushLowPC ();
-	inline void WasteCycle ();
+	sidinline void fetchNextOpcode ();
+	sidinline void throwAwayFetch ();
+	sidinline void throwAwayRead ();
+	sidinline void FetchDataByte ();
+	sidinline void FetchLowAddr ();
+	sidinline void FetchLowAddrX ();
+	sidinline void FetchLowAddrY ();
+	sidinline void FetchHighAddr ();
+	sidinline void FetchHighAddrX ();
+	sidinline void FetchHighAddrX2 ();
+	sidinline void FetchHighAddrY ();
+	sidinline void FetchHighAddrY2 ();
+	sidinline void FetchLowEffAddr ();
+	sidinline void FetchHighEffAddr ();
+	sidinline void FetchHighEffAddrY ();
+	sidinline void FetchHighEffAddrY2 ();
+	sidinline void FetchLowPointer ();
+	sidinline void FetchLowPointerX ();
+	sidinline void FetchHighPointer ();
+	sidinline void FetchEffAddrDataByte ();
+	sidinline void PutEffAddrDataByte ();
+	sidinline void PushLowPC ();
+	sidinline void PushHighPC ();
+	sidinline void PushSR ();
+	sidinline void PopLowPC ();
+	sidinline void PopHighPC ();
+	sidinline void PopSR ();
+	sidinline void brkPushLowPC ();
+	sidinline void WasteCycle ();
 
-	inline void Push ( uint8_t data );
-	inline uint8_t Pop ();
-	inline void compare ( uint8_t data );
+	sidinline void Push ( uint8_t data );
+	sidinline uint8_t Pop ();
+	sidinline void compare ( uint8_t data );
 
 	// Delcare Instruction Operation Routines
-	inline void adc_instr ();
-	inline void alr_instr ();
-	inline void anc_instr ();
-	inline void and_instr ();
-	inline void ane_instr ();
-	inline void arr_instr ();
-	inline void asl_instr ();
-	inline void asla_instr ();
-	inline void aso_instr ();
-	inline void axa_instr ();
-	inline void axs_instr ();
-	inline void bcc_instr ();
-	inline void bcs_instr ();
-	inline void beq_instr ();
-	inline void bit_instr ();
-	inline void bmi_instr ();
-	inline void bne_instr ();
-	inline void branch_instr ( bool condition );
-	inline void fix_branch ();
-	inline void bpl_instr ();
-	inline void bvc_instr ();
-	inline void bvs_instr ();
-	inline void clc_instr ();
-	inline void cld_instr ();
-	inline void cli_instr ();
-	inline void clv_instr ();
-	inline void cmp_instr ();
-	inline void cpx_instr ();
-	inline void cpy_instr ();
-	inline void dcm_instr ();
-	inline void dec_instr ();
-	inline void dex_instr ();
-	inline void dey_instr ();
-	inline void eor_instr ();
-	inline void inc_instr ();
-	inline void ins_instr ();
-	inline void inx_instr ();
-	inline void iny_instr ();
-	inline void jmp_instr ();
-	inline void las_instr ();
-	inline void lax_instr ();
-	inline void lda_instr ();
-	inline void ldx_instr ();
-	inline void ldy_instr ();
-	inline void lse_instr ();
-	inline void lsr_instr ();
-	inline void lsra_instr ();
-	inline void oal_instr ();
-	inline void ora_instr ();
-	inline void pha_instr ();
-	inline void pla_instr ();
-	inline void rla_instr ();
-	inline void rol_instr ();
-	inline void rola_instr ();
-	inline void ror_instr ();
-	inline void rora_instr ();
-	inline void rra_instr ();
-	inline void rti_instr ();
-	inline void rts_instr ();
-	inline void sbx_instr ();
-	inline void say_instr ();
-	inline void sbc_instr ();
-	inline void sec_instr ();
-	inline void sed_instr ();
-	inline void sei_instr ();
-	inline void shs_instr ();
-	inline void sta_instr ();
-	inline void stx_instr ();
-	inline void sty_instr ();
-	inline void tax_instr ();
-	inline void tay_instr ();
-	inline void tsx_instr ();
-	inline void txa_instr ();
-	inline void txs_instr ();
-	inline void tya_instr ();
-	inline void xas_instr ();
-	inline void sh_instr ();
+	sidinline void adc_instr ();
+	sidinline void alr_instr ();
+	sidinline void anc_instr ();
+	sidinline void and_instr ();
+	sidinline void ane_instr ();
+	sidinline void arr_instr ();
+	sidinline void asl_instr ();
+	sidinline void asla_instr ();
+	sidinline void aso_instr ();
+	sidinline void axa_instr ();
+	sidinline void axs_instr ();
+	sidinline void bcc_instr ();
+	sidinline void bcs_instr ();
+	sidinline void beq_instr ();
+	sidinline void bit_instr ();
+	sidinline void bmi_instr ();
+	sidinline void bne_instr ();
+	sidinline void branch_instr ( bool condition );
+	sidinline void fix_branch ();
+	sidinline void bpl_instr ();
+	sidinline void bvc_instr ();
+	sidinline void bvs_instr ();
+	sidinline void clc_instr ();
+	sidinline void cld_instr ();
+	sidinline void cli_instr ();
+	sidinline void clv_instr ();
+	sidinline void cmp_instr ();
+	sidinline void cpx_instr ();
+	sidinline void cpy_instr ();
+	sidinline void dcm_instr ();
+	sidinline void dec_instr ();
+	sidinline void dex_instr ();
+	sidinline void dey_instr ();
+	sidinline void eor_instr ();
+	sidinline void inc_instr ();
+	sidinline void ins_instr ();
+	sidinline void inx_instr ();
+	sidinline void iny_instr ();
+	sidinline void jmp_instr ();
+	sidinline void las_instr ();
+	sidinline void lax_instr ();
+	sidinline void lda_instr ();
+	sidinline void ldx_instr ();
+	sidinline void ldy_instr ();
+	sidinline void lse_instr ();
+	sidinline void lsr_instr ();
+	sidinline void lsra_instr ();
+	sidinline void oal_instr ();
+	sidinline void ora_instr ();
+	sidinline void pha_instr ();
+	sidinline void pla_instr ();
+	sidinline void rla_instr ();
+	sidinline void rol_instr ();
+	sidinline void rola_instr ();
+	sidinline void ror_instr ();
+	sidinline void rora_instr ();
+	sidinline void rra_instr ();
+	sidinline void rti_instr ();
+	sidinline void rts_instr ();
+	sidinline void sbx_instr ();
+	sidinline void say_instr ();
+	sidinline void sbc_instr ();
+	sidinline void sec_instr ();
+	sidinline void sed_instr ();
+	sidinline void sei_instr ();
+	sidinline void shs_instr ();
+	sidinline void sta_instr ();
+	sidinline void stx_instr ();
+	sidinline void sty_instr ();
+	sidinline void tax_instr ();
+	sidinline void tay_instr ();
+	sidinline void tsx_instr ();
+	sidinline void txa_instr ();
+	sidinline void txs_instr ();
+	sidinline void tya_instr ();
+	sidinline void xas_instr ();
+	sidinline void sh_instr ();
 
 	/**
 	* @throws haltInstruction
@@ -266,15 +261,15 @@ private:
 	void invalidOpcode ();
 
 	// Declare Arithmetic Operations
-	inline void doADC ();
-	inline void doSBC ();
+	sidinline void doADC ();
+	sidinline void doSBC ();
 
-	inline bool checkInterrupts () const { return rstFlag || nmiFlag || ( irqAssertedOnPin && !flags.getI () ); }
+	sidinline bool checkInterrupts () const { return rstFlag || nmiFlag || ( irqAssertedOnPin && !flags.getI () ); }
 
-	inline void buildInstructionTable ();
+	sidinline void buildInstructionTable ();
 
 public:
-	MOS6510 ( EventScheduler& scheduler, CPUDataBus& bus );
+	MOS6510 ( EventScheduler& scheduler, c64cpubus& bus );
 	~MOS6510 () = default;
 
 	/**
@@ -283,7 +278,7 @@ public:
 	* @param address
 	* @return data byte CPU requested
 	*/
-	inline uint8_t cpuRead ( uint16_t addr )					{	return dataBus.cpuRead ( addr );	}
+	sidinline uint8_t cpuRead ( uint16_t addr )					{	return dataBus.cpuRead ( addr );	}
 
 	/**
 	* Write data to system environment.
@@ -291,7 +286,7 @@ public:
 	* @param address
 	* @param data
 	*/
-	inline void cpuWrite ( uint_least16_t addr, uint8_t data )	{	dataBus.cpuWrite ( addr, data );	}
+	sidinline void cpuWrite ( uint16_t addr, uint8_t data )		{	dataBus.cpuWrite ( addr, data );	}
 
 	void reset ();
 

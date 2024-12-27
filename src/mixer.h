@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include "helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -143,7 +145,7 @@ public:
 	* @param i the number of the SID to get
 	* @return a pointer to the requested sid emu or 0 if not found
 	*/
-	[[ nodiscard ]] inline sidemu* getSid ( int i ) const { return ( i < int ( m_chips.size () ) ) ? m_chips[ i ] : nullptr; }
+	[[ nodiscard ]] sidinline sidemu* getSid ( int i ) const { return ( i < int ( m_chips.size () ) ) ? m_chips[ i ] : nullptr; }
 
 	/**
 	* Set mixing mode.
@@ -162,19 +164,19 @@ public:
 	/**
 	* Check if the buffer have been filled
 	*/
-	[[ nodiscard ]] inline bool notFinished () const { return m_sampleIndex < m_sampleCount; }
+	[[ nodiscard ]] sidinline bool notFinished () const { return m_sampleIndex < m_sampleCount; }
 
 	/**
 	* Get the number of samples generated up to now
 	*/
-	[[ nodiscard ]] inline uint32_t samplesGenerated () const { return m_sampleIndex; }
+	[[ nodiscard ]] sidinline uint32_t samplesGenerated () const { return m_sampleIndex; }
 
 	/*
 	 * Wait till we consume the buffer.
 	 */
-	[[ nodiscard ]] inline bool wait () const { return m_wait; }
+	[[ nodiscard ]] sidinline bool wait () const { return m_wait; }
 
-	[[ nodiscard ]] int getNumChips () const { return int ( m_chips.size () ); }
+	[[ nodiscard ]] sidinline int getNumChips () const { return int ( m_chips.size () ); }
 };
 
 }

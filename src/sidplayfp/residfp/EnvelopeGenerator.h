@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include "../../helpers.h"
+
 namespace reSIDfp
 {
 /**
@@ -153,7 +155,7 @@ public:
 	/**
 	* Get the Envelope Generator digital output.
 	*/
-	unsigned int output () const { return envelope_counter; }
+	[[ nodiscard ]] sidinline unsigned int output () const { return envelope_counter; }
 
 	/**
 	* SID reset.
@@ -189,11 +191,11 @@ public:
 	*
 	* @return envelope counter value
 	*/
-	uint8_t readENV () const { return env3; }
+	sidinline uint8_t readENV () const { return env3; }
 };
 //-----------------------------------------------------------------------------
 
-inline void EnvelopeGenerator::clock ()
+sidinline void EnvelopeGenerator::clock ()
 {
 	env3 = envelope_counter;
 
@@ -326,7 +328,7 @@ inline void EnvelopeGenerator::clock ()
 *  1 - Nothing
 *  2 - Counter is disabled
 */
-inline void EnvelopeGenerator::state_change ()
+sidinline void EnvelopeGenerator::state_change ()
 {
 	state_pipeline--;
 
@@ -367,7 +369,7 @@ inline void EnvelopeGenerator::state_change ()
 }
 //-----------------------------------------------------------------------------
 
-inline void EnvelopeGenerator::set_exponential_counter ()
+sidinline void EnvelopeGenerator::set_exponential_counter ()
 {
 	// Check for change of exponential counter period.
 	//

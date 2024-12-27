@@ -64,7 +64,7 @@ public:
 	* @param ringModulator Ring-modulator for waveform
 	* @return the voice analog output
 	*/
-	inline float output ( WaveformGenerator& ringModulator )
+	sidinline float output ( WaveformGenerator& ringModulator )
 	{
 		auto	wav = waveformGenerator.output ( ringModulator );
 		auto	env = envelopeGenerator.output ();

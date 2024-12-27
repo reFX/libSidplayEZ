@@ -25,6 +25,8 @@
 
 #include "../../sidemu.h"
 
+#include "../../helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -55,8 +57,8 @@ public:
 
 	void resetSIDMapper ( Bank* bank )					{	std::fill_n ( mapper, MAPPER_SIZE, bank );	}
 
-	uint8_t peek ( uint16_t addr ) override				{	return mapper[ addr >> 5 & ( MAPPER_SIZE - 1 ) ]->peek ( addr );	}
-	void poke ( uint16_t addr, uint8_t data ) override	{	mapper[ addr >> 5 & ( MAPPER_SIZE - 1 ) ]->poke ( addr, data );		}
+	sidinline uint8_t peek ( uint16_t addr ) override				{	return mapper[ addr >> 5 & ( MAPPER_SIZE - 1 ) ]->peek ( addr );	}
+	sidinline void poke ( uint16_t addr, uint8_t data ) override	{	mapper[ addr >> 5 & ( MAPPER_SIZE - 1 ) ]->poke ( addr, data );		}
 
 	/**
 	* Set SID emulation.

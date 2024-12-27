@@ -31,6 +31,8 @@
 
 #include "sidplayfp/residfp/SID.h"
 
+#include "helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -46,12 +48,12 @@ private:
 
 public:
 	// Bank functions
-	void poke ( uint16_t address, uint8_t value ) override
+	sidinline void poke ( uint16_t address, uint8_t value ) override
 	{
 		lastpoke[ address & 0x1f ] = value;
 		write ( address & 0x1f, value );
 	}
-	uint8_t peek ( uint16_t address ) override { return read ( address & 0x1f ); }
+	sidinline uint8_t peek ( uint16_t address ) override { return read ( address & 0x1f ); }
 
 	void getStatus ( uint8_t regs[ 0x20 ] ) const { std::copy_n ( lastpoke, std::size ( lastpoke ), regs ); }
 
@@ -81,7 +83,7 @@ public:
 	/**
 	* Clock the SID chip
 	*/
-	inline void clock ()
+	sidinline void clock ()
 	{
 		const event_clock_t	cycles = eventScheduler.getTime ( EVENT_CLOCK_PHI1 ) - m_accessClk;
 		m_accessClk += cycles;
@@ -106,8 +108,8 @@ public:
 	*/
 	[[ nodiscard ]] const char* error () const { return m_error.c_str (); }
 
-	[[ nodiscard ]] inline uint8_t read ( uint8_t addr ) 		{	clock ();	return m_sid.read ( addr );	}
-	inline void write ( uint8_t addr, uint8_t data ) 			{	clock ();	m_sid.write ( addr, data );	}
+	[[ nodiscard ]] sidinline uint8_t read ( uint8_t addr ) 		{	clock ();	return m_sid.read ( addr );	}
+	sidinline void write ( uint8_t addr, uint8_t data ) 			{	clock ();	m_sid.write ( addr, data );	}
 
 	void combinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold )	{	m_sid.setCombinedWaveforms ( cws, threshold );	}
 
@@ -124,7 +126,7 @@ public:
 	/**
 	* Get the current position in buffer.
 	*/
-	[[ nodiscard ]] inline int bufferpos () const { return m_bufferpos; }
+	[[ nodiscard ]] sidinline int bufferpos () const { return m_bufferpos; }
 
 	/**
 	* Set the position in buffer.

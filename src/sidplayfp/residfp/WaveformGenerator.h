@@ -23,6 +23,8 @@
 
 #include <vector>
 
+#include "../../helpers.h"
+
 namespace reSIDfp
 {
 
@@ -168,7 +170,7 @@ public:
 	/**
 	* SID clocking.
 	*/
-	inline void clock ()
+	sidinline void clock ()
 	{
 		if ( test )
 		{
@@ -280,7 +282,7 @@ public:
 	* @param ringModulator The oscillator ring-modulating current one.
 	* @return the waveform generator digital output
 	*/
-	inline unsigned int output ( const WaveformGenerator& ringModulator )
+	sidinline unsigned int output ( const WaveformGenerator& ringModulator )
 	{
 		// Set output value.
 		if ( waveform )
@@ -295,7 +297,7 @@ public:
 
 			// Triangle/Sawtooth output is delayed half cycle on 8580
 			// This will appear as a one cycle delay on OSC3 as it is latched in the first phase of the clock
-			if ( ( waveform & 3 ) && ! is6581 )
+			if ( ( waveform & 3 ) && !is6581 )
 			{
 				osc3 = tri_saw_pipeline & ( no_pulse | pulse_output ) & no_noise_or_noise_output;
 				if ( pulldown )
@@ -353,27 +355,27 @@ public:
 	/**
 	* Read OSC3 value.
 	*/
-	uint8_t readOSC () const { return uint8_t ( osc3 >> 4 ); }
+	sidinline uint8_t readOSC () const { return uint8_t ( osc3 >> 4 ); }
 
 	/**
 	* Read accumulator value.
 	*/
-	unsigned int readAccumulator () const { return accumulator; }
+	sidinline unsigned int readAccumulator () const { return accumulator; }
 
 	/**
 	* Read freq value.
 	*/
-	unsigned int readFreq () const { return freq; }
+	sidinline unsigned int readFreq () const { return freq; }
 
 	/**
 	* Read test value.
 	*/
-	bool readTest () const { return test; }
+	sidinline bool readTest () const { return test; }
 
 	/**
 	* Read sync value.
 	*/
-	bool readSync () const { return sync; }
+	sidinline bool readSync () const { return sync; }
 };
 
 

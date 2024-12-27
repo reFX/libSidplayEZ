@@ -286,7 +286,7 @@ protected:
 public:
 	Filter8580 ();
 
-	[[ nodiscard ]] inline uint16_t clock ( int voice1, int voice2, int voice3 ) override
+	[[ nodiscard ]] sidinline uint16_t clock ( int voice1, int voice2, int voice3 ) override
 	{
 		// index 0 = unfiltered, index 1 = filtered
 		int		Vsum[ 2 ] = { 0, 0 };

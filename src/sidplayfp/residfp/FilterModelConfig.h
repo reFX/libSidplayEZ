@@ -155,12 +155,12 @@ public:
 
 	void setVoiceDCVoltage ( double voltage );
 
-	[[ nodiscard ]] inline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }
-	[[ nodiscard ]] inline double getVddt () const { return Vddt; }
-	[[ nodiscard ]] inline double getVth () const { return Vth; }
+	[[ nodiscard ]] sidinline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }
+	[[ nodiscard ]] sidinline double getVddt () const { return Vddt; }
+	[[ nodiscard ]] sidinline double getVth () const { return Vth; }
 
 	// helper functions
-	[[ nodiscard ]] inline uint16_t getNormalizedValue ( double value ) const
+	[[ nodiscard ]] sidinline uint16_t getNormalizedValue ( double value ) const
 	{
 		const auto	tmp = N16 * ( value - vmin );
 
@@ -171,21 +171,21 @@ public:
 		return uint16_t ( tmp + 0.5 );
 	}
 
-	[[ nodiscard ]] inline uint16_t getNormalizedCurrentFactor ( double wl ) const
+	[[ nodiscard ]] sidinline uint16_t getNormalizedCurrentFactor ( double wl ) const
 	{
 		const auto	tmp = ( 1 << 13 ) * currFactorCoeff * wl;
 		assert ( tmp > -0.5 && tmp < 65535.5 );
 		return uint16_t ( tmp + 0.5 );
 	}
 
-	[[ nodiscard ]] inline uint16_t getNVmin () const
+	[[ nodiscard ]] sidinline uint16_t getNVmin () const
 	{
 		const auto	tmp = N16 * vmin;
 		assert ( tmp > -0.5 && tmp < 65535.5 );
 		return uint16_t ( tmp + 0.5 );
 	}
 
-	[[ nodiscard ]] inline int getNormalizedVoice ( float value, unsigned int env ) const
+	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const
 	{
 		const auto	tmp = N16 * ( ( value * voice_voltage_range + voiceDC[ env ] ) - vmin );
 

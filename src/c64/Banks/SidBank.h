@@ -23,6 +23,8 @@
 #include "Bank.h"
 #include "../../sidemu.h"
 
+#include "../../helpers.h"
+
 namespace libsidplayfp
 {
 
@@ -36,8 +38,8 @@ class SidBank final : public Bank
 public:
 	void reset () {	sid->reset ( 0xf );	}
 
-	uint8_t peek ( uint16_t addr ) override { return sid->peek ( addr ); }
-	void poke ( uint16_t addr, uint8_t data ) override { sid->poke ( addr, data ); }
+	sidinline uint8_t peek ( uint16_t addr ) override { return sid->peek ( addr ); }
+	sidinline void poke ( uint16_t addr, uint8_t data ) override { sid->poke ( addr, data ); }
 
 	/**
 	* Set SID emulation.
