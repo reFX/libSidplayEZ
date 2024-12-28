@@ -32,8 +32,6 @@ Filter6581::Filter6581 ()
 	, hpIntegrator ( FilterModelConfig6581::getInstance () )
 	, bpIntegrator ( FilterModelConfig6581::getInstance () )
 {
-	setDigiVolume ( 1.0f );
-
 	setFilterCurve ( 0.5f );
 
 	hpIntegrator.solve ( 16384 );
@@ -66,8 +64,12 @@ void Filter6581::setFilterRange ( double adjustment )
 
 void Filter6581::setDigiVolume ( double adjustment )
 {
-	constexpr auto range = int ( 32767 * 0.75 );
-	input ( int16_t ( int ( adjustment * range ) - range ) );
+	auto remap = [] ( double val, double in1, double in2, int out1, int out2 )
+	{
+		return int ( double ( out1 ) + ( val - in1 ) * double ( out2 - out1 ) / ( in2 - in1 ) );
+	};
+
+	Ve = remap ( adjustment, 0.0, 2.0, 36000, 20000 );
 }
 //-----------------------------------------------------------------------------
 

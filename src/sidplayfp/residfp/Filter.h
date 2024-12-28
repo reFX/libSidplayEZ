@@ -84,7 +84,7 @@ protected:
 	sidinline void updateMixing ()
 	{
 		// Voice 3 is silenced by voice3off if it is not routed through the filter
-		voice3Mask = ( filterModeRouting & 0x84 ) == 0x80 ? 0 : -1;
+		voice3Mask = ( filterModeRouting & 0x84 ) == 0x80 ? 0 : UINT_MAX;
 
 		const auto	Nsum_Nmix = sumFltResults[ filterModeRouting ];
 
@@ -147,9 +147,10 @@ public:
 	*
 	* @param input a signed 16 bit sample
 	*/
-	void input ( int16_t _input )	{ Ve = fmc.getNormalizedVoice ( _input / 32768.0f,  0 ); }
+	void input ( int16_t _input ) { Ve = fmc.getNormalizedVoice ( _input / 32768.0f, 0 ); }
 
 	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const { return fmc.getNormalizedVoice ( value, env ); }
 };
+//-----------------------------------------------------------------------------
 
 } // namespace reSIDfp

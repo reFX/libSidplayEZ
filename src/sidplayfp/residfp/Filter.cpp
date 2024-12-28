@@ -51,12 +51,12 @@ Filter::Filter ( FilterModelConfig& _fmc )
 		sumFltResults[ i ] = uint8_t ( Nsum | Nmix );
 	}
 
-	input ( 0 );
-
 	mixer = fmc.getMixer ();
 	summer = fmc.getSummer ();
 	volume = fmc.getVolume ();
 	resonance = fmc.getResonance ();
+
+	input ( 0 );
 }
 //-----------------------------------------------------------------------------
 

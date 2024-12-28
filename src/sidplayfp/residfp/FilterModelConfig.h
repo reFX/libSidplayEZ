@@ -89,8 +89,8 @@ protected:
 	uint16_t	opamp_rev[ 1 << 16 ];	//-V730_NOINIT this is initialized in the derived class constructor
 
 private:
-// 	double			rndBuffer[ 1024 ];
-// 	mutable int		rndIndex = 0;
+ 	double			rndBuffer[ 4096 ];
+ 	mutable int		rndIndex = 0;
 
 	FilterModelConfig ( const FilterModelConfig& ) = delete;
 	FilterModelConfig& operator= ( const FilterModelConfig& ) = delete;
@@ -134,32 +134,33 @@ public:
 	// helper functions
 	[[ nodiscard ]] sidinline uint16_t getNormalizedValue ( double value ) const
 	{
-		const auto	tmp = N16 * ( value - vmin );
+		// This function does not get called in real-time, so we can afford to be a bit more accurate
+		const auto	tmp = N16 * ( value - vmin ) + rndBuffer[ rndIndex++ & 4095 ];
 
- 		assert ( tmp > -0.5 && tmp < 65535.5 );
- 		return uint16_t ( tmp + 0.5 );
+ 		assert ( tmp >= 0.0 && tmp < 65536.0 );
+ 		return uint16_t ( tmp );
 	}
 
 	[[ nodiscard ]] sidinline uint16_t getNormalizedCurrentFactor ( double wl ) const
 	{
 		const auto	tmp = ( 1 << 13 ) * currFactorCoeff * wl;
-		assert ( tmp > -0.5 && tmp < 65535.5 );
-		return uint16_t ( tmp + 0.5 );
+		assert ( tmp >= 0.0 && tmp < 65536.0 );
+		return uint16_t ( tmp );
 	}
 
 	[[ nodiscard ]] sidinline uint16_t getNVmin () const
 	{
 		const auto	tmp = N16 * vmin;
-		assert ( tmp > -0.5 && tmp < 65535.5 );
-		return uint16_t ( tmp + 0.5 );
+		assert ( tmp >= 0.0 && tmp < 65536.0 );
+		return uint16_t ( tmp );
 	}
 
 	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const
 	{
- 		const auto	tmp = N16 * ( ( value * voice_voltage_range + voiceDC[ env ] ) - vmin );
- 
- 		assert ( tmp > -0.5 && tmp < 65535.5 );
- 		return int ( tmp + 0.5 );
+		const auto	tmp = N16 * ( ( value * voice_voltage_range + voiceDC[ env ] ) - vmin );
+
+ 		assert ( tmp >= 0.0 && tmp < 65536.0 );
+ 		return int ( tmp );
 	}
 };
 

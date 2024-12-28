@@ -39,14 +39,14 @@ FilterModelConfig::FilterModelConfig ( double vvr, double c, double vdd, double 
 	, N16 ( norm * ( ( 1 << 16 ) - 1 ) )
 	, voice_voltage_range ( vvr )
 {
-// 	// Generate random noise for dithering
-// 	{
-// 		std::uniform_real_distribution<double> unif ( 0.0, 1.0 );
-// 		std::default_random_engine	re;
-// 
-// 		for ( auto& buf : rndBuffer )
-// 			buf = unif ( re );
-// 	}
+	// Generate random noise for dithering
+	{
+		std::uniform_real_distribution<double>	unif ( 0.0, 1.0 );
+		std::default_random_engine		re;
+
+		for ( auto& buf : rndBuffer )
+			buf = unif ( re );
+	}
 
 	setUCox ( ucox );
 
