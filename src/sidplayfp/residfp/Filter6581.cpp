@@ -34,8 +34,9 @@ Filter6581::Filter6581 ()
 {
 	setFilterCurve ( 0.5f );
 
-	hpIntegrator.solve ( 16384 );
-	bpIntegrator.solve ( 16384 );
+	updatedCenterFrequency ();
+	hpIntegrator.solve ( 0 );
+	bpIntegrator.solve ( 0 );
 }
 //-----------------------------------------------------------------------------
 

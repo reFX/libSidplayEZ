@@ -21,7 +21,7 @@
 { "Falco Paul",							{	.folder = "/MUSICIANS/0-9/20CC/Paul_Falco/",		.filter = 0.15	} },
 { "Figge Wasberger (Fegolhuzz)",		{	.folder = "/MUSICIANS/F/Fegolhuzz/",				.filter = 0.25	} },
 { "Fred Gray",							{	.folder = "/MUSICIANS/G/Gray_Fred/",				.filter = 0.4,	.zeroDac = 0.1	} },
-{ "Geir Tjelta",						{	.folder = "/MUSICIANS/T/Tjelta_Geir/",				.filter = 0.5,	.digi = 1.5		} },
+{ "Geir Tjelta",						{	.folder = "/MUSICIANS/T/Tjelta_Geir/",				.filter = 0.5,	.digi = 0.4		} },
 { "Georg Feil",							{	.folder = "/MUSICIANS/F/Feil_Georg/",				.filter = 0.2	} },
 { "Glenn Gallefoos",					{	.folder = "/MUSICIANS/B/Blues_Muz/Gallefoss_Glenn/",.filter = 1.3,	.zeroDac = 0.5	} },
 { "Jason Page",							{	.folder = "/MUSICIANS/P/Page_Jason/",				.filter = 0.35	} },

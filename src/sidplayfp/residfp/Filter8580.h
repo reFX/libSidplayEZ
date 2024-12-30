@@ -295,7 +295,7 @@ public:
 		{
 			const auto	fltMd = filterModeRouting & 0xF;
 
-			Vsum[ fltMd & 1 ]			+= voice1;
+			Vsum[ fltMd & 1 ]			= voice1;
 			Vsum[ ( fltMd >> 1 ) & 1 ]	+= voice2;
 			Vsum[ ( fltMd >> 2 ) & 1 ]	+= voice3 & voice3Mask;
 			Vsum[ fltMd >> 3 ]			+= Ve;

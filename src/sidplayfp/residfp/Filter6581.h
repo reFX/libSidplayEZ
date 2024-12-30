@@ -343,7 +343,7 @@ public:
 		{
 			const auto	fltMd = filterModeRouting & 0xF;
 
-			Vsum[ fltMd & 1 ]			+= voice1;
+			Vsum[ fltMd & 1 ]			= voice1;
 			Vsum[ ( fltMd >> 1 ) & 1 ]	+= voice2;
 			Vsum[ ( fltMd >> 2 ) & 1 ]	+= voice3 & voice3Mask;
 			Vsum[ fltMd >> 3 ]			+= Ve;
@@ -359,11 +359,11 @@ public:
 		// Mix filter outputs
 		{
 			const auto		fltMd = ( ( filterModeRouting >> 4 ) & 7 ) ^ 7;
-			constexpr auto	multiplier = int ( 0.9 * ( 1 << 8 ) );
+			constexpr auto	filterGain = int ( 0.92 * ( 1 << 12 ) );
 
-			Vsum[ fltMd & 1 ]			+= ( Vlp * multiplier ) >> 8;
-			Vsum[ ( fltMd >> 1 ) & 1 ]	+= ( Vbp * multiplier ) >> 8;
-			Vsum[ fltMd >> 2 ]			+= ( Vhp * multiplier ) >> 8;
+ 			Vsum[ fltMd & 1 ]			+= ( Vlp * filterGain ) >> 12;
+ 			Vsum[ ( fltMd >> 1 ) & 1 ]	+= ( Vbp * filterGain ) >> 12;
+			Vsum[ fltMd >> 2 ]			+= ( Vhp * filterGain ) >> 12;
 		}
 
 		return currentVolume[ currentMixer[ Vsum[ 0 ] ] ];

@@ -98,9 +98,8 @@ private:
 	// Last written value
 	uint8_t	busValue;
 
-	// Last written FC/LO/HI
-	uint8_t	lastFC_LO = 0;
-	uint8_t	lastFC_HI = 0;
+	// Last written filter related values
+	uint8_t	lastRegs[ 32 ] = {};
 
 	/**
 	* Emulated nonlinearity of the envelope DAC
@@ -142,7 +141,7 @@ private:
 	*
 	* @param sync whether to do the actual voice synchronization
 	*/
-	sidinline void voiceSync ( bool sync )
+	sidinline void voiceSync ( const bool sync )
 	{
 		// Synchronize the 3 waveform generators
 		if ( sync )
@@ -267,7 +266,7 @@ public:
 	* @param buf audio output buffer
 	* @return number of samples produced
 	*/
-	inline __attribute__((always_inline)) int clock ( unsigned int cycles, int16_t* buf )
+	sidinline int clock ( unsigned int cycles, int16_t* buf )
 	{
 		// ageBusValue
 		if ( busValueTtl )
@@ -280,7 +279,6 @@ public:
 		}
 
 		auto    s = 0;
-
 		while ( cycles )
 		{
 			if ( auto delta_t = std::min ( nextVoiceSync, cycles ); delta_t > 0 )

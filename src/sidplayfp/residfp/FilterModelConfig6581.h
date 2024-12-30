@@ -83,8 +83,8 @@ public:
 	[[ nodiscard ]] uint16_t* getDAC ( double adjustment ) const;
 	[[ nodiscard ]] double getWL_snake () const { return WL_snake; }
 
-	[[ nodiscard ]] sidinline uint16_t getVcr_nVg ( const int i ) const { return vcr_nVg[ i ]; }
-	[[ nodiscard ]] sidinline uint16_t getVcr_n_Ids_term ( const int i ) const	{	return uint16_t ( vcr_n_Ids_term[ i ] * uCox /* + 0.5 */ ); }
+	[[ nodiscard ]] sidinline uint16_t getVcr_nVg ( const int i )		 const	{	return vcr_nVg[ i ]; }
+	[[ nodiscard ]] sidinline uint16_t getVcr_n_Ids_term ( const int i ) const	{	return uint16_t ( vcr_n_Ids_term[ i ] * uCox ); }
 
 	#if 0
 		[[ nodiscard ]] sidinline double getUt () const { return Ut; }
