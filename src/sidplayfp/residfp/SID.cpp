@@ -140,15 +140,15 @@ void SID::setChipModel ( ChipModel _model )
 
 	if ( model == MOS6581 )
 	{
-		filter = &noFilter6581;
 		modelFilter = &filter6581;
+		filter = &noFilter6581;
 		scaleFactor = 3;
 		modelTTL = BUS_TTL_6581;
 	}
 	else
 	{
-//		filter = &noFilter8580;
 		modelFilter = &filter8580;
+//		filter = &noFilter8580;
 		filter = modelFilter;
 		scaleFactor = 5;
 		modelTTL = BUS_TTL_8580;
