@@ -20,11 +20,19 @@ public:
 	struct settings final
 	{
 		std::string	folder;
-		double		filter = 0.5;
+
+		// Filter settings
+		double		fltCox = 0.5;
+		double		flt0Dac = 0.4;
+		double		fltGain = 0.92;
+
+		// Digi value
 		double		digi = 1.0;
-		double		zeroDac = 0.4;
+
+		// Combined waveform strength
 		int			cwsLevel = strong;
 		double		cwsThreshold = 0.8;
+
 		std::unordered_map<std::string, std::string>	exceptions;
 	};
 

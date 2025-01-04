@@ -110,9 +110,11 @@ public:
 
 	void set6581FilterCurve ( const double value );
 	void set6581FilterRange ( const double value );
+	void set6581FilterGain ( const double value );
 	void set6581DigiVolume ( const double value );
 
 	void setDacLeakage ( const double value );
+	void set6581VoiceDCDrift ( const double value );
 
 	[[ nodiscard ]] uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds
 	[[ nodiscard ]] uint32_t timeMs () const { return m_c64.getTimeMs (); }				// Time in milliseconds

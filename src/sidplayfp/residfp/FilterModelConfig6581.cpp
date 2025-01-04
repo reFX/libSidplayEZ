@@ -1,3 +1,5 @@
+#include <JuceHeader.h>
+
 /*
 * This file is part of libsidplayfp, a SID player engine.
 *
@@ -104,6 +106,20 @@ void FilterModelConfig6581::setFilterRange ( double adjustment )
 }
 //-----------------------------------------------------------------------------
 
+void FilterModelConfig6581::setVoiceDCDrift ( double drift )
+{
+	/**
+	* On 6581 the DC offset varies between ~5.0V and ~5.214V depending on
+	* the envelope value.
+	*/
+	Dac	envDac ( 8 );
+	envDac.kinkedDac ( true );
+
+	for ( auto i = 0; i < 256; ++i )
+		voiceDC[ i ] = 5.0 * VOLTAGE_SKEW + ( drift * 0.2143 * envDac.getOutput ( i ) );
+}
+//-----------------------------------------------------------------------------
+
 FilterModelConfig6581::FilterModelConfig6581 ()
 	: FilterModelConfig (
 		1.5,					// voice voltage range FIXME should theoretically be ~3,571V
@@ -122,17 +138,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 {
 	dac.kinkedDac ( true );
 
-	{
-		/**
-		* On 6581 the DC offset varies between ~5.0V and ~5.214V depending on
-		* the envelope value.
-		*/
-		Dac	envDac ( 8 );
-		envDac.kinkedDac ( true );
-
-		for ( auto i = 0; i < 256; ++i )
-			voiceDC[ i ] = 5.0 * VOLTAGE_SKEW + ( 0.2143 * envDac.getOutput ( i ) );
-	}
+	setVoiceDCDrift ( 1.0 );
 
 	// Create lookup tables for gains / summers
 	auto clBuildSummerTable = [ this ]

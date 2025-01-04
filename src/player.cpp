@@ -265,10 +265,13 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 
 			selectedChipProfile = profileName;
 
-			setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), float ( chipProfile.cwsThreshold ) );
-			set6581FilterRange ( chipProfile.filter );
-			set6581FilterCurve ( chipProfile.zeroDac );
+			set6581FilterRange ( chipProfile.fltCox );
+			set6581FilterCurve ( chipProfile.flt0Dac );
+			set6581FilterGain ( chipProfile.fltGain );
+
 			set6581DigiVolume ( chipProfile.digi );
+
+			setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), float ( chipProfile.cwsThreshold ) );
 
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
@@ -472,6 +475,14 @@ void Player::set6581FilterRange ( const double value )
 }
 //-----------------------------------------------------------------------------
 
+void Player::set6581FilterGain ( const double value )
+{
+	for ( auto i = 0; i < 3; i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->filter6581Gain ( value );
+}
+//-----------------------------------------------------------------------------
+
 void Player::set6581DigiVolume ( const double value )
 {
 	for ( auto i = 0; i < 3; i++ )
@@ -485,6 +496,14 @@ void Player::setDacLeakage ( const double value )
 	for ( auto i = 0; i < 3; i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->setDacLeakage ( value );
+}
+//-----------------------------------------------------------------------------
+
+void Player::set6581VoiceDCDrift ( const double value )
+{
+	for ( auto i = 0; i < 3; i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->voice6581DCDrift ( value );
 }
 //-----------------------------------------------------------------------------
 

@@ -72,6 +72,8 @@ public:
 
 	void setFilterRange ( double adjustment );
 
+	void setVoiceDCDrift ( double drift ) override;
+
 	/**
 	* Construct an 11 bit cutoff frequency DAC output voltage table.
 	* Ownership is transferred to the requester which becomes responsible

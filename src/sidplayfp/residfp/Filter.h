@@ -104,10 +104,7 @@ public:
 	* @param v3 voice 3 in
 	* @return filtered output
 	*/
-	[[ nodiscard ]] virtual sidinline uint16_t clock ( int voice1, int voice2, int voice3 )
-	{
-		return currentVolume[ currentMixer[ voice1 + voice2 + ( voice3 & voice3Mask ) + Ve ] ];
-	}
+	[[ nodiscard ]] virtual sidinline uint16_t clock ( int voice1, int voice2, int voice3 ) = 0;
 
 	/**
 	* SID reset.

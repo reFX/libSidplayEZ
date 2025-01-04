@@ -127,6 +127,8 @@ public:
 
 	void setVoiceDCVoltage ( double voltage );
 
+	virtual void setVoiceDCDrift ( double /*drift*/ ) {}
+
 	[[ nodiscard ]] sidinline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }
 	[[ nodiscard ]] sidinline double getVddt () const { return Vddt; }
 	[[ nodiscard ]] sidinline double getVth () const { return Vth; }

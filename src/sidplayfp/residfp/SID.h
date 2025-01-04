@@ -49,12 +49,8 @@ namespace reSIDfp
 class SID final
 {
 private:
-	Filter		noFilter6581 { *FilterModelConfig6581::getInstance () };
-	Filter		noFilter8580 { *FilterModelConfig8580::getInstance () };
-
 	// Currently active filter
 	Filter*		filter;
-	Filter*		modelFilter;
 
 	// Filter used, if model is set to 6581
 	Filter6581	filter6581;
@@ -95,11 +91,11 @@ private:
 	// Dac leakage
 	double	dacLeakage = 0.01;
 
+	// Voice DC drift
+	double	voiceDCDrift = 1.0;
+
 	// Last written value
 	uint8_t	busValue;
-
-	// Last written filter related values
-	uint8_t	lastRegs[ 32 ] = {};
 
 	/**
 	* Emulated nonlinearity of the envelope DAC
@@ -197,6 +193,11 @@ public:
 	* Set DAC leakage
 	*/
 	void setDacLeakage ( const double leakage );
+
+	/**
+	* Set Voice DC drift
+	*/
+	void setVoiceDCDrift ( const double drift );
 
 	/**
 	* SID reset.
@@ -323,6 +324,13 @@ public:
 	* @see Filter6581::setFilterRange(double)
 	*/
 	void setFilter6581Range ( double adjustment )	{	filter6581.setFilterRange ( adjustment );	}
+
+	/**
+	* Set filter gain parameter for 6581 model
+	*
+	* @see Filter6581::setFilterGain(double)
+	*/
+	void setFilter6581Gain ( double adjustment )	{	filter6581.setFilterGain ( adjustment ); }
 
 	/**
 	* Set filter digi volume for 6581 model

@@ -320,6 +320,8 @@ private:
 	Integrator6581	hpIntegrator;	// VCR + associated capacitor connected to highpass output.
 	Integrator6581	bpIntegrator;	// VCR + associated capacitor connected to bandpass output.
 
+	int	filterGain = int ( 0.92 * ( 1 << 12 ) );	// Filter gain
+
 protected:
 	/**
 	* Set filter cutoff frequency.
@@ -359,7 +361,6 @@ public:
 		// Mix filter outputs
 		{
 			const auto		fltMd = ( ( filterModeRouting >> 4 ) & 7 ) ^ 7;
-			constexpr auto	filterGain = int ( 0.92 * ( 1 << 12 ) );
 
  			Vsum[ fltMd & 1 ]			+= ( Vlp * filterGain ) >> 12;
  			Vsum[ ( fltMd >> 1 ) & 1 ]	+= ( Vbp * filterGain ) >> 12;
@@ -370,25 +371,39 @@ public:
 	}
 
 	/**
-	* Set filter curve type based on single parameter.
+	* Set filter curve
 	*
 	* @param curvePosition 0 .. 1, where 0 sets center frequency high ("light") and 1 sets it low ("dark"), default is 0.5
 	*/
 	void setFilterCurve ( double curvePosition );
 
 	/**
-	* Set filter offset and range based on single parameter.
+	* Set filter range
 	*
 	* @param adjustment 0 .. 2, where 0 sets center frequency low, 1 is default, 2 is bright. This also affects the range
 	*/
 	void setFilterRange ( double adjustment );
 
 	/**
+	* Set filter gain
+	*
+	* @param adjustment 0 .. 2
+	*/
+	void setFilterGain ( double adjustment );
+
+	/**
 	* Set DC offset for external filter input which affects the digi volume
 	*
-	* @param adjustment 0 .. 2, where 0 sets volume to zero (inaudble), 1 is default and 2 gets very loud
+	* @param adjustment 0 .. 1
 	*/
 	void setDigiVolume ( double adjustment );
+
+	/**
+	* Set Voice DC drift
+	*
+	* @param adjustment 0 .. 1, where 0 has no drift at all and 1 is with full drift
+	*/
+	void setVoiceDCDrift ( double adjustment );
 };
 
 

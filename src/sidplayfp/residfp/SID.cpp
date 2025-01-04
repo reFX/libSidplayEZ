@@ -140,16 +140,13 @@ void SID::setChipModel ( ChipModel _model )
 
 	if ( model == MOS6581 )
 	{
-		modelFilter = &filter6581;
-		filter = &noFilter6581;
+		filter = &filter6581;
 		scaleFactor = 3;
 		modelTTL = BUS_TTL_6581;
 	}
 	else
 	{
-		modelFilter = &filter8580;
-//		filter = &noFilter8580;
-		filter = modelFilter;
+		filter = &filter8580;
 		scaleFactor = 5;
 		modelTTL = BUS_TTL_8580;
 	}
@@ -185,6 +182,14 @@ void SID::setDacLeakage ( const double leakage )
 }
 //-----------------------------------------------------------------------------
 
+void SID::setVoiceDCDrift ( const double drift )
+{
+	voiceDCDrift = drift;
+
+	filter6581.setVoiceDCDrift ( drift );
+}
+//-----------------------------------------------------------------------------
+
 void SID::recalculateDACs ()
 {
 	constexpr auto	MOSFET_LEAKAGE_6581 = 0.0075;
@@ -206,7 +211,6 @@ void SID::recalculateDACs ()
 		Dac dacBuilder ( OSC_DAC_BITS, dacLeakFactor );
 		dacBuilder.kinkedDac ( model == MOS6581 );
 
-		//const auto	offset = dacBuilder.getOutput ( model == MOS6581 ? OFFSET_6581 : OFFSET_8580 );
 		const auto	offset = dacBuilder.getOutput ( 0x7FF );
 
 		for ( auto i = 0u; i < ( 1 << OSC_DAC_BITS ); i++ )
@@ -220,10 +224,6 @@ void SID::reset ()
 	for ( auto& vce : voice )
 		vce.reset ();
 
-	std::fill ( std::begin ( lastRegs ), std::end ( lastRegs ), 0 );
-
-	noFilter6581.reset ();
-	noFilter8580.reset ();
 	filter6581.reset ();
 	filter8580.reset ();
 	externalFilter.reset ();
@@ -275,22 +275,6 @@ void SID::write ( int offset, uint8_t value )
 {
 	busValue = value;
 	busValueTtl = modelTTL;
-
-	if ( filter != modelFilter )
-	{
-		lastRegs[ offset & 0x1F ] = value;
-
- 		// If the filter is actually used, we switch to the real filter
-		if ( ( lastRegs[ 0x17 ] & 0xF ) && ( lastRegs[ 0x18 ] & 0x70 ) )
-		{
-			filter = modelFilter;
-
-			filter->writeFC_LO ( lastRegs[ 0x15 ] );
-			filter->writeFC_HI ( lastRegs[ 0x16 ] );
-			filter->writeRES_FILT ( lastRegs[ 0x17 ] );
-			filter->writeMODE_VOL ( lastRegs[ 0x18 ] );
-		}
-	}
 
 	switch ( offset )
 	{

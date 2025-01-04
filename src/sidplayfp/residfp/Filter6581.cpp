@@ -35,8 +35,6 @@ Filter6581::Filter6581 ()
 	setFilterCurve ( 0.5f );
 
 	updatedCenterFrequency ();
-	hpIntegrator.solve ( 0 );
-	bpIntegrator.solve ( 0 );
 }
 //-----------------------------------------------------------------------------
 
@@ -63,14 +61,21 @@ void Filter6581::setFilterRange ( double adjustment )
 }
 //-----------------------------------------------------------------------------
 
+void Filter6581::setFilterGain ( double adjustment )
+{
+	filterGain = int ( adjustment * ( 1 << 12 ) );
+}
+//-----------------------------------------------------------------------------
+
 void Filter6581::setDigiVolume ( double adjustment )
 {
-	auto remap = [] ( double val, double in1, double in2, int out1, int out2 )
-	{
-		return int ( double ( out1 ) + ( val - in1 ) * double ( out2 - out1 ) / ( in2 - in1 ) );
-	};
+	Ve = int16_t ( adjustment * fmc.getNormalizedVoice ( 0.0f, 0 ) );
+}
+//-----------------------------------------------------------------------------
 
-	Ve = remap ( adjustment, 0.0, 2.0, 36000, 20000 );
+void Filter6581::setVoiceDCDrift ( double adjustment )
+{
+	fmc.setVoiceDCDrift ( adjustment );
 }
 //-----------------------------------------------------------------------------
 
