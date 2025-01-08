@@ -56,7 +56,7 @@ Filter::Filter ( FilterModelConfig& _fmc )
 	volume = fmc.getVolume ();
 	resonance = fmc.getResonance ();
 
-	input ( 0 );
+//	input ( 0 );
 }
 //-----------------------------------------------------------------------------
 

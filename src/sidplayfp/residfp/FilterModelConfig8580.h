@@ -53,6 +53,14 @@ public:
 
 public:
 	[[ nodiscard ]] sidinline constexpr double getVref () const { return Vref * VOLTAGE_SKEW; }
+
+	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value ) const
+	{
+		const auto	tmp = N16 * ( ( value * voice_voltage_range + Vref * VOLTAGE_SKEW ) - vmin );
+
+		assert ( tmp >= 0.0 && tmp < 65536.0 );
+		return int ( tmp );
+	}
 };
 
 } // namespace reSIDfp

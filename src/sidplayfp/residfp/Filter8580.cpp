@@ -36,8 +36,9 @@ constexpr auto	DAC_WL0 = 0.00615;
 
 Filter8580::Filter8580 ()
 	: Filter ( *FilterModelConfig8580::getInstance () )
-	, hpIntegrator ( FilterModelConfig8580::getInstance () )
-	, bpIntegrator ( FilterModelConfig8580::getInstance () )
+	, fmc8580 ( *FilterModelConfig8580::getInstance () )
+	, hpIntegrator ( fmc8580 )
+	, bpIntegrator ( fmc8580 )
 {
 	// Pre-calculate all possible filter DAC values
 	for ( auto fc = 0; fc < 2048; ++fc )
@@ -65,6 +66,8 @@ Filter8580::Filter8580 ()
 	setFilterCurve ( 0.5 );
 
 	updatedCenterFrequency ();
+
+	input ( 0 );
 }
 //-----------------------------------------------------------------------------
 

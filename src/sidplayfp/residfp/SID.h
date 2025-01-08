@@ -119,15 +119,17 @@ private:
 		const auto	o2 = voice[ 1 ].output ( voice[ 0 ].waveformGenerator );
 		const auto	o3 = voice[ 2 ].output ( voice[ 1 ].waveformGenerator );
 
+		if ( model == MOS8580 )
+		{
+			const auto	input = int ( filter8580.clock ( o1, o2, o3 ) );
+			return externalFilter.clock ( input );
+		}
+
 		const auto	env1 = voice[ 0 ].envelopeGenerator.output ();
 		const auto	env2 = voice[ 1 ].envelopeGenerator.output ();
 		const auto	env3 = voice[ 2 ].envelopeGenerator.output ();
 
-		const auto	v1 = filter->getNormalizedVoice ( o1, env1 );
-		const auto	v2 = filter->getNormalizedVoice ( o2, env2 );
-		const auto	v3 = filter->getNormalizedVoice ( o3, env3 );
-
-		const auto	input = int ( filter->clock ( v1, v2, v3 ) );
+		const auto	input = int ( filter6581.clock ( o1, o2, o3, env1, env2, env3 ) );
 		return externalFilter.clock ( input );
 	}
 

@@ -28,13 +28,16 @@ namespace reSIDfp
 
 Filter6581::Filter6581 ()
 	: Filter ( *FilterModelConfig6581::getInstance () )
-	, f0_dac ( FilterModelConfig6581::getInstance ()->getDAC ( 0.5 ) )
-	, hpIntegrator ( FilterModelConfig6581::getInstance () )
-	, bpIntegrator ( FilterModelConfig6581::getInstance () )
+	, fmc6581 ( *FilterModelConfig6581::getInstance () )
+	, f0_dac ( fmc6581.getDAC ( 0.5 ) )
+	, hpIntegrator ( fmc6581 )
+	, bpIntegrator ( fmc6581 )
 {
 	setFilterCurve ( 0.5f );
 
 	updatedCenterFrequency ();
+
+	input ( 0 );
 }
 //-----------------------------------------------------------------------------
 
@@ -50,14 +53,14 @@ void Filter6581::updatedCenterFrequency ()
 void Filter6581::setFilterCurve ( double curvePosition )
 {
 	delete[] f0_dac;
-	f0_dac = FilterModelConfig6581::getInstance ()->getDAC ( curvePosition );
+	f0_dac = fmc6581.getDAC ( curvePosition );
 	updatedCenterFrequency ();
 }
 //-----------------------------------------------------------------------------
 
 void Filter6581::setFilterRange ( double adjustment )
 {
-	FilterModelConfig6581::getInstance ()->setFilterRange ( adjustment );
+	fmc6581.setFilterRange ( adjustment );
 }
 //-----------------------------------------------------------------------------
 
@@ -69,13 +72,13 @@ void Filter6581::setFilterGain ( double adjustment )
 
 void Filter6581::setDigiVolume ( double adjustment )
 {
-	Ve = int16_t ( adjustment * fmc.getNormalizedVoice ( 0.0f, 0 ) );
+	Ve = int16_t ( adjustment * fmc6581.getNormalizedVoice ( 0.0f, 0 ) );
 }
 //-----------------------------------------------------------------------------
 
 void Filter6581::setVoiceDCDrift ( double adjustment )
 {
-	fmc.setVoiceDCDrift ( adjustment );
+	fmc6581.setVoiceDCDrift ( adjustment );
 }
 //-----------------------------------------------------------------------------
 

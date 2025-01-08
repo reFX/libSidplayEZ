@@ -315,6 +315,8 @@ namespace reSIDfp
 class Filter6581 final : public Filter
 {
 private:
+	FilterModelConfig6581&	fmc6581;
+
 	const uint16_t* f0_dac = nullptr;
 
 	Integrator6581	hpIntegrator;	// VCR + associated capacitor connected to highpass output.
@@ -336,7 +338,7 @@ public:
 		delete[] f0_dac;
 	}
 
-	[[ nodiscard ]] sidinline uint16_t clock ( int voice1, int voice2, int voice3 ) override
+	[[ nodiscard ]] sidinline uint16_t clock ( float voice1, float voice2, float voice3, uint8_t env1, uint8_t env2, uint8_t env3 )
 	{
 		// index 0 = unfiltered, index 1 = filtered
 		int	Vsum[ 2 ] = { 0, 0 };
@@ -345,9 +347,9 @@ public:
 		{
 			const auto	fltMd = filterModeRouting & 0xF;
 
-			Vsum[ fltMd & 1 ]			= voice1;
-			Vsum[ ( fltMd >> 1 ) & 1 ]	+= voice2;
-			Vsum[ ( fltMd >> 2 ) & 1 ]	+= voice3 & voice3Mask;
+			Vsum[ fltMd & 1 ]			 = fmc6581.getNormalizedVoice ( voice1, env1 );
+			Vsum[ ( fltMd >> 1 ) & 1 ]	+= fmc6581.getNormalizedVoice ( voice2, env2 );
+			Vsum[ ( fltMd >> 2 ) & 1 ]	+= fmc6581.getNormalizedVoice ( voice3, env3 ) & voice3Mask;
 			Vsum[ fltMd >> 3 ]			+= Ve;
 		}
 
@@ -404,6 +406,13 @@ public:
 	* @param adjustment 0 .. 1, where 0 has no drift at all and 1 is with full drift
 	*/
 	void setVoiceDCDrift ( double adjustment );
+
+	/**
+	* Apply a signal to EXT-IN
+	*
+	* @param input a signed 16 bit sample
+	*/
+	void input ( int16_t _input ) { Ve = fmc6581.getNormalizedVoice ( _input / 32768.0f, 0 ); }
 };
 
 

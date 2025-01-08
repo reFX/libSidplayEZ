@@ -72,7 +72,7 @@ public:
 
 	void setFilterRange ( double adjustment );
 
-	void setVoiceDCDrift ( double drift ) override;
+	void setVoiceDCDrift ( double drift );
 
 	/**
 	* Construct an 11 bit cutoff frequency DAC output voltage table.
@@ -87,6 +87,14 @@ public:
 
 	[[ nodiscard ]] sidinline uint16_t getVcr_nVg ( const int i )		 const	{	return vcr_nVg[ i ]; }
 	[[ nodiscard ]] sidinline uint16_t getVcr_n_Ids_term ( const int i ) const	{	return uint16_t ( vcr_n_Ids_term[ i ] * uCox ); }
+
+	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const
+	{
+		const auto	tmp = N16 * ( ( value * voice_voltage_range + voiceDC[ env ] ) - vmin );
+
+		assert ( tmp >= 0.0 && tmp < 65536.0 );
+		return int ( tmp );
+	}
 
 	#if 0
 		[[ nodiscard ]] sidinline double getUt () const { return Ut; }

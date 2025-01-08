@@ -104,7 +104,7 @@ public:
 	* @param v3 voice 3 in
 	* @return filtered output
 	*/
-	[[ nodiscard ]] virtual sidinline uint16_t clock ( int voice1, int voice2, int voice3 ) = 0;
+//	[[ nodiscard ]] virtual sidinline uint16_t clock ( int voice1, int voice2, int voice3 ) = 0;
 
 	/**
 	* SID reset.
@@ -138,15 +138,6 @@ public:
 	* @param mode_vol Filter Mode/Volume
 	*/
 	void writeMODE_VOL ( uint8_t mode_vol );
-
-	/**
-	* Apply a signal to EXT-IN
-	*
-	* @param input a signed 16 bit sample
-	*/
-	void input ( int16_t _input ) { Ve = fmc.getNormalizedVoice ( _input / 32768.0f, 0 ); }
-
-	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const { return fmc.getNormalizedVoice ( value, env ); }
 };
 //-----------------------------------------------------------------------------
 

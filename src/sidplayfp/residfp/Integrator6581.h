@@ -184,12 +184,12 @@ private:
 	const FilterModelConfig6581& fmc;
 
 public:
-	Integrator6581 ( const FilterModelConfig6581* _fmc )
-		: wlSnake ( _fmc->getWL_snake () )
-		, nVddt ( _fmc->getNormalizedValue ( _fmc->getVddt () ) )
-		, nVt ( _fmc->getNormalizedValue ( _fmc->getVth () ) )
-		, nVmin ( _fmc->getNVmin () )
-		, fmc ( *_fmc )
+	Integrator6581 ( const FilterModelConfig6581& _fmc )
+		: wlSnake ( _fmc.getWL_snake () )
+		, nVddt ( _fmc.getNormalizedValue ( _fmc.getVddt () ) )
+		, nVt ( _fmc.getNormalizedValue ( _fmc.getVth () ) )
+		, nVmin ( _fmc.getNVmin () )
+		, fmc ( _fmc )
 	{
 	}
 

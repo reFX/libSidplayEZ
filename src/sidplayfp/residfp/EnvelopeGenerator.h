@@ -155,7 +155,7 @@ public:
 	/**
 	* Get the Envelope Generator digital output.
 	*/
-	[[ nodiscard ]] sidinline unsigned int output () const { return envelope_counter; }
+	[[ nodiscard ]] sidinline uint8_t output () const { return envelope_counter; }
 
 	/**
 	* SID reset.

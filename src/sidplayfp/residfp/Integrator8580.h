@@ -59,8 +59,8 @@ private:
 	const FilterModelConfig8580& fmc;
 
 public:
-	Integrator8580 ( const FilterModelConfig8580* _fmc )
-		: fmc ( *_fmc )
+	Integrator8580 ( const FilterModelConfig8580& _fmc )
+		: fmc ( _fmc )
 	{
 		setV ( 1.5 );
 	}

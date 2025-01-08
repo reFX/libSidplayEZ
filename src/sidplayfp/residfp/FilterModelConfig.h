@@ -127,8 +127,6 @@ public:
 
 	void setVoiceDCVoltage ( double voltage );
 
-	virtual void setVoiceDCDrift ( double /*drift*/ ) {}
-
 	[[ nodiscard ]] sidinline uint16_t getOpampRev ( int i ) const { return opamp_rev[ i ]; }
 	[[ nodiscard ]] sidinline double getVddt () const { return Vddt; }
 	[[ nodiscard ]] sidinline double getVth () const { return Vth; }
@@ -155,14 +153,6 @@ public:
 		const auto	tmp = N16 * vmin;
 		assert ( tmp >= 0.0 && tmp < 65536.0 );
 		return uint16_t ( tmp );
-	}
-
-	[[ nodiscard ]] sidinline int getNormalizedVoice ( float value, unsigned int env ) const
-	{
-		const auto	tmp = N16 * ( ( value * voice_voltage_range + voiceDC[ env ] ) - vmin );
-
- 		assert ( tmp >= 0.0 && tmp < 65536.0 );
- 		return int ( tmp );
 	}
 };
 

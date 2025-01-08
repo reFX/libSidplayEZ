@@ -272,6 +272,8 @@ namespace reSIDfp
 class Filter8580 final : public Filter
 {
 private:
+	FilterModelConfig8580&	fmc8580;
+
 	Integrator8580	hpIntegrator;	// VCR + associated capacitor connected to highpass output.
 	Integrator8580	bpIntegrator;	// VCR + associated capacitor connected to bandpass output.
 
@@ -286,7 +288,7 @@ protected:
 public:
 	Filter8580 ();
 
-	[[ nodiscard ]] sidinline uint16_t clock ( int voice1, int voice2, int voice3 ) override
+	[[ nodiscard ]] sidinline uint16_t clock ( float voice1, float voice2, float voice3 )
 	{
 		// index 0 = unfiltered, index 1 = filtered
 		int	Vsum[ 2 ] = { 0, 0 };
@@ -295,9 +297,9 @@ public:
 		{
 			const auto	fltMd = filterModeRouting & 0xF;
 
-			Vsum[ fltMd & 1 ]			= voice1;
-			Vsum[ ( fltMd >> 1 ) & 1 ]	+= voice2;
-			Vsum[ ( fltMd >> 2 ) & 1 ]	+= voice3 & voice3Mask;
+			Vsum[ fltMd & 1 ]			 = fmc8580.getNormalizedVoice ( voice1 );
+			Vsum[ ( fltMd >> 1 ) & 1 ]	+= fmc8580.getNormalizedVoice ( voice2 );
+			Vsum[ ( fltMd >> 2 ) & 1 ]	+= fmc8580.getNormalizedVoice ( voice3 ) & voice3Mask;
 			Vsum[ fltMd >> 3 ]			+= Ve;
 		}
 
@@ -326,6 +328,13 @@ public:
 	* @param curvePosition 0 .. 1, where 0 sets center frequency high ("light") and 1 sets it low ("dark"), default is 0.5
 	*/
 	void setFilterCurve ( double curvePosition );
+
+	/**
+	* Apply a signal to EXT-IN
+	*
+	* @param input a signed 16 bit sample
+	*/
+	void input ( int16_t _input ) { Ve = fmc8580.getNormalizedVoice ( _input / 32768.0f ); }
 };
 
 } // namespace reSIDfp
