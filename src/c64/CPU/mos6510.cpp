@@ -43,7 +43,7 @@ constexpr int interruptDelay = 2;
 
 //-----------------------------------------------------------------------------
 
-template<void( MOS6510::* Func )()>
+template<void( MOS6510::*Func )()>
 void StaticFuncWrapper ( MOS6510& self )
 {
 	( self.*Func )();
@@ -55,7 +55,7 @@ void StaticFuncWrapper ( MOS6510& self )
 */
 void MOS6510::eventWithoutSteals ()
 {
-	const ProcessorCycle& instr = instrTable[ cycleCount++ ];
+	const auto&	instr = instrTable[ cycleCount++ ];
 	( instr.func )( *this );
 	eventScheduler.schedule ( m_nosteal, 1 );
 }
@@ -67,7 +67,7 @@ void MOS6510::eventWithSteals ()
 {
 	if ( instrTable[ cycleCount ].nosteal )
 	{
-		const ProcessorCycle& instr = instrTable[ cycleCount++ ];
+		const auto&	instr = instrTable[ cycleCount++ ];
 		( instr.func )( *this );
 		eventScheduler.schedule ( m_steal, 1 );
 	}
@@ -77,13 +77,13 @@ void MOS6510::eventWithSteals ()
 		{
 			case ( CLIn << 3 ):
 				flags.setI ( false );
-				if ( irqAssertedOnPin && ( interruptCycle == MAX ) )
-					interruptCycle = -MAX;
+				if ( irqAssertedOnPin && ( interruptCycle == MOS6510::MAX ) )
+					interruptCycle = -MOS6510::MAX;
 				break;
 			case ( SEIn << 3 ):
 				flags.setI ( true );
-				if ( !rstFlag && !nmiFlag && ( cycleCount <= interruptCycle + interruptDelay ) )
-					interruptCycle = MAX;
+				if ( ! rstFlag && ! nmiFlag && ( cycleCount <= interruptCycle + interruptDelay ) )
+					interruptCycle = MOS6510::MAX;
 				break;
 			case ( SHAiy << 3 ) + 3:
 			case ( SHSay << 3 ) + 2:
@@ -100,16 +100,14 @@ void MOS6510::eventWithSteals ()
 		// Even while stalled, the CPU can still process first clock of
 		// interrupt delay, but only the first one.
 		if ( interruptCycle == cycleCount )
-		{
 			interruptCycle--;
-		}
 	}
 }
 
 void MOS6510::removeIRQ ()
 {
-	if ( !rstFlag && !nmiFlag && ( interruptCycle != MAX ) )
-		interruptCycle = MAX;
+	if ( ! rstFlag && ! nmiFlag && ( interruptCycle != MOS6510::MAX ) )
+		interruptCycle = MOS6510::MAX;
 }
 
 /**
@@ -122,16 +120,8 @@ void MOS6510::setRDY ( bool newRDY )
 {
 	rdy = newRDY;
 
-	if ( rdy )
-	{
-		eventScheduler.cancel ( m_steal );
-		eventScheduler.schedule ( m_nosteal, 0, EVENT_CLOCK_PHI2 );
-	}
-	else
-	{
-		eventScheduler.cancel ( m_nosteal );
-		eventScheduler.schedule ( m_steal, 0, EVENT_CLOCK_PHI2 );
-	}
+	eventScheduler.cancel ( rdy ? (Event&)m_steal : (Event&)m_nosteal );
+	eventScheduler.schedule ( rdy ? (Event&)m_nosteal : (Event&)m_steal, 0, EVENT_CLOCK_PHI2 );
 }
 
 
@@ -223,12 +213,12 @@ void MOS6510::clearIRQ ()
 
 void MOS6510::interruptsAndNextOpcode ()
 {
-	if ( cycleCount > interruptCycle + interruptDelay )
+	if ( cycleCount > ( interruptCycle + interruptDelay ) )
 	{
 		cpuRead ( Register_ProgramCounter );
 		cycleCount = BRKn << 3;
 		d1x1 = true;
-		interruptCycle = MAX;
+		interruptCycle = MOS6510::MAX;
 	}
 	else
 	{
@@ -244,13 +234,9 @@ void MOS6510::fetchNextOpcode ()
 	Register_ProgramCounter++;
 
 	if ( ! checkInterrupts () )
-	{
-		interruptCycle = MAX;
-	}
-	else if ( interruptCycle != MAX )
-	{
-		interruptCycle = -MAX;
-	}
+		interruptCycle = MOS6510::MAX;
+	else if ( interruptCycle != MOS6510::MAX )
+		interruptCycle = -MOS6510::MAX;
 }
 
 /**
@@ -259,14 +245,10 @@ void MOS6510::fetchNextOpcode ()
 */
 void MOS6510::calculateInterruptTriggerCycle ()
 {
-	/* Interrupt cycle not going to trigger? */
-	if ( interruptCycle == MAX )
-	{
+	// Interrupt cycle not going to trigger?
+	if ( interruptCycle == MOS6510::MAX )
 		if ( checkInterrupts () )
-		{
 			interruptCycle = cycleCount;
-		}
-	}
 }
 
 void MOS6510::IRQLoRequest ()
@@ -311,9 +293,7 @@ void MOS6510::FetchDataByte ()
 {
 	Cycle_Data = cpuRead ( Register_ProgramCounter );
 	if ( ! d1x1 )
-	{
 		Register_ProgramCounter++;
-	}
 }
 
 /**
@@ -530,7 +510,8 @@ void MOS6510::PutEffAddrDataByte ()
 */
 void MOS6510::Push ( uint8_t data )
 {
-	cpuWrite ( uint16_t ( ( SP_PAGE << 8 ) | Register_StackPointer ), data );
+	const auto	addr = get_16 ( SP_PAGE, Register_StackPointer );
+	cpuWrite ( addr, data );
 	Register_StackPointer--;
 }
 
@@ -540,7 +521,8 @@ void MOS6510::Push ( uint8_t data )
 uint8_t MOS6510::Pop ()
 {
 	Register_StackPointer++;
-	return cpuRead ( uint16_t ( ( SP_PAGE << 8 ) | Register_StackPointer ) );
+	const auto	addr = get_16 ( SP_PAGE, Register_StackPointer );
+	return cpuRead ( addr );
 }
 
 /**
@@ -662,8 +644,8 @@ void MOS6510::sei_instr ()
 {
 	flags.setI ( true );
 	interruptsAndNextOpcode ();
-	if ( ! rstFlag && !nmiFlag && interruptCycle != MAX )
-		interruptCycle = MAX;
+	if ( ! rstFlag && ! nmiFlag && interruptCycle != MOS6510::MAX )
+		interruptCycle = MOS6510::MAX;
 }
 
 void MOS6510::sta_instr ()
@@ -717,9 +699,7 @@ void MOS6510::sh_instr ()
 	* the highbyte of the target address is ANDed with the value stored.
 	*/
 	if ( adl_carry )
-	{
 		set_16hi8 ( Cycle_EffectiveAddress, tmp & Cycle_Data );
-	}
 	else
 		tmp++;
 
@@ -731,9 +711,7 @@ void MOS6510::sh_instr ()
 	* http://sourceforge.net/p/vice-emu/bugs/578/
 	*/
 	if ( ! rdyOnThrowAwayRead )
-	{
 		Cycle_Data &= tmp;
-	}
 
 	PutEffAddrDataByte ();
 }
@@ -784,23 +762,23 @@ void MOS6510::axs_instr ()
 */
 void MOS6510::doADC ()
 {
-	const unsigned int C = flags.getC () ? 1 : 0;
-	const unsigned int A = Register_Accumulator;
-	const unsigned int s = Cycle_Data;
-	const unsigned int regAC2 = A + s + C;
+	const auto	C = flags.getC () ? 1u : 0u;
+	const auto	A = (unsigned int)Register_Accumulator;
+	const auto	s = (unsigned int)Cycle_Data;
+	const auto	regAC2 = A + s + C;
 
 	if ( flags.getD () )
 	{   // BCD mode
-		unsigned int lo = ( A & 0x0f ) + ( s & 0x0f ) + C;
-		unsigned int hi = ( A & 0xf0 ) + ( s & 0xf0 );
+		auto	lo = ( A & 0x0f ) + ( s & 0x0f ) + C;
+		auto	hi = ( A & 0xf0 ) + ( s & 0xf0 );
 		if ( lo > 0x09 )
 			lo += 0x06;
 		if ( lo > 0x0f )
 			hi += 0x10;
 
-		flags.setZ ( !( regAC2 & 0xff ) );
+		flags.setZ ( ! ( regAC2 & 0xff ) );
 		flags.setN ( hi & 0x80 );
-		flags.setV ( ( ( hi ^ A ) & 0x80 ) && !( ( A ^ s ) & 0x80 ) );
+		flags.setV ( ( ( hi ^ A ) & 0x80 ) && ! ( ( A ^ s ) & 0x80 ) );
 		if ( hi > 0x90 )
 			hi += 0x60;
 
@@ -810,7 +788,7 @@ void MOS6510::doADC ()
 	else
 	{   // Binary mode
 		flags.setC ( regAC2 > 0xff );
-		flags.setV ( ( ( regAC2 ^ A ) & 0x80 ) && !( ( A ^ s ) & 0x80 ) );
+		flags.setV ( ( ( regAC2 ^ A ) & 0x80 ) && ! ( ( A ^ s ) & 0x80 ) );
 		flags.setNZ ( Register_Accumulator = regAC2 & 0xff );
 	}
 }
@@ -820,10 +798,10 @@ void MOS6510::doADC ()
 */
 void MOS6510::doSBC ()
 {
-	const unsigned int C = flags.getC () ? 0 : 1;
-	const unsigned int A = Register_Accumulator;
-	const unsigned int s = Cycle_Data;
-	const unsigned int regAC2 = A - s - C;
+	const auto	C = flags.getC () ? 0u : 1u;
+	const auto	A = (unsigned int)Register_Accumulator;
+	const auto	s = (unsigned int)Cycle_Data;
+	const auto	regAC2 = A - s - C;
 
 	flags.setC ( regAC2 < 0x100 );
 	flags.setV ( ( ( regAC2 ^ A ) & 0x80 ) && ( ( A ^ s ) & 0x80 ) );
@@ -831,8 +809,8 @@ void MOS6510::doSBC ()
 
 	if ( flags.getD () )
 	{   // BCD mode
-		unsigned int lo = ( A & 0x0f ) - ( s & 0x0f ) - C;
-		unsigned int hi = ( A & 0xf0 ) - ( s & 0xf0 );
+		auto	lo = ( A & 0x0f ) - ( s & 0x0f ) - C;
+		auto	hi = ( A & 0xf0 ) - ( s & 0xf0 );
 		if ( lo & 0x10 )
 		{
 			lo -= 0x06;
@@ -932,7 +910,7 @@ void MOS6510::branch_instr ( bool condition )
 		Register_ProgramCounter = Cycle_EffectiveAddress;
 
 		// Check for page boundary crossing
-		if ( !adl_carry )
+		if ( ! adl_carry )
 		{
 			// Skip next throw away read
 			cycleCount++;
@@ -951,7 +929,7 @@ void MOS6510::branch_instr ( bool condition )
 
 void MOS6510::bcc_instr ()
 {
-	branch_instr ( !flags.getC () );
+	branch_instr ( ! flags.getC () );
 }
 
 void MOS6510::bcs_instr ()
@@ -979,17 +957,17 @@ void MOS6510::bmi_instr ()
 
 void MOS6510::bne_instr ()
 {
-	branch_instr ( !flags.getZ () );
+	branch_instr ( ! flags.getZ () );
 }
 
 void MOS6510::bpl_instr ()
 {
-	branch_instr ( !flags.getN () );
+	branch_instr ( ! flags.getN () );
 }
 
 void MOS6510::bvc_instr ()
 {
-	branch_instr ( !flags.getV () );
+	branch_instr ( ! flags.getV () );
 }
 
 void MOS6510::bvs_instr ()
@@ -1011,7 +989,7 @@ void MOS6510::clv_instr ()
 
 void MOS6510::compare ( uint8_t data )
 {
-	const uint16_t tmp = static_cast<uint16_t>( data ) - Cycle_Data;
+	const auto	tmp = uint16_t ( uint16_t ( data ) - Cycle_Data );
 	flags.setNZ ( uint8_t ( tmp ) );
 	flags.setC ( tmp < 0x100 );
 	interruptsAndNextOpcode ();
@@ -1119,7 +1097,7 @@ void MOS6510::pla_instr ()
 
 void MOS6510::rol_instr ()
 {
-	const uint8_t newC = Cycle_Data & 0x80;
+	const auto	newC = uint8_t ( Cycle_Data & 0x80 );
 	PutEffAddrDataByte ();
 	Cycle_Data <<= 1;
 	if ( flags.getC () )
@@ -1130,7 +1108,7 @@ void MOS6510::rol_instr ()
 
 void MOS6510::rola_instr ()
 {
-	const uint8_t newC = Register_Accumulator & 0x80;
+	const auto	newC = uint8_t ( Register_Accumulator & 0x80 );
 	Register_Accumulator <<= 1;
 	if ( flags.getC () )
 		Register_Accumulator |= 0x01;
@@ -1141,7 +1119,7 @@ void MOS6510::rola_instr ()
 
 void MOS6510::ror_instr ()
 {
-	const uint8_t newC = Cycle_Data & 0x01;
+	const auto	newC = uint8_t ( Cycle_Data & 0x01 );
 	PutEffAddrDataByte ();
 	Cycle_Data >>= 1;
 	if ( flags.getC () )
@@ -1152,7 +1130,7 @@ void MOS6510::ror_instr ()
 
 void MOS6510::rora_instr ()
 {
-	const uint8_t newC = Register_Accumulator & 0x01;
+	const auto	newC = uint8_t ( Register_Accumulator & 0x01 );
 	Register_Accumulator >>= 1;
 	if ( flags.getC () )
 		Register_Accumulator |= 0x80;
@@ -1163,7 +1141,7 @@ void MOS6510::rora_instr ()
 
 void MOS6510::sbx_instr ()
 {
-	const unsigned int tmp = ( Register_X & Register_Accumulator ) - Cycle_Data;
+	const auto	tmp = (unsigned int)( ( Register_X & Register_Accumulator ) - Cycle_Data );
 	flags.setNZ ( Register_X = tmp & 0xff );
 	flags.setC ( tmp < 0x100 );
 	interruptsAndNextOpcode ();
@@ -1226,7 +1204,7 @@ void MOS6510::tya_instr ()
 
 void MOS6510::invalidOpcode ()
 {
-	throw haltInstruction ();
+//	throw haltInstruction ();
 }
 
 
@@ -1268,7 +1246,7 @@ void MOS6510::anc_instr ()
 */
 void MOS6510::arr_instr ()
 {
-	const uint8_t data = Cycle_Data & Register_Accumulator;
+	const auto	data = uint8_t ( Cycle_Data & Register_Accumulator );
 	Register_Accumulator = data >> 1;
 	if ( flags.getC () )
 		Register_Accumulator |= 0x80;
@@ -1314,7 +1292,7 @@ void MOS6510::dcm_instr ()
 {
 	PutEffAddrDataByte ();
 	Cycle_Data--;
-	const uint16_t tmp = static_cast<uint16_t>( Register_Accumulator ) - Cycle_Data;
+	const auto	tmp = uint16_t ( uint16_t ( Register_Accumulator ) - Cycle_Data );
 	flags.setNZ ( uint8_t ( tmp ) );
 	flags.setC ( tmp < 0x100 );
 }
@@ -1382,7 +1360,7 @@ void MOS6510::oal_instr ()
 */
 void MOS6510::rla_instr ()
 {
-	const uint8_t newC = Cycle_Data & 0x80;
+	const auto	newC = uint8_t ( Cycle_Data & 0x80 );
 	PutEffAddrDataByte ();
 	Cycle_Data <<= 1;
 	if ( flags.getC () )
@@ -1397,7 +1375,7 @@ void MOS6510::rla_instr ()
 */
 void MOS6510::rra_instr ()
 {
-	const uint8_t newC = Cycle_Data & 0x01;
+	const auto	newC = uint8_t ( Cycle_Data & 0x01 );
 	PutEffAddrDataByte ();
 	Cycle_Data >>= 1;
 	if ( flags.getC () )
@@ -1438,7 +1416,7 @@ MOS6510::MOS6510 ( EventScheduler& scheduler, c64cpubus& bus )
 */
 void MOS6510::buildInstructionTable ()
 {
-	for ( unsigned int i = 0; i < 0x100; i++ )
+	for ( auto i = 0u; i < 0x100; ++i )
 	{
 		/*
 		* So: what cycles are marked as stealable? Rules are:
@@ -1454,7 +1432,7 @@ void MOS6510::buildInstructionTable ()
 
 		enum class AccessMode { WRITE, READ };
 
-		AccessMode	access = AccessMode::WRITE;
+		auto	access = AccessMode::WRITE;
 		auto	legalMode = true;
 		auto	legalInstr = true;
 
@@ -1469,7 +1447,7 @@ void MOS6510::buildInstructionTable ()
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::throwAwayFetch>;
 				break;
 
-				// Immediate and Relative Addressing Mode Handler
+			// Immediate and Relative Addressing Mode Handler
 			case ADCb: case ANDb:  case ANCb_: case ANEb: case ASRb: case ARRb:
 			case BCCr: case BCSr:  case BEQr:  case BMIr: case BNEr: case BPLr:
 			case BRKn: case BVCr:  case BVSr:  case CMPb: case CPXb: case CPYb:
@@ -1478,7 +1456,7 @@ void MOS6510::buildInstructionTable ()
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchDataByte>;
 				break;
 
-				// Zero Page Addressing Mode Handler - Read & RMW
+			// Zero Page Addressing Mode Handler - Read & RMW
 			case ADCz:  case ANDz: case BITz: case CMPz: case CPXz: case CPYz:
 			case EORz:  case LAXz: case LDAz: case LDXz: case LDYz: case ORAz:
 			case NOPz_: case SBCz:
@@ -1490,10 +1468,10 @@ void MOS6510::buildInstructionTable ()
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchLowAddr>;
 				break;
 
-				// Zero Page with X Offset Addressing Mode Handler
-				// these issue extra reads on the 0 page, but we don't care about it
-				// because there are no detectable effects from them. These reads
-				// occur during the "wasted" cycle.
+			// Zero Page with X Offset Addressing Mode Handler
+			// these issue extra reads on the 0 page, but we don't care about it
+			// because there are no detectable effects from them. These reads
+			// occur during the "wasted" cycle.
 			case ADCzx: case ANDzx:  case CMPzx: case EORzx: case LDAzx: case LDYzx:
 			case NOPzx_: case ORAzx: case SBCzx:
 			case ASLzx: case DCPzx: case DECzx: case INCzx: case ISBzx: case LSRzx:
@@ -1625,9 +1603,7 @@ void MOS6510::buildInstructionTable ()
 		}
 
 		if ( access == AccessMode::READ )
-		{
 			instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchEffAddrDataByte>;
-		}
 
 		//---------------------------------------------------------------------------------------
 		// Addressing Modes Finished, other cycles are instruction dependent
@@ -1661,10 +1637,8 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case ASLz: case ASLzx: case ASLa: case ASLax:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::asl_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::asl_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case ASRb: // Also known as ALR
@@ -1706,12 +1680,9 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case BRKn:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushHighPC>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::brkPushLowPC>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushSR>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PushHighPC>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::brkPushLowPC>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PushSR>, true };
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::IRQLoRequest>;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::IRQHiRequest>;
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::fetchNextOpcode>;
@@ -1758,17 +1729,13 @@ void MOS6510::buildInstructionTable ()
 
 			case DCPz: case DCPzx: case DCPa: case DCPax: case DCPay: case DCPix:
 			case DCPiy: // Also known as DCM
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::dcm_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::dcm_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case DECz: case DECzx: case DECa: case DECax:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::dec_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::dec_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case DEXn:
@@ -1783,20 +1750,18 @@ void MOS6510::buildInstructionTable ()
 			case EORiy: case EORb:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::eor_instr>;
 				break;
-				#if 0
+#if 0
 				// HLT, also known as JAM
 			case 0x02: case 0x12: case 0x22: case 0x32: case 0x42: case 0x52:
 			case 0x62: case 0x72: case 0x92: case 0xb2: case 0xd2: case 0xf2:
 			case 0x02: case 0x12: case 0x22: case 0x32: case 0x42: case 0x52:
 			case 0x62: case 0x72: case 0x92: case 0xb2: case 0xd2: case 0xf2:
-				instrTable[ buildCycle++ ].func = hlt_instr;
+				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<hlt_instr>;
 				break;
-				#endif
+#endif
 			case INCz: case INCzx: case INCa: case INCax:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::inc_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::inc_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case INXn:
@@ -1809,18 +1774,14 @@ void MOS6510::buildInstructionTable ()
 
 			case ISBz: case ISBzx: case ISBa: case ISBax: case ISBay: case ISBix:
 			case ISBiy: // Also known as INS
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ins_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::ins_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case JSRw:
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::WasteCycle>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushHighPC>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushLowPC>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PushHighPC>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PushLowPC>, true };
 				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::FetchHighAddr>;
 				[[ fallthrough ]];
 			case JMPw: case JMPi:
@@ -1853,10 +1814,8 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case LSRz: case LSRzx: case LSRa: case LSRax:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::lsr_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::lsr_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case NOPn_: case NOPb_:
@@ -1875,13 +1834,11 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case PHAn:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::pha_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::pha_instr>, true };
 				break;
 
 			case PHPn:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PushSR>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PushSR>, true };
 				break;
 
 			case PLAn:
@@ -1900,10 +1857,8 @@ void MOS6510::buildInstructionTable ()
 
 			case RLAz: case RLAzx: case RLAix: case RLAa: case RLAax: case RLAay:
 			case RLAiy:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rla_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::rla_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case ROLn:
@@ -1911,10 +1866,8 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case ROLz: case ROLzx: case ROLa: case ROLax:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rol_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::rol_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case RORn:
@@ -1922,18 +1875,14 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case RORz: case RORzx: case RORa: case RORax:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::ror_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::ror_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case RRAa: case RRAax: case RRAay: case RRAz: case RRAzx: case RRAix:
 			case RRAiy:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::rra_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::rra_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case RTIn:
@@ -1956,8 +1905,7 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case SAXz: case SAXzy: case SAXa: case SAXix: // Also known as AXS
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::axs_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::axs_instr>, true };
 				break;
 
 			case SBCz:  case SBCzx: case SBCa: case SBCax: case SBCay: case SBCix:
@@ -1982,55 +1930,44 @@ void MOS6510::buildInstructionTable ()
 				break;
 
 			case SHAay: case SHAiy: // Also known as AXA
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::axa_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::axa_instr>, true };
 				break;
 
 			case SHSay: // Also known as TAS
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::shs_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::shs_instr>, true };
 				break;
 
 			case SHXay: // Also known as XAS
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::xas_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::xas_instr>, true };
 				break;
 
 			case SHYax: // Also known as SAY
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::say_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::say_instr>, true };
 				break;
 
 			case SLOz: case SLOzx: case SLOa: case SLOax: case SLOay: case SLOix:
 			case SLOiy: // Also known as ASO
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::aso_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::aso_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case SREz: case SREzx: case SREa: case SREax: case SREay: case SREix:
 			case SREiy: // Also known as LSE
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::lse_instr>;
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::lse_instr>, true };
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::PutEffAddrDataByte>, true };
 				break;
 
 			case STAz: case STAzx: case STAa: case STAax: case STAay: case STAix:
 			case STAiy:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sta_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::sta_instr>, true };
 				break;
 
 			case STXz: case STXzy: case STXa:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::stx_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::stx_instr>, true };
 				break;
 
 			case STYz: case STYzx: case STYa:
-				instrTable[ buildCycle ].nosteal = true;
-				instrTable[ buildCycle++ ].func = &StaticFuncWrapper<&MOS6510::sty_instr>;
+				instrTable[ buildCycle++ ] = { &StaticFuncWrapper<&MOS6510::sty_instr>, true };
 				break;
 
 			case TAXn:
@@ -2094,7 +2031,7 @@ void MOS6510::Initialise ()
 	irqAssertedOnPin = false;
 	nmiFlag = false;
 	rstFlag = false;
-	interruptCycle = MAX;
+	interruptCycle = MOS6510::MAX;
 
 	// Signals
 	rdy = true;

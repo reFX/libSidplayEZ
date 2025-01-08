@@ -29,6 +29,9 @@ sidinline void set_16lo8 ( uint16_t& word, uint8_t byte )		{	word = ( word & 0xf
 // Get the lo byte (8 bit) in a word (16 bit)
 [[ nodiscard ]] sidinline uint8_t get_16lo8 ( uint16_t word )	{	return uint8_t ( word );			}
 
+// Convert high-byte and low-byte to 16-bit word.
+[[ nodiscard ]] sidinline uint16_t get_16 ( uint8_t hi, uint8_t lo ) { return uint16_t ( ( hi << 8 ) | lo ); }
+
 // Set the hi byte (8 bit) in a word (16 bit)
 sidinline void set_16hi8 ( uint16_t& word, uint8_t byte )		{	word = ( word & 0x00FF ) | uint16_t ( byte << 8 );	}
 

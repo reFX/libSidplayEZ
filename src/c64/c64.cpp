@@ -120,7 +120,7 @@ void c64::reset ()
 {
 	eventScheduler.reset ();
 
-	//cpu.reset();
+	//cpu.reset ();
 	cia1.reset ();
 	cia2.reset ();
 	vic.reset ();

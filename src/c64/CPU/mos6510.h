@@ -68,7 +68,7 @@ private:
 	struct ProcessorCycle
 	{
 		void ( *func )( MOS6510& ) = nullptr;
-		bool nosteal = false ;
+		bool nosteal = false;
 	};
 
 private:
@@ -119,7 +119,7 @@ private:
 	uint8_t Register_Y;
 
 	/// Table of CPU opcode implementations
-	struct ProcessorCycle instrTable[ 0x101 << 3 ];
+	struct ProcessorCycle instrTable[ 0x101 << 3 ] = {};
 
 private:
 	void eventWithoutSteals ();
@@ -264,7 +264,7 @@ private:
 	sidinline void doADC ();
 	sidinline void doSBC ();
 
-	sidinline bool checkInterrupts () const { return rstFlag || nmiFlag || ( irqAssertedOnPin && !flags.getI () ); }
+	sidinline bool checkInterrupts () const { return rstFlag || nmiFlag || ( irqAssertedOnPin && ! flags.getI () ); }
 
 	sidinline void buildInstructionTable ();
 
