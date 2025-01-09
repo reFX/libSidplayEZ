@@ -135,3 +135,11 @@ const uint8_t* SidTune::c64Data () const
 	return tune ? tune->c64Data () : nullptr;
 }
 //-----------------------------------------------------------------------------
+
+const std::vector<uint8_t>& SidTune::getSidData () const
+{
+	static const std::vector<uint8_t> empty;
+
+	return tune ? tune->getSidData () : empty;
+}
+//-----------------------------------------------------------------------------

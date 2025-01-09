@@ -113,7 +113,7 @@ void Player::initialise ()
 
 	m_info.m_driverAddr = driver.driverAddr ();
 	m_info.m_driverLength = driver.driverLength ();
-	m_info.m_powerOnDelay = SidConfig::MAX_POWER_ON_DELAY;
+	m_info.m_powerOnDelay = SidConfig::MAX_POWER_ON_DELAY - 1;
 
 	driver.install ( m_c64.getMemInterface (), videoSwitch );
 

@@ -182,12 +182,11 @@ void SidTuneBase::placeSidTuneInC64mem ( sidmemory& mem )
 
 void SidTuneBase::loadFile ( const char* fileName, buffer_t& bufferRef )
 {
-	std::ifstream inFile ( fileName, std::ifstream::binary );
+	std::ifstream inFile ( fileName, std::ifstream::binary | std::ifstream::ate );
 
 	if ( ! inFile.is_open () )
 		throw loadError ( ERR_CANT_OPEN_FILE );
 
-	inFile.seekg ( 0, inFile.end );
 	const auto fileLen = int ( inFile.tellg () );
 
 	if ( fileLen <= 0 )

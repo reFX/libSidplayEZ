@@ -154,6 +154,7 @@ public:
 	* Get the pointer to the tune data.
 	*/
 	[[ nodiscard ]] const uint8_t* c64Data () const { return &cache[ fileOffset ]; }
+	[[ nodiscard ]] const std::vector<uint8_t>& getSidData () const { return cache; }
 
 	virtual ~SidTuneBase () = default;
 

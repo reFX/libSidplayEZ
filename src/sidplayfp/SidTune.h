@@ -170,6 +170,7 @@ public:  // ----------------------------------------------------------------
 	const char* createMD5New ( char* md5 = 0 );
 
 	[[ nodiscard ]] const uint8_t* c64Data () const;
+	[[ nodiscard ]] const std::vector<uint8_t>& getSidData () const;
 
 private:
 	// prevent copying

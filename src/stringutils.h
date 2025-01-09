@@ -23,6 +23,8 @@
 #include <cctype>
 #include <algorithm>
 #include <string>
+#include <sstream>
+#include <fstream>
 
 namespace stringutils
 {
@@ -32,7 +34,7 @@ namespace stringutils
 	[[ nodiscard ]] inline bool casecompare ( char c1, char c2 ) { return std::tolower ( c1 ) == std::tolower ( c2 ); }
 
 	/**
-	 * Compare two strings in a case insensitive way. 
+	 * Compare two strings in a case insensitive way.
 	 *
 	 * @return true if strings are equal.
 	 */
@@ -56,7 +58,7 @@ namespace stringutils
 
 		while ( *s1 || *s2 )
 		{
-			if ( ! casecompare ( *s1, *s2 ) )
+			if ( !casecompare ( *s1, *s2 ) )
 				return false;
 
 			++s1;
@@ -81,7 +83,7 @@ namespace stringutils
 
 		while ( n-- && ( *s1 || *s2 ) )
 		{
-			if ( ! casecompare ( *s1, *s2 ) )
+			if ( !casecompare ( *s1, *s2 ) )
 				return false;
 
 			++s1;
@@ -102,7 +104,7 @@ namespace stringutils
 
 	[[ nodiscard ]] inline std::string utf8toExtendedASCII ( const std::string& input )
 	{
-		if ( ! input.size () )
+		if ( !input.size () )
 			return {};
 
 		auto	in = input.c_str ();
@@ -117,5 +119,51 @@ namespace stringutils
 			else					out.append ( 1, char ( ch ) );
 		}
 		return out;
+	}
+
+	[[ nodiscard ]] inline std::string trim ( std::string str )
+	{
+		// ltrim
+		str.erase ( str.begin (), std::find_if ( str.begin (), str.end (), [] ( unsigned char ch ) {	return ! std::isspace ( ch );	} ) );
+		// rtrim
+		str.erase ( std::find_if ( str.rbegin (), str.rend (), [] ( unsigned char ch ) { return ! std::isspace ( ch );	} ).base (), str.end () );
+
+		return str;
+	}
+
+	[[ nodiscard ]] inline std::vector<std::string> arrayFromTokens ( const std::string& input, const char delimeter = '\n' )
+	{
+		std::vector<std::string>	tokens;
+
+		std::stringstream	ss ( input );
+		std::string			part;
+		while ( std::getline ( ss, part, delimeter ) )
+		{
+			part = trim ( part );
+			if ( ! part.empty () )
+				tokens.emplace_back ( part );
+		}
+
+		return tokens;
+	}
+
+	[[ nodiscard ]] inline std::string loadFile ( const char* filename )
+	{
+		// Read file into std::string
+		auto	file = std::ifstream ( filename, std::ios::in | std::ios::binary | std::ios::ate );
+		if ( !file.is_open () )
+			return {};
+
+		const auto	size = file.tellg ();
+		if ( size <= 0 )
+			return {};
+
+		file.seekg ( 0, std::ios::beg );
+
+		auto	str = std::string ( size, '\0' );
+		file.read ( str.data (), size );
+		file.close ();
+
+		return str;
 	}
 }

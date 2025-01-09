@@ -42,7 +42,7 @@ public:
 		"Copyright (C) 2000 Simon White\n",
 		"Copyright (C) 2007-2010 Antti Lankila\n",
 		"Copyright (C) 2010-2024 Leandro Nini\n",
-		"Copyright (C) 2023-2024 Michael Hartmann\n",
+		"Copyright (C) 2023-2025 Michael Hartmann\n",
 		"https://github.com/reFX/libsidplayEZ/\n",
 	};
 
