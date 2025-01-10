@@ -1,0 +1,55 @@
+#pragma once
+
+/*
+ * This file is part of libsidplayEZ, a SID player engine.
+ *
+ *  Copyright 2025 Michael Hartmann
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include <string>
+#include <vector>
+
+//-----------------------------------------------------------------------------
+
+struct SidTuneInfoEZ
+{
+	// All strings are stored as UTF8
+
+	// Absolute path
+	std::string		filename;
+
+	// Tune info
+	std::string		title;
+	std::string		author;
+	std::string		released;
+
+	// 6581 or 8580
+	std::vector<std::string>	model;
+
+	// PAL or NTSC
+	std::string		clock;
+
+	// e.g. 'CIA (PAL)', '50 Hz VBI (PAL)', etc.
+	std::string		speed;
+
+	// e.g. 'Martin_Galway_Digi', 'Rob_Hubbard', etc.
+	std::string		playroutineID;
+
+	unsigned int	numSongs = 0;
+	unsigned int	startSong = 0;
+};
+//-----------------------------------------------------------------------------

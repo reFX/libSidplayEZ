@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace libsidplayfp
+namespace libsidplayEZ
 {
 
 class sidid

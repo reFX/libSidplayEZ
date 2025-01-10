@@ -33,7 +33,7 @@
 #include "mixer.h"
 #include "c64/c64.h"
 
-#include "chip-selector.h"
+#include "EZ/chip-selector.h"
 
 #include <atomic>
 #include <vector>
@@ -65,9 +65,6 @@ private:
 	state_t		m_isPlaying = state_t::STOPPED;	// Playback status
 	uint8_t		videoSwitch;					// PAL/NTSC switch value
 
-	ChipSelector	chipSelector;
-	std::string		selectedChipProfile;
-
 	/**
 	* Get the C64 model for the current loaded tune.
 	*
@@ -83,7 +80,7 @@ private:
 
 	void sidParams ( double cpuFreq, int frequency );
 
-	inline void run ( unsigned int events )
+	sidinline void run ( unsigned int events )
 	{
 		while ( events-- )
 			m_c64.clock ();
@@ -103,8 +100,6 @@ public:
 	[[ nodiscard ]] bool isPlaying () const { return m_isPlaying != state_t::STOPPED; }
 
 	[[ nodiscard ]] int getNumChips () const { return m_mixer.getNumChips (); }
-
-	void setChipProfiles ( const ChipSelector::profileMap& map ) { chipSelector.setProfiles ( map ); }
 
 	void setCombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold );
 
@@ -128,8 +123,6 @@ public:
 	[[ nodiscard ]] uint16_t getCia1TimerA () const { return m_c64.getCia1TimerA (); }
 
 	bool getSidStatus ( int sidNum, uint8_t regs[ 32 ] );
-
-	[[ nodiscard ]] std::string getChipProfile () const { return selectedChipProfile; }
 };
 
 }

@@ -23,8 +23,7 @@
 #include <cctype>
 #include <algorithm>
 #include <string>
-#include <sstream>
-#include <fstream>
+#include <vector>
 
 namespace stringutils
 {
@@ -48,50 +47,14 @@ namespace stringutils
 	 *
 	 * @return true if strings are equal.
 	 */
-	[[ nodiscard ]] inline bool equal ( const char* s1, const char* s2 )
-	{
-		if ( s1 == s2 )
-			return true;
-
-		if ( s1 == 0 || s2 == 0 )
-			return false;
-
-		while ( *s1 || *s2 )
-		{
-			if ( !casecompare ( *s1, *s2 ) )
-				return false;
-
-			++s1;
-			++s2;
-		}
-
-		return true;
-	}
+	[[ nodiscard ]] bool equal ( const char* s1, const char* s2 );
 
 	/**
 	 * Compare first n characters of two strings in a case insensitive way.
 	 *
 	 * @return true if strings are equal.
 	 */
-	[[ nodiscard ]] inline bool equal ( const char* s1, const char* s2, size_t n )
-	{
-		if ( s1 == s2 || n == 0 )
-			return true;
-
-		if ( s1 == 0 || s2 == 0 )
-			return false;
-
-		while ( n-- && ( *s1 || *s2 ) )
-		{
-			if ( !casecompare ( *s1, *s2 ) )
-				return false;
-
-			++s1;
-			++s2;
-		}
-
-		return true;
-	}
+	[[ nodiscard ]] bool equal ( const char* s1, const char* s2, size_t n );
 
 	[[ nodiscard ]] inline std::string toLower ( const std::string& input )
 	{
@@ -102,24 +65,8 @@ namespace stringutils
 		return newStr;
 	}
 
-	[[ nodiscard ]] inline std::string utf8toExtendedASCII ( const std::string& input )
-	{
-		if ( !input.size () )
-			return {};
-
-		auto	in = input.c_str ();
-		std::string	out;
-
-		while ( *in )
-		{
-			auto	ch = uint8_t ( *in++ );
-
-			if ( ch == 0xC2 )		out.append ( 1, *in++ );
-			else if ( ch == 0xC3 )	out.append ( 1, *in++ + 0x40 );
-			else					out.append ( 1, char ( ch ) );
-		}
-		return out;
-	}
+	[[ nodiscard ]] std::string utf8toExtendedASCII ( const std::string& input );
+	[[ nodiscard ]] std::string extendedASCIItoUTF8 ( const char* str );
 
 	[[ nodiscard ]] inline std::string trim ( std::string str )
 	{
@@ -131,39 +78,6 @@ namespace stringutils
 		return str;
 	}
 
-	[[ nodiscard ]] inline std::vector<std::string> arrayFromTokens ( const std::string& input, const char delimeter = '\n' )
-	{
-		std::vector<std::string>	tokens;
-
-		std::stringstream	ss ( input );
-		std::string			part;
-		while ( std::getline ( ss, part, delimeter ) )
-		{
-			part = trim ( part );
-			if ( ! part.empty () )
-				tokens.emplace_back ( part );
-		}
-
-		return tokens;
-	}
-
-	[[ nodiscard ]] inline std::string loadFile ( const char* filename )
-	{
-		// Read file into std::string
-		auto	file = std::ifstream ( filename, std::ios::in | std::ios::binary | std::ios::ate );
-		if ( !file.is_open () )
-			return {};
-
-		const auto	size = file.tellg ();
-		if ( size <= 0 )
-			return {};
-
-		file.seekg ( 0, std::ios::beg );
-
-		auto	str = std::string ( size, '\0' );
-		file.read ( str.data (), size );
-		file.close ();
-
-		return str;
-	}
-}
+	[[ nodiscard ]] std::vector<std::string> arrayFromTokens ( const std::string& input, const char delimeter = '\n' );
+	[[ nodiscard ]] std::string loadFile ( const char* filename );
+} // namespace stringutils

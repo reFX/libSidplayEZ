@@ -1204,7 +1204,7 @@ void MOS6510::tya_instr ()
 
 void MOS6510::invalidOpcode ()
 {
-//	throw haltInstruction ();
+	throw haltInstruction ();
 }
 
 

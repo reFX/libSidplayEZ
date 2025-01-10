@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace libsidplayfp
+namespace libsidplayEZ
 {
 
 //-----------------------------------------------------------------------------

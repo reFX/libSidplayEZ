@@ -257,22 +257,6 @@ bool Player::setConfig ( const SidConfig& cfg, bool force )
 			// SID emulation setup (must be performed before the environment setup call)
 			sidCreate ( cfg.defaultSidModel, cfg.forceSidModel, addresses );
 
-			//
-			// Attempt to have better sounding SIDs by adjusting filter-range, digi-boost, and combined waveform strength
-			// per author with the assumption they worked with the same machine their entire career
-			//
-			const auto [ profileName, chipProfile ] = chipSelector.getChipProfile ( tuneInfo->path (), tuneInfo->dataFileName () );
-
-			selectedChipProfile = profileName;
-
-			set6581FilterRange ( chipProfile.fltCox );
-			set6581FilterCurve ( chipProfile.flt0Dac );
-			set6581FilterGain ( chipProfile.fltGain );
-
-			set6581DigiVolume ( chipProfile.digi );
-
-			setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), float ( chipProfile.cwsThreshold ) );
-
 			m_c64.setModel ( c64model ( cfg.defaultC64Model, cfg.forceC64Model ) );
 
 			auto getCiaModel = [] ( SidConfig::cia_model_t model )

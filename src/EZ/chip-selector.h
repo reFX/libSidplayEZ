@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 
-namespace libsidplayfp
+namespace libsidplayEZ
 {
 //-----------------------------------------------------------------------------
 

@@ -21,7 +21,7 @@
 #include "sidid.h"
 #include "../stringutils.h"
 
-namespace libsidplayfp
+namespace libsidplayEZ
 {
 
 //-----------------------------------------------------------------------------

@@ -50,7 +50,11 @@ int SincResampler::fir ( int subcycle )
 	{
 		auto    out = 0;
 
-  		for ( auto i = 0; i < bLength; ++i )
+		#if __has_cpp_attribute( assume )
+			[[ assume ( bLength > 0 ) ]];
+		#endif
+
+		for ( auto i = 0; i < bLength; ++i )
   			out += a[ i ] * b[ i ];
  
 		return ( out + ( 1 << 14 ) ) >> 15;
