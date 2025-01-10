@@ -25,6 +25,8 @@
 
 #include <cassert>
 #include <cmath>
+#include <numeric>
+#include <execution>
 
 #if ! defined __APPLE__
 constexpr auto	M_PI = 3.14159265358979323846;
@@ -48,9 +50,9 @@ int SincResampler::fir ( int subcycle )
 	{
 		auto    out = 0;
 
-		for ( auto i = 0; i < bLength; ++i )
-			out += a[ i ] * b[ i ];
-
+  		for ( auto i = 0; i < bLength; ++i )
+  			out += a[ i ] * b[ i ];
+ 
 		return ( out + ( 1 << 14 ) ) >> 15;
 	};
 
@@ -90,7 +92,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 	// A fraction of the bandwidth is allocated to the transition band, which we double because we design the filter to transition halfway at Nyquist
 	const auto	dw = ( 1.0 - 2.0 * highestAccurateFrequency / samplingFrequency ) * M_PI * 2.0;
 
-	auto I0 = [] ( double x )
+	constexpr auto I0 = [] ( double x )
 	{
 		// Maximum error acceptable in I0 is 1e-6, or ~96 dB
 		constexpr auto	I0E = 1e-6;
@@ -156,7 +158,7 @@ void SincResampler::setup ( double clockFrequency, double samplingFrequency, dou
 	firTable.resize ( firRES * firN );
 
 	// The cutoff frequency is midway through the transition band, in effect the same as Nyquist
-	const auto	wc = M_PI;
+	constexpr auto	wc = M_PI;
 
 	// Calculate the sinc tables
 	const auto	scale = 32768.0 * wc * r_cyclesPerSampleD / M_PI;
