@@ -215,7 +215,7 @@ public:
 		const unsigned int Vgdt_2 = Vgdt * Vgdt;
 
 		// "Snake" current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
-		const auto	n_I_snake = fmc.getNormalizedCurrentFactor ( wlSnake ) * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
+		const auto	n_I_snake = fmc.getNormalizedCurrentFactor<13> ( wlSnake ) * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
 
 		// VCR gate voltage.       // Scaled by m*2^16
 		// Vg = Vddt - sqrt(((Vddt - Vw)^2 + Vgdt^2)/2)

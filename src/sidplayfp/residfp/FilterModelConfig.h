@@ -141,9 +141,10 @@ public:
  		return uint16_t ( tmp );
 	}
 
+	template<int N> 
 	[[ nodiscard ]] sidinline uint16_t getNormalizedCurrentFactor ( double wl ) const
 	{
-		const auto	tmp = ( 1 << 13 ) * currFactorCoeff * wl;
+		const auto	tmp = ( 1 << N ) * currFactorCoeff * wl;
 		assert ( tmp >= 0.0 && tmp < 65536.0 );
 		return uint16_t ( tmp );
 	}

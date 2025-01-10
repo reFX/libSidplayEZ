@@ -71,8 +71,7 @@ public:
 	sidinline void setFc ( double wl )
 	{
 		// Normalized current factor, 1 cycle at 1MHz.
-		// Fit in 5 bits.
-		n_dac = fmc.getNormalizedCurrentFactor ( wl );
+		n_dac = fmc.getNormalizedCurrentFactor<17> ( wl );
 	}
 
 	/**
@@ -104,7 +103,7 @@ public:
 		const unsigned int Vgdt_2 = Vgdt * Vgdt;
 
 		// DAC current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
-		const auto	n_I_dac = n_dac * ( int ( Vgst_2 - Vgdt_2 ) >> 15 );
+		const auto	n_I_dac = ( n_dac * ( int ( Vgst_2 - Vgdt_2 ) >> 15 ) ) >> 4;
 
 		// Change in capacitor charge.
 		vc += n_I_dac;
