@@ -40,16 +40,28 @@ struct SidTuneInfoEZ
 	// 6581 or 8580
 	std::vector<std::string>	model;
 
-	// PAL or NTSC
+	// "PAL" or "NTSC"
 	std::string		clock;
 
-	// e.g. 'CIA (PAL)', '50 Hz VBI (PAL)', etc.
+	// e.g. "CIA (PAL)", "50 Hz VBI (PAL)", etc.
 	std::string		speed;
 
-	// e.g. 'Martin_Galway_Digi', 'Rob_Hubbard', etc.
+	// e.g. "Martin_Galway_Digi", "Rob_Hubbard", etc.
 	std::string		playroutineID;
 
+	// e.g. "Martin Galway", "Rob Hubbard", "GoatTracker", etc.
+	std::string		chipProfile;
+
+	// Technical data
+	unsigned int	currentSong = 0;
 	unsigned int	numSongs = 0;
 	unsigned int	startSong = 0;
+	std::string		md5;
+
+	// C64 memory addresses
+	uint16_t	c64LoadAddress = 0;
+	uint16_t	c64InitAddress = 0;
+	uint16_t	c64PlayAddress = 0;
+	uint32_t	c64DataLength = 0;
 };
 //-----------------------------------------------------------------------------

@@ -7,8 +7,13 @@
 namespace libsidplayEZ
 {
 
-Player::Player ()
+//-----------------------------------------------------------------------------
+
+void Player::setRoms ( const void* kernal, const void* basic, const void* character )
 {
+	engine.setKernal ( (const uint8_t*)kernal );
+	engine.setBasic ( (const uint8_t*)basic );
+	engine.setChargen ( (const uint8_t*)character );
 }
 //-----------------------------------------------------------------------------
 
@@ -25,7 +30,7 @@ bool Player::loadSidFile ( const char* filename )
 	stiEZ = {};
 
 	tune.load ( filename );
-	md5 = tune.createMD5New ();
+	stiEZ.md5 = tune.createMD5New ();
 
 	auto	info = tune.getInfo ();
 	if ( ! info )
@@ -43,6 +48,11 @@ bool Player::loadSidFile ( const char* filename )
 		stiEZ.startSong = info->startSong ();
 
 		stiEZ.playroutineID = sidID.findPlayerRoutine ( tune.getSidData () );
+
+		stiEZ.c64LoadAddress = info->loadAddr ();
+		stiEZ.c64InitAddress = info->initAddr ();
+		stiEZ.c64PlayAddress = info->playAddr ();
+		stiEZ.c64DataLength = info->c64dataLen ();
 	}
 
 	//
@@ -52,7 +62,7 @@ bool Player::loadSidFile ( const char* filename )
 	{
 		const auto [ profileName, chipProfile ] = chipSelector.getChipProfile ( info->path (), info->dataFileName () );
 
-		selectedChipProfile = profileName;
+		stiEZ.chipProfile = profileName;
 
 		engine.set6581FilterRange ( chipProfile.fltCox );
 		engine.set6581FilterCurve ( chipProfile.flt0Dac );
@@ -67,12 +77,12 @@ bool Player::loadSidFile ( const char* filename )
 }
 //-----------------------------------------------------------------------------
 
-bool Player::init ( const unsigned int songNo )
+bool libsidplayEZ::Player::setTuneNumber ( const unsigned int songNo )
 {
 	readyToPlay = false;
 
 	// Select song
-	tune.selectSong ( songNo );
+	stiEZ.currentSong = tune.selectSong ( songNo );
 
 	auto	info = tune.getInfo ();
 	if ( ! info )
@@ -105,16 +115,32 @@ bool Player::init ( const unsigned int songNo )
 		stiEZ.speed = engineInfo.speedString ();
 	}
 
+	// Override chip-profile for Emulation based SID editors (Cheesecutter, GoatTracker, SidWizard etc.)
+	{
+		if ( stiEZ.model[ 0 ] == "6581" )
+		{
+			auto oldEmulation = [ this ]
+			{
+				stiEZ.chipProfile = "Editor uses reSID emulation";
+
+				engine.set6581FilterRange ( 0.5 );
+				engine.set6581FilterCurve ( 0.5 );
+				engine.set6581FilterGain ( 1.0 );
+				engine.set6581DigiVolume ( 1.0 );
+				engine.setCombinedWaveforms ( reSIDfp::CombinedWaveforms::STRONG, 1.0 );
+			};
+
+			static const std::vector<std::string>	editorsUsingEmulation = {
+				"CheeseCutter_1", "GoatTracker_V", "SidWizard_", "Hermit/SidWizard_V",
+			};
+
+			for ( const auto& id : editorsUsingEmulation )
+				if ( stiEZ.playroutineID.starts_with ( id ) )
+					oldEmulation ();
+		}
+	}
+
 	return readyToPlay;
-}
-//-----------------------------------------------------------------------------
-
-unsigned int Player::getCurrentSong () const
-{
-	if ( auto info = tune.getInfo () )
-		return info->currentSong ();
-
-	return 0;
 }
 //-----------------------------------------------------------------------------
 

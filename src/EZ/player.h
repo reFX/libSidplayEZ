@@ -13,37 +13,37 @@ namespace libsidplayEZ
 class Player final
 {
 public:
-	Player ();
-	~Player () = default;
-
 	bool loadSidIDConfig ( const char* filename ) { return sidID.loadSidIDConfig ( filename ); }
 	void setChipProfileMap ( const ChipSelector::profileMap& map ) { chipSelector.setProfiles ( map ); }
 
+	void setRoms ( const void* kernal, const void* basic, const void* character );
+
 	void setSamplerate ( const int _sampleRate );
 	bool isReadyToPlay () const { return readyToPlay; }
+
 	bool loadSidFile ( const char* filename );
-	bool init ( const unsigned int songNo = 0 );
+	bool setTuneNumber (const unsigned int songNo = 0 );
+	uint32_t runEmulation ( int16_t* dst, uint32_t lengthWanted )	{	return engine.play ( dst, lengthWanted );		}
+	bool getSidStatus ( int sidNum, uint8_t regs[ 32 ] )			{	return engine.getSidStatus ( sidNum, regs );	}
 
 	[[ nodiscard ]] int getNumChips () const { return engine.getNumChips (); }
 	[[ nodiscard ]] const int getNumOutChannels () const { return config.playback; }
 
 	[[ nodiscard ]] const SidTuneInfoEZ& getFileInfo () const	{	return stiEZ;	}
-	[[ nodiscard ]] const SidTuneInfo* getSidTuneInfo () const	{	return tune.getInfo ();	}
 	[[ nodiscard ]] const SidTune& getSidTune () const { return tune; }
 
-	[[ nodiscard ]] unsigned int getCurrentSong () const;
-	[[ nodiscard ]] std::string getChipProfile () const { return selectedChipProfile; }
+	void setDacLeakage ( const double leakage )		{ engine.setDacLeakage ( leakage ); }
+	void set6581VoiceDrift ( const double drift )	{ engine.set6581VoiceDCDrift ( drift ); }
 
-	libsidplayfp::Player	engine;
+	[[ nodiscard ]] unsigned int getEmulatedTimeMs () const { return engine.timeMs (); }
 
 private:
 	bool	readyToPlay = false;
 	int		sampleRate = 0;
 
-	const char* md5 = nullptr;
-
 	ChipSelector	chipSelector;
-	std::string		selectedChipProfile;
+
+	libsidplayfp::Player	engine;
 
 	SidTune		tune;
 	SidConfig	config;
