@@ -85,7 +85,7 @@ bool sidid::loadSidIDConfig ( const char* filename )
 }
 //-----------------------------------------------------------------------------
 
-std::string sidid::findPlayerRoutine ( const std::vector<uint8_t>& tuneData ) const
+std::vector<std::string> sidid::findPlayerRoutines ( const std::vector<uint8_t>& tuneData ) const
 {
 	// No signatures loaded
 	if ( sidIDs.empty () )
@@ -155,12 +155,15 @@ std::string sidid::findPlayerRoutine ( const std::vector<uint8_t>& tuneData ) co
 	};
 
 	// Identify playroutine
+	std::vector<std::string>	routines;
+
 	for ( const auto& id : sidIDs )
 		for ( const auto& sig : id.sigs )
 			if ( identifybytes ( sig ) )
-				return id.name;
+				if ( std::find ( routines.begin (), routines.end (), id.name ) == routines.end () )
+					routines.emplace_back ( id.name );
 
-	return {};
+	return routines;
 }
 //-----------------------------------------------------------------------------
 

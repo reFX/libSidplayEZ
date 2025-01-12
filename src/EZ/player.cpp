@@ -47,7 +47,7 @@ bool Player::loadSidFile ( const char* filename )
 		stiEZ.numSongs = info->songs ();
 		stiEZ.startSong = info->startSong ();
 
-		stiEZ.playroutineID = sidID.findPlayerRoutine ( tune.getSidData () );
+		stiEZ.playroutineID = sidID.findPlayerRoutines ( tune.getSidData () );
 
 		stiEZ.c64LoadAddress = info->loadAddr ();
 		stiEZ.c64InitAddress = info->initAddr ();
@@ -117,7 +117,7 @@ bool libsidplayEZ::Player::setTuneNumber ( const unsigned int songNo )
 
 	// Override chip-profile for Emulation based SID editors (Cheesecutter, GoatTracker, SidWizard etc.)
 	{
-		if ( stiEZ.model[ 0 ] == "6581" )
+		if ( stiEZ.model[ 0 ] == "6581" && ! stiEZ.playroutineID.empty () )
 		{
 			auto oldEmulation = [ this ]
 			{
@@ -131,11 +131,11 @@ bool libsidplayEZ::Player::setTuneNumber ( const unsigned int songNo )
 			};
 
 			static const std::vector<std::string>	editorsUsingEmulation = {
-				"CheeseCutter_1", "GoatTracker_V", "SidWizard_", "Hermit/SidWizard_V",
+				"CheeseCutter_1", "GoatTracker_V", "SidWizard_", "Hermit/SidWizard_V", "SidFactory_II/",
 			};
 
 			for ( const auto& id : editorsUsingEmulation )
-				if ( stiEZ.playroutineID.starts_with ( id ) )
+				if ( stiEZ.playroutineID[ 0 ].starts_with ( id ) )
 					oldEmulation ();
 		}
 	}

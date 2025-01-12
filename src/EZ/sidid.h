@@ -31,7 +31,7 @@ class sidid
 {
 public:
 	bool loadSidIDConfig ( const char* filename );
-	std::string findPlayerRoutine ( const std::vector<uint8_t>& data ) const;
+	std::vector<std::string> findPlayerRoutines ( const std::vector<uint8_t>& data ) const;
 
 private:
 	struct SIDID

@@ -47,7 +47,7 @@ struct SidTuneInfoEZ
 	std::string		speed;
 
 	// e.g. "Martin_Galway_Digi", "Rob_Hubbard", etc.
-	std::string		playroutineID;
+	std::vector<std::string>		playroutineID;
 
 	// e.g. "Martin Galway", "Rob Hubbard", "GoatTracker", etc.
 	std::string		chipProfile;
