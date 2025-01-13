@@ -55,24 +55,6 @@ bool Player::loadSidFile ( const char* filename )
 		stiEZ.c64DataLength = info->c64dataLen ();
 	}
 
-	//
-	// Attempt to have better sounding SIDs by adjusting filter-range, digi-boost, and combined waveform strength
-	// per author with the assumption they worked with the same machine their entire career
-	//
-	{
-		const auto [ profileName, chipProfile ] = chipSelector.getChipProfile ( info->path (), info->dataFileName () );
-
-		stiEZ.chipProfile = profileName;
-
-		engine.set6581FilterRange ( chipProfile.fltCox );
-		engine.set6581FilterCurve ( chipProfile.flt0Dac );
-		engine.set6581FilterGain ( chipProfile.fltGain );
-
-		engine.set6581DigiVolume ( chipProfile.digi );
-
-		engine.setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), float ( chipProfile.cwsThreshold ) );
-	}
-
 	return tune.getStatus ();
 }
 //-----------------------------------------------------------------------------
@@ -113,6 +95,24 @@ bool libsidplayEZ::Player::setTuneNumber ( const unsigned int songNo )
 		const auto& engineInfo = (const SidInfoImpl&)engine.getInfo ();
 
 		stiEZ.speed = engineInfo.speedString ();
+	}
+
+	//
+	// Attempt to have better sounding SIDs by adjusting filter-range, digi-boost, and combined waveform strength
+	// per author with the assumption they worked with the same machine their entire career
+	//
+	{
+		const auto [ profileName, chipProfile ] = chipSelector.getChipProfile ( info->path (), info->dataFileName () );
+
+		stiEZ.chipProfile = profileName;
+
+		engine.set6581FilterRange ( chipProfile.fltCox );
+		engine.set6581FilterCurve ( chipProfile.flt0Dac );
+		engine.set6581FilterGain ( chipProfile.fltGain );
+
+		engine.set6581DigiVolume ( chipProfile.digi );
+
+		engine.setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), float ( chipProfile.cwsThreshold ) );
 	}
 
 	// Override chip-profile for Emulation based SID editors (Cheesecutter, GoatTracker, SidWizard etc.)
