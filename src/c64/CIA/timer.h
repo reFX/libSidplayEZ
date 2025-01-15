@@ -27,7 +27,7 @@
 #include "../../EventCallback.h"
 #include "../../EventScheduler.h"
 
-#include "../../helpers.h"
+#include "../../EZ/config.h"
 
 namespace libsidplayfp
 {

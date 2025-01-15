@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-#include "../../helpers.h"
+#include "../../EZ/config.h"
 
 namespace reSIDfp
 {

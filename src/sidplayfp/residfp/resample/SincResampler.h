@@ -25,7 +25,7 @@
 #include <cmath>
 #include <vector>
 
-#include "../../../helpers.h"
+#include "../../../EZ/config.h"
 
 namespace reSIDfp
 {

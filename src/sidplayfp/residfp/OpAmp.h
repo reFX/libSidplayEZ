@@ -25,7 +25,7 @@
 #include <memory>
 #include <vector>
 
-#include "../../helpers.h"
+#include "../../EZ/config.h"
 
 #include "Spline.h"
 

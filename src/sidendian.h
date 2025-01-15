@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 
-#include "helpers.h"
+#include "EZ/config.h"
 
 // Set the lo byte (8 bit) in a word (16 bit)
 sidinline void set_16lo8 ( uint16_t& word, uint8_t byte )		{	word = ( word & 0xff00 ) | byte;	}

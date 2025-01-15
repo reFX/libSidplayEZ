@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "../../helpers.h"
+#include "../../EZ/config.h"
 
 constexpr auto  SPRITES = 8;
 

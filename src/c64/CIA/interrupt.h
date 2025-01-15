@@ -25,7 +25,7 @@
 #include "../../EventScheduler.h"
 #include "../../EventCallback.h"
 
-#include "../../helpers.h"
+#include "../../EZ/config.h"
 
 #include <stdint.h>
 

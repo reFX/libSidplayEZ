@@ -23,7 +23,7 @@
 #include "Bank.h"
 #include "pla.h"
 
-#include "../../helpers.h"
+#include "../../EZ/config.h"
 
 namespace libsidplayfp
 {
