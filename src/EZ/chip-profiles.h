@@ -47,7 +47,6 @@
 { "Mitch & Dane",						{	.folder = "/MUSICIANS/M/Mitch_and_Dane/",			.fltCox = 0.85,	.flt0Dac = 0.3,	.cwsThreshold = 0.5	} },
 { "Neil Brennan",						{	.folder = "/MUSICIANS/B/Brennan_Neil/",				.fltCox = 0.25	} },
 { "Nigel Grieve",						{	.folder = "/MUSICIANS/G/Grieve_Nigel/",				.fltCox = 1.0,	.fltGain = 1.5	} },
-{ "NM156",								{	.folder = "/MUSICIANS/N/NM156/",					.fltCox = 0.7,	.flt0Dac = 0.8	} },
 { "Paul Hannay (Feekzoid)",				{	.folder = "/MUSICIANS/F/Feekzoid/",			} },
 { "Peter Clarke",						{	.folder = "/MUSICIANS/C/Clarke_Peter/",				.fltCox = 0.2	} },
 { "Pex Tufvesson",						{	.folder = "/MUSICIANS/M/Mahoney/",					.fltCox = 0.35	} },
@@ -68,3 +67,4 @@
 { "Keith Tinman",						{	.folder = "/MUSICIANS/T/Tinman_Keith/",				.fltCox = 0.4,	.fltGain = 0.7	} },
 { "Gerard Gourley",						{	.folder = "/MUSICIANS/S/Sonic_Graffiti/Gourley_Gerard/",	.fltCox = 0.1,	.flt0Dac = 1.5,	.fltGain = 0.8	} },
 { "Frederik Segerfalk",					{	.folder = "/MUSICIANS/M/Moppe/",					.fltCox = 0.9	} },
+{ "David Sturgeon (Abynx)",				{	.folder = "/MUSICIANS/A/Abynx/",					.fltCox = 0.1,	.flt0Dac = 0.3,	.fltGain = 0.8	} },
