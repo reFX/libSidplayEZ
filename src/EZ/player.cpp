@@ -140,6 +140,8 @@ bool libsidplayEZ::Player::setTuneNumber ( const unsigned int songNo )
 		}
 	}
 
+	engine.warmup ();
+
 	return readyToPlay;
 }
 //-----------------------------------------------------------------------------

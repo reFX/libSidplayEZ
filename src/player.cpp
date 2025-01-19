@@ -106,14 +106,16 @@ void Player::initialise ()
 	if ( size > 0xffff )
 		throw configError ( "SIDPLAYER ERROR: Size of music data exceeds C64 memory." );
 
+	constexpr auto	powerOnDelay = 0;	// SidConfig::MAX_POWER_ON_DELAY - 1 
+
 	psiddrv	driver ( m_tune->getInfo () );
-	driver.powerOnDelay ( 32767 );// SidConfig::MAX_POWER_ON_DELAY );
+	driver.powerOnDelay ( powerOnDelay );
 	if ( ! driver.drvReloc () )
 		throw configError ( driver.errorString () );
 
 	m_info.m_driverAddr = driver.driverAddr ();
 	m_info.m_driverLength = driver.driverLength ();
-	m_info.m_powerOnDelay = SidConfig::MAX_POWER_ON_DELAY - 1;
+	m_info.m_powerOnDelay = powerOnDelay;
 
 	driver.install ( m_c64.getMemInterface (), videoSwitch );
 
@@ -506,6 +508,25 @@ bool Player::getSidStatus ( int sidNum, uint8_t regs[ 32 ] )
 	}
 
 	return false;
+}
+//-----------------------------------------------------------------------------
+
+void Player::warmup ()
+{
+	// Make sure a tune is loaded
+	if ( ! m_tune )
+		return;
+
+	int16_t		buffer[ 4410 ];	// 100 ms buffer
+	uint32_t	count = uint32_t ( std::size ( buffer ) );
+
+	constexpr auto	seconds = 1.5;
+	constexpr auto	loopsToRun = int ( ( 44100.0 * seconds ) / std::size ( buffer ) );
+
+	for ( auto i = 0; i < loopsToRun; ++i )
+		play ( buffer, count );
+
+	m_c64.startCpu ();
 }
 //-----------------------------------------------------------------------------
 

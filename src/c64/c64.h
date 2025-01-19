@@ -197,6 +197,7 @@ public:
 
 	void reset ();
 	void resetCpu () { cpu.reset (); }
+	void startCpu () { cpu.start (); }
 
 	/**
 	* Set the c64 model.
