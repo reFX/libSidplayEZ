@@ -328,7 +328,13 @@ protected:
 	/**
 	* Set filter cutoff frequency.
 	*/
-	void updatedCenterFrequency () override;
+	sidinline void updatedCenterFrequency () override
+	{
+		const auto	Vw = f0_dac[ fc ];
+
+		hpIntegrator.setVw ( Vw );
+		bpIntegrator.setVw ( Vw );
+	}
 
 public:
 	Filter6581 ();

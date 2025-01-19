@@ -283,7 +283,13 @@ protected:
 	/**
 	* Set filter cutoff frequency.
 	*/
-	void updatedCenterFrequency () override;
+	sidinline void updatedCenterFrequency () override
+	{
+		const auto	wl = fltDac[ fc ];
+
+		hpIntegrator.setFc ( wl );
+		bpIntegrator.setFc ( wl );
+	}
 
 public:
 	Filter8580 ();

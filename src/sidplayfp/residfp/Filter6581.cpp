@@ -41,15 +41,6 @@ Filter6581::Filter6581 ()
 }
 //-----------------------------------------------------------------------------
 
-void Filter6581::updatedCenterFrequency ()
-{
-	const auto	Vw = f0_dac[ fc ];
-
-	hpIntegrator.setVw ( Vw );
-	bpIntegrator.setVw ( Vw );
-}
-//-----------------------------------------------------------------------------
-
 void Filter6581::setFilterCurve ( double curvePosition )
 {
 	delete[] f0_dac;

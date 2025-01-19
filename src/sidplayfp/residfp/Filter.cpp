@@ -55,8 +55,6 @@ Filter::Filter ( FilterModelConfig& _fmc )
 	summer = fmc.getSummer ();
 	volume = fmc.getVolume ();
 	resonance = fmc.getResonance ();
-
-//	input ( 0 );
 }
 //-----------------------------------------------------------------------------
 

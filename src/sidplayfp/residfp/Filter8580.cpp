@@ -71,15 +71,6 @@ Filter8580::Filter8580 ()
 }
 //-----------------------------------------------------------------------------
 
-void Filter8580::updatedCenterFrequency ()
-{
-	const auto	wl = fltDac[ fc ];
-
-	hpIntegrator.setFc ( wl );
-	bpIntegrator.setFc ( wl );
-}
-//-----------------------------------------------------------------------------
-
 void Filter8580::setFilterCurve ( double curvePosition )
 {
 	// Adjust curvePosition (1.2 <= curvePosition <= 1.8)

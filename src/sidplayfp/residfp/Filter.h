@@ -76,7 +76,7 @@ protected:
 	/**
 	* Set filter cutoff frequency.
 	*/
-	virtual void updatedCenterFrequency () {}
+	sidinline virtual void updatedCenterFrequency () = 0;
 
 	/**
 	* Mixing configuration modified (offsets change)
@@ -95,16 +95,6 @@ protected:
 public:
 	Filter ( FilterModelConfig& fmc );
 	virtual ~Filter () = default;
-
-	/**
-	* SID clocking - 1 cycle
-	*
-	* @param v1 voice 1 in
-	* @param v2 voice 2 in
-	* @param v3 voice 3 in
-	* @return filtered output
-	*/
-//	[[ nodiscard ]] virtual sidinline uint16_t clock ( int voice1, int voice2, int voice3 ) = 0;
 
 	/**
 	* SID reset.
