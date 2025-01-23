@@ -17,9 +17,8 @@ void Player::setRoms ( const void* kernal, const void* basic, const void* charac
 }
 //-----------------------------------------------------------------------------
 
-void Player::setSamplerate ( const int _sampleRate )
+void Player::setSamplerate ( const int sampleRate )
 {
-	sampleRate = _sampleRate;
 	config.frequency = sampleRate;
 }
 //-----------------------------------------------------------------------------
@@ -139,8 +138,6 @@ bool libsidplayEZ::Player::setTuneNumber ( const unsigned int songNo )
 					oldEmulation ();
 		}
 	}
-
-	engine.warmup ();
 
 	return readyToPlay;
 }

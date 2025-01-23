@@ -293,7 +293,6 @@ public:
 	static const char* credits ();
 
 	void setRDY ( bool newRDY );
-	void start ();
 
 	// Non-standard functions
 	void triggerRST ();

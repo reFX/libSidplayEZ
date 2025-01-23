@@ -2036,10 +2036,7 @@ void MOS6510::Initialise ()
 	// Signals
 	rdy = true;
 	d1x1 = false;
-}
 
-void MOS6510::start ()
-{
 	eventScheduler.schedule ( m_nosteal, 0, EVENT_CLOCK_PHI2 );
 }
 

@@ -39,7 +39,6 @@ public:
 
 private:
 	bool	readyToPlay = false;
-	int		sampleRate = 0;
 
 	ChipSelector	chipSelector;
 

@@ -58,7 +58,7 @@ private:
 	SidInfoImpl	m_info;				// Tune info
 	SidConfig	m_cfg;				// User Configuration Settings
 
-	sidemu		m_sidEmu[ 3 ] = { m_c64.getEventScheduler (), m_c64.getEventScheduler (),m_c64.getEventScheduler () };		// emulation of an actual SID chip
+	sidemu		m_sidEmu[ 3 ] = { m_c64.getEventScheduler (), m_c64.getEventScheduler (), m_c64.getEventScheduler () };		// emulation of an actual SID chip
 
 	std::string	m_errorString = "N/A";
 
@@ -123,8 +123,6 @@ public:
 	[[ nodiscard ]] uint16_t getCia1TimerA () const { return m_c64.getCia1TimerA (); }
 
 	bool getSidStatus ( int sidNum, uint8_t regs[ 32 ] );
-
-	void warmup ();
 };
 
 }

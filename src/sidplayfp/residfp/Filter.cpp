@@ -62,7 +62,7 @@ void Filter::reset ()
 {
 	writeFC_LO ( 0 );
 	writeFC_HI ( 0 );
-	writeMODE_VOL ( 0 );
+	writeMODE_VOL ( 15 );
 	writeRES_FILT ( 0 );
 }
 //-----------------------------------------------------------------------------

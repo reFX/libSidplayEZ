@@ -123,6 +123,15 @@ void Player::initialise ()
 		throw configError ( m_tune->statusString () );
 
 	m_c64.resetCpu ();
+
+	// Run for some cycles until the initialization routine is done
+	for ( auto i = 0; i < 140; ++i )
+	{
+		run ( 1000 );
+
+		m_mixer.clockChips ();
+		m_mixer.resetBufs ();
+	}
 }
 //-----------------------------------------------------------------------------
 
@@ -508,25 +517,6 @@ bool Player::getSidStatus ( int sidNum, uint8_t regs[ 32 ] )
 	}
 
 	return false;
-}
-//-----------------------------------------------------------------------------
-
-void Player::warmup ()
-{
-	// Make sure a tune is loaded
-	if ( ! m_tune )
-		return;
-
-	int16_t		buffer[ 4410 ];	// 100 ms buffer
-	uint32_t	count = uint32_t ( std::size ( buffer ) );
-
-	constexpr auto	seconds = 1.5;
-	constexpr auto	loopsToRun = int ( ( 44100.0 * seconds ) / std::size ( buffer ) );
-
-	for ( auto i = 0; i < loopsToRun; ++i )
-		play ( buffer, count );
-
-	m_c64.startCpu ();
 }
 //-----------------------------------------------------------------------------
 
