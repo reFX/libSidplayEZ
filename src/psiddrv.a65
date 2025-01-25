@@ -23,10 +23,10 @@
 
 /***************************************************************************
  * psiddrv.a65  -  C64 Sid Player
- * 
+ *
  * written by Dag Lem
  * modified by Simon White for use in the sidplayer SIDPlay2.
- * 
+ *
  * Build with:
  * xa -R -G psiddrv.a65 -o psiddrv.o65
  * od -v -An -w8 -tx1 psiddrv.o65 | sed -re 's/[[:alnum:]]+/0x&,/g' > psiddrv.bin
@@ -50,12 +50,12 @@ playnum     .byte 0
 speed       .byte 0
 initvec     .word 0
 playvec     .word 0
-rndwait     .word 0
 initiomap   .byte 0
 playiomap   .byte 0
 video       .byte 0
 clock       .byte 0
 flags       .byte 0
+handshake   .byte 0
 
             ; init/play PSID
 play        jmp (playvec)
@@ -115,24 +115,14 @@ vicinit     stx $d011
 
             ; don't override default irq handler for RSIDs
             lda initiomap
-            beq delay
+            beq irqinit
 
             ; if play address, override default irq vector so
             ; we reach our routine to handle play routine
             lda playiomap
-            beq delay
+            beq irqinit
             ldx #<irqjob
             stx $0314
-
-            ; simulate time before user loads tune
-delay       ldx rndwait
-            ldy rndwait+1
-            inx
-            iny
-wait        dex
-            bne wait
-            dey
-            bne wait
 
             ; 0 indicates VIC timing (PSIDs only)
             ; else it's from CIA
@@ -165,6 +155,13 @@ setregs     lda flags
             lda playnum
             plp
             jsr init
+
+            ; wait for handshake
+            inc handshake
+handwait    lda handshake
+            cmp #$02
+            bne handwait
+
             lda initiomap
             beq idle
             lda playiomap

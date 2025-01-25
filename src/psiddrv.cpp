@@ -203,7 +203,7 @@ bool psiddrv::drvReloc ()
 }
 //-----------------------------------------------------------------------------
 
-void psiddrv::install ( sidmemory& mem, uint8_t video ) const
+uint16_t psiddrv::install ( sidmemory& mem, uint8_t video ) const
 {
 	mem.fillRam ( 0, uint8_t ( 0 ), 0x3ff );
 
@@ -255,9 +255,6 @@ void psiddrv::install ( sidmemory& mem, uint8_t video ) const
 	mem.writeMemWord ( pos, m_tuneInfo->playAddr () );
 	pos += 2;
 
-	mem.writeMemWord ( pos, m_powerOnDelay );
-	pos += 2;
-
 	// Set init address io bank value
 	mem.writeMemByte ( pos, iomap ( m_tuneInfo->initAddr () ) );
 	pos++;
@@ -285,6 +282,17 @@ void psiddrv::install ( sidmemory& mem, uint8_t video ) const
 
 	// Set default processor register flags on calling init
 	mem.writeMemByte ( pos, m_tuneInfo->compatibility () >= SidTuneInfo::COMPATIBILITY_R64 ? 0 : 1 << MOS6510::SR_INTERRUPT );
+	pos++;
+
+	// Set the handshake value ( !0 = don't wait for handshake )
+	const auto	handshareAddr = pos;
+	uint8_t	handshake = 0;
+	if ( m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_BASIC )		handshake = 1;
+	else if ( m_tuneInfo->playAddr () == 0 )									handshake = 1;
+
+	mem.writeMemByte ( pos, handshake );
+
+	return handshareAddr;
 }
 //-----------------------------------------------------------------------------
 

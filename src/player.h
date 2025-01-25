@@ -63,6 +63,7 @@ private:
 	std::string	m_errorString = "N/A";
 
 	state_t		m_isPlaying = state_t::STOPPED;	// Playback status
+	uint32_t	m_startTime = 0;
 	uint8_t		videoSwitch;					// PAL/NTSC switch value
 
 	/**
@@ -111,8 +112,7 @@ public:
 	void setDacLeakage ( const double value );
 	void set6581VoiceDCDrift ( const double value );
 
-	[[ nodiscard ]] uint32_t time () const { return m_c64.getTimeMs () / 1000; }		// Time in seconds
-	[[ nodiscard ]] uint32_t timeMs () const { return m_c64.getTimeMs (); }				// Time in milliseconds
+	[[ nodiscard ]] uint32_t timeMs () const { return m_c64.getTimeMs () - m_startTime; }				// Time in milliseconds
 
 	[[ nodiscard ]] const char* error () const { return m_errorString.c_str (); }
 

@@ -43,8 +43,6 @@ private:
 	uint16_t m_driverAddr;
 	uint16_t m_driverLength;
 
-	uint16_t m_powerOnDelay = 0;
-
 private:
 	/**
 	* Get required I/O map to reach address
@@ -61,13 +59,6 @@ public:
 	}
 
 	/**
-	* Set the power on delay cycles
-	*
-	* @param delay the delay
-	*/
-	void powerOnDelay ( uint16_t delay ) { m_powerOnDelay = delay; }
-
-	/**
 	* Relocate the driver
 	*
 	* @return false if something is wrong, check #errorString for error details
@@ -80,8 +71,9 @@ public:
 	*
 	* @param mem the c64 memory interface
 	* @param video the PAL/NTSC switch value, 0: NTSC, 1: PAL
+	* @return address of the handshake variable (set to 2 to continue)
 	*/
-	void install ( sidmemory& mem, uint8_t video ) const;
+	uint16_t install ( sidmemory& mem, uint8_t video ) const;
 
 	/**
 	* Get a detailed error message.

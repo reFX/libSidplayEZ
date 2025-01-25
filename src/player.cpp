@@ -106,10 +106,23 @@ void Player::initialise ()
 	if ( size > 0xffff )
 		throw configError ( "SIDPLAYER ERROR: Size of music data exceeds C64 memory." );
 
-	constexpr auto	powerOnDelay = 0;	// SidConfig::MAX_POWER_ON_DELAY - 1 
+	auto warmup = [ this ] ( int iterations )
+	{
+		while ( iterations-- )
+		{
+			run ( 100 );
 
-	psiddrv	driver ( m_tune->getInfo () );
-	driver.powerOnDelay ( powerOnDelay );
+			m_mixer.clockChips ();
+			m_mixer.resetBufs ();
+		}
+	};
+
+	constexpr auto	powerOnDelay = 3000;	// SidConfig::MAX_POWER_ON_DELAY - 1 
+
+	// Run for calculated number of cycles
+	warmup ( powerOnDelay );
+
+	auto	driver = psiddrv ( m_tune->getInfo () );
 	if ( ! driver.drvReloc () )
 		throw configError ( driver.errorString () );
 
@@ -117,21 +130,31 @@ void Player::initialise ()
 	m_info.m_driverLength = driver.driverLength ();
 	m_info.m_powerOnDelay = powerOnDelay;
 
-	driver.install ( m_c64.getMemInterface (), videoSwitch );
+	auto&	mem = m_c64.getMemInterface ();
+	const auto	handshakeAddr = driver.install ( mem, videoSwitch );
 
-	if ( ! m_tune->placeSidTuneInC64mem ( m_c64.getMemInterface () ) )
+	if ( ! m_tune->placeSidTuneInC64mem ( mem ) )
 		throw configError ( m_tune->statusString () );
 
 	m_c64.resetCpu ();
 
 	// Run for some cycles until the initialization routine is done
-	for ( auto i = 0; i < 140; ++i )
+	if ( mem.readMemByte ( handshakeAddr ) == 0 )
 	{
-		run ( 1000 );
+ 		// Wait for the handshake to be acknowledged
+ 		while ( mem.readMemByte ( handshakeAddr ) == 0 )
+ 			warmup ( 1000 );
 
-		m_mixer.clockChips ();
-		m_mixer.resetBufs ();
+		// Wait a bit until volume clicks are gone
+		warmup ( 1000 );
+
+		// Set the handshake to continue
+		mem.writeMemByte ( handshakeAddr, 2 );
+
+		warmup ( 5 );
 	}
+
+	m_startTime = m_c64.getTimeMs ();
 }
 //-----------------------------------------------------------------------------
 
