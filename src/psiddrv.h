@@ -37,11 +37,13 @@ private:
 	std::string	m_errorString;
 
 	std::vector<uint8_t>	psid_driver;
-	uint8_t*				reloc_driver;
+	uint8_t* reloc_driver;
 	int						reloc_size;
 
-	uint16_t m_driverAddr;
-	uint16_t m_driverLength;
+	uint16_t	m_driverAddr;
+	uint16_t	m_driverLength;
+
+	uint16_t	m_handshakeAddr;
 
 private:
 	/**
@@ -71,9 +73,8 @@ public:
 	*
 	* @param mem the c64 memory interface
 	* @param video the PAL/NTSC switch value, 0: NTSC, 1: PAL
-	* @return address of the handshake variable (set to 2 to continue)
 	*/
-	uint16_t install ( sidmemory& mem, uint8_t video ) const;
+	void install ( sidmemory& mem, uint8_t video );
 
 	/**
 	* Get a detailed error message.
@@ -84,6 +85,8 @@ public:
 
 	[[ nodiscard ]] uint16_t driverAddr () const { return m_driverAddr; }
 	[[ nodiscard ]] uint16_t driverLength () const { return m_driverLength; }
+
+	[[ nodiscard ]] uint16_t getHandshakeAddr () const { return m_handshakeAddr; }
 };
 
 }

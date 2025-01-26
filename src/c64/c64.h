@@ -131,6 +131,9 @@ private:
 	/// CPU
 	MOS6510 cpu;
 
+	uint16_t		irqTime = 0;
+	event_clock_t	irqStart = 0;
+
 private:
 	static double getCpuFreq ( model_t model );
 
@@ -250,6 +253,11 @@ public:
 	sidmemory& getMemInterface () { return mmu; }
 
 	uint16_t getCia1TimerA () const { return cia1.getTimerA (); }
+
+	/**
+	* Get amount of cycles spent in the last IRQ
+	*/
+	uint16_t getInterruptCycles () const { return irqTime; }
 };
 //-----------------------------------------------------------------------------
 
@@ -258,7 +266,11 @@ void c64::interruptIRQ ( bool state )
 	if ( state )
 	{
 		if ( irqCount == 0 )
+		{
 			cpu.triggerIRQ ();
+
+			irqStart = eventScheduler.getTime ( EVENT_CLOCK_PHI2 );
+		}
 
 		irqCount++;
 	}
@@ -266,7 +278,11 @@ void c64::interruptIRQ ( bool state )
 	{
 		irqCount--;
 		if ( irqCount == 0 )
+		{
+			irqTime = uint16_t ( eventScheduler.getTime ( EVENT_CLOCK_PHI2 ) - irqStart );
+
 			cpu.clearIRQ ();
+		}
 	}
 }
 //-----------------------------------------------------------------------------

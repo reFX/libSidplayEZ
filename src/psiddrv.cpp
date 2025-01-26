@@ -203,7 +203,7 @@ bool psiddrv::drvReloc ()
 }
 //-----------------------------------------------------------------------------
 
-uint16_t psiddrv::install ( sidmemory& mem, uint8_t video ) const
+void psiddrv::install ( sidmemory& mem, uint8_t video )
 {
 	mem.fillRam ( 0, uint8_t ( 0 ), 0x3ff );
 
@@ -240,12 +240,10 @@ uint16_t psiddrv::install ( sidmemory& mem, uint8_t video ) const
 	mem.fillRam ( pos, &reloc_driver[ 10 ], reloc_size );
 
 	// Set song number
-	mem.writeMemByte ( pos, uint8_t ( m_tuneInfo->currentSong () - 1 ) );
-	pos++;
+	mem.writeMemByte ( pos++, uint8_t ( m_tuneInfo->currentSong () - 1 ) );
 
 	// Set tunes speed (VIC/CIA)
-	mem.writeMemByte ( pos, m_tuneInfo->songSpeed () == SidTuneInfo::SPEED_VBI ? 0 : 1 );
-	pos++;
+	mem.writeMemByte ( pos++, m_tuneInfo->songSpeed () == SidTuneInfo::SPEED_VBI ? 0 : 1 );
 
 	// Set init address
 	mem.writeMemWord ( pos, m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_BASIC ? 0xbf55 : m_tuneInfo->initAddr () );
@@ -256,43 +254,34 @@ uint16_t psiddrv::install ( sidmemory& mem, uint8_t video ) const
 	pos += 2;
 
 	// Set init address io bank value
-	mem.writeMemByte ( pos, iomap ( m_tuneInfo->initAddr () ) );
-	pos++;
+	mem.writeMemByte ( pos++, iomap ( m_tuneInfo->initAddr () ) );
 
 	// Set play address io bank value
-	mem.writeMemByte ( pos, iomap ( m_tuneInfo->playAddr () ) );
-	pos++;
+	mem.writeMemByte ( pos++, iomap ( m_tuneInfo->playAddr () ) );
 
 	// Set PAL/NTSC flag
-	mem.writeMemByte ( pos, video );
-	pos++;
+	mem.writeMemByte ( pos++, video );
 
 	// Set the required tune clock speed
-	uint8_t	clockSpeed;
-
-	switch ( m_tuneInfo->clockSpeed () )
 	{
-		case SidTuneInfo::CLOCK_PAL:		clockSpeed = 1;			break;
-		case SidTuneInfo::CLOCK_NTSC:		clockSpeed = 0;			break;
-		default:							clockSpeed = video;		break;	// UNKNOWN or ANY
+		uint8_t	clockSpeed;
+
+		switch ( m_tuneInfo->clockSpeed () )
+		{
+			case SidTuneInfo::CLOCK_PAL:		clockSpeed = 1;			break;
+			case SidTuneInfo::CLOCK_NTSC:		clockSpeed = 0;			break;
+			default:							clockSpeed = video;		break;	// UNKNOWN or ANY
+		}
+
+		mem.writeMemByte ( pos++, clockSpeed );
 	}
 
-	mem.writeMemByte ( pos, clockSpeed );
-	pos++;
-
 	// Set default processor register flags on calling init
-	mem.writeMemByte ( pos, m_tuneInfo->compatibility () >= SidTuneInfo::COMPATIBILITY_R64 ? 0 : 1 << MOS6510::SR_INTERRUPT );
-	pos++;
+	mem.writeMemByte ( pos++, m_tuneInfo->compatibility () >= SidTuneInfo::COMPATIBILITY_R64 ? 0 : 1 << MOS6510::SR_INTERRUPT );
 
 	// Set the handshake value ( !0 = don't wait for handshake )
-	const auto	handshareAddr = pos;
-	uint8_t	handshake = 0;
-	if ( m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_BASIC )		handshake = 1;
-	else if ( m_tuneInfo->playAddr () == 0 )									handshake = 1;
-
-	mem.writeMemByte ( pos, handshake );
-
-	return handshareAddr;
+	m_handshakeAddr = pos++;
+	mem.writeMemByte ( m_handshakeAddr, ( m_tuneInfo->compatibility () == SidTuneInfo::COMPATIBILITY_BASIC || m_tuneInfo->playAddr () == 0 ) ? 1 : 0 );
 }
 //-----------------------------------------------------------------------------
 

@@ -89,7 +89,7 @@ void MOS656X::reset ()
 	vblanking = false;
 	lpAsserted = false;
 
-	memset ( regs, 0, sizeof ( regs ) );
+	std::fill ( std::begin ( regs ), std::end ( regs ), 0 );
 
 	lp.reset ();
 	sprites.reset ();
@@ -164,11 +164,11 @@ void MOS656X::write ( uint8_t addr, uint8_t data )
 	{
 		case 0x11: // Control register 1
 		{
-			const unsigned int oldYscroll = yscroll;
+			const auto	oldYscroll = yscroll;
 			yscroll = data & 0x7;
 
 			// This is the funniest part... handle bad line tricks.
-			const bool wasBadLinesEnabled = areBadLinesEnabled;
+			const auto	wasBadLinesEnabled = areBadLinesEnabled;
 
 			if ( rasterY == FIRST_DMA_LINE && lineCycle == 0 )
 				areBadLinesEnabled = readDEN ();

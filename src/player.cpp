@@ -131,7 +131,7 @@ void Player::initialise ()
 	m_info.m_powerOnDelay = powerOnDelay;
 
 	auto&	mem = m_c64.getMemInterface ();
-	const auto	handshakeAddr = driver.install ( mem, videoSwitch );
+	driver.install ( mem, videoSwitch );
 
 	if ( ! m_tune->placeSidTuneInC64mem ( mem ) )
 		throw configError ( m_tune->statusString () );
@@ -139,7 +139,7 @@ void Player::initialise ()
 	m_c64.resetCpu ();
 
 	// Run for some cycles until the initialization routine is done
-	if ( mem.readMemByte ( handshakeAddr ) == 0 )
+	if ( const auto	handshakeAddr = driver.getHandshakeAddr (); mem.readMemByte ( handshakeAddr ) == 0 )
 	{
  		// Wait for the handshake to be acknowledged
  		while ( mem.readMemByte ( handshakeAddr ) == 0 )
@@ -177,7 +177,7 @@ bool Player::loadTune ( SidTune* tune )
 
 uint32_t Player::play ( int16_t* buffer, uint32_t count )
 {
-	static constexpr auto	CYCLES = 3000u;
+	constexpr auto	CYCLES = 3000u;
 
 	// Make sure a tune is loaded
 	if ( ! m_tune )

@@ -155,7 +155,7 @@ private:
 	*/
 	void rasterYIRQEdgeDetector ()
 	{
-		const bool oldRasterYIRQCondition = rasterYIRQCondition;
+		const auto	oldRasterYIRQCondition = rasterYIRQCondition;
 		rasterYIRQCondition = rasterY == readRasterLineIRQ ();
 		if ( ! oldRasterYIRQCondition && rasterYIRQCondition )
 			activateIRQFlag ( IRQ_RASTER );
