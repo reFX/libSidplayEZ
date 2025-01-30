@@ -158,8 +158,8 @@ setregs     lda flags
 
             ; wait for handshake
             inc handshake
-handwait    lda handshake
-            cmp #$02
+            lda #$02
+handwait    cmp handshake
             bne handwait
 
             lda initiomap

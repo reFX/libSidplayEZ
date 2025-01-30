@@ -151,7 +151,7 @@ void Player::initialise ()
 		// Set the handshake to continue
 		mem.writeMemByte ( handshakeAddr, 2 );
 
-		warmup ( 5 );
+//		warmup ( 5 );
 	}
 
 	m_startTime = m_c64.getTimeMs ();
