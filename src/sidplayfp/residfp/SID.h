@@ -489,6 +489,28 @@ public:
 	}
 
 	/**
+	* Set 6581 waveform DAC DC offset, the envelope-scaled part of the digi volume
+	*
+	* @see Filter6581::setWaveDCOffset(double)
+	*/
+	void setWaveDCOffset ( [[ maybe_unused ]] const double adjustment ) noexcept
+	{
+		if constexpr ( is6581 )
+			filter.setWaveDCOffset ( adjustment );
+	}
+
+	/**
+	* Set 6581 voice DC bias, the per-chip spread of the voice operating point
+	*
+	* @see Filter6581::setVoiceDCBias(double)
+	*/
+	void setVoiceDCBias ( [[ maybe_unused ]] const double bias ) noexcept
+	{
+		if constexpr ( is6581 )
+			filter.setVoiceDCBias ( bias );
+	}
+
+	/**
 	* Set Saw+Pulse-ultra-loud
 	*/
 	void setSawPulseUltra ( const bool enabled ) noexcept
@@ -877,14 +899,14 @@ public:
 	}
 
 	/**
-	* Set filter digi volume for 6581 model
+	* Set EXT-IN DC operating point for 6581 model
 	*
-	* @see Filter6581::setDigitVolume(double)
+	* @see Filter6581::setExtInDC(double)
 	*/
-	void setFilter6581Digi ( [[ maybe_unused ]] double adjustment ) noexcept
+	void setFilter6581ExtInDC ( [[ maybe_unused ]] double adjustment ) noexcept
 	{
 		if constexpr ( is6581 )
-			filter.setDigiVolume ( adjustment );
+			filter.setExtInDC ( adjustment );
 	}
 
 	/**

@@ -56,6 +56,7 @@ public:
 
 	void setDacLeakage ( const double leakage )		{ engine.setDacLeakage ( leakage ); }
 	void set6581VoiceDrift ( const double drift )	{ engine.set6581VoiceDCDrift ( drift ); }
+	void set6581WaveDCOffset ( const double value )	{ engine.set6581WaveDCOffset ( value ); }
 	void set6581LeakageRate ( const double rate )	{ engine.set6581LeakageRate ( rate ); }
 	void setTodPowerOnSeed ( const uint32_t seed )	{ engine.setTodPowerOnSeed ( seed ); }
 
@@ -64,7 +65,8 @@ public:
 	void set6581FilterGain ( const double value )							{ engine.set6581FilterGain ( value ); }
 	void set6581FilterSaturation ( const double value )						{ engine.set6581FilterSaturation ( value ); }
 	void set6581FilterBandpassWidthOffset ( const double value )			{ engine.set6581FilterBandpassWidthOffset ( value ); }
-	void set6581DigiVolume ( const double value )							{ engine.set6581DigiVolume ( value ); }
+	void set6581ExtInDC ( const double value )								{ engine.set6581ExtInDC ( value ); }
+	void set6581VoiceDCBias ( const double value )							{ engine.set6581VoiceDCBias ( value ); }
 	void setCombinedWaveforms ( const reSIDfp::CombinedWaveforms cws, const float threshold )	{ engine.setCombinedWaveforms ( cws, threshold ); }
 	void setDigiCapture ( const reSIDfp::DigiMode mode )					{ engine.setDigiCapture ( mode ); }
 	void setDigiScan ( const reSIDfp::DigiMode mode )						{ engine.setDigiScan ( mode ); }

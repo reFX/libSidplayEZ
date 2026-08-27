@@ -564,14 +564,6 @@ void Player::set6581FilterBandpassWidthOffset ( const double value )
 }
 //-----------------------------------------------------------------------------
 
-void Player::set6581DigiVolume ( const double value )
-{
-	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
-		if ( auto s = m_mixer.getSid ( i ) )
-			s->filter6581Digi ( value );
-}
-//-----------------------------------------------------------------------------
-
 void Player::setDacLeakage ( const double value )
 {
 	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
@@ -585,6 +577,30 @@ void Player::set6581VoiceDCDrift ( const double value )
 	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
 			s->voice6581DCDrift ( value );
+}
+//-----------------------------------------------------------------------------
+
+void Player::set6581WaveDCOffset ( const double value )
+{
+	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->voice6581WaveDCOffset ( value );
+}
+//-----------------------------------------------------------------------------
+
+void Player::set6581VoiceDCBias ( const double value )
+{
+	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->voice6581DCBias ( value );
+}
+//-----------------------------------------------------------------------------
+
+void Player::set6581ExtInDC ( const double value )
+{
+	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->filter6581ExtInDC ( value );
 }
 //-----------------------------------------------------------------------------
 

@@ -99,6 +99,27 @@ void FilterModelConfig6581::setFilter_uCoxAndCap ( double newUCox, bool oldCap )
 
 void FilterModelConfig6581::setVoiceDCDrift ( double drift ) noexcept
 {
+	voiceDCDrift = drift;
+	updateVoiceDC ();
+}
+//-----------------------------------------------------------------------------
+
+void FilterModelConfig6581::setWaveDCOffset ( double adjustment ) noexcept
+{
+	waveDCOffset = adjustment;
+	updateVoiceDC ();
+}
+//-----------------------------------------------------------------------------
+
+void FilterModelConfig6581::setVoiceDCBias ( double bias ) noexcept
+{
+	voiceDCBias = bias;
+	updateVoiceDC ();
+}
+//-----------------------------------------------------------------------------
+
+void FilterModelConfig6581::updateVoiceDC () noexcept
+{
 	/**
 	* On 6581 the DC offset varies between ~5.0V and ~5.214V depending on
 	* the envelope value.
@@ -106,9 +127,18 @@ void FilterModelConfig6581::setVoiceDCDrift ( double drift ) noexcept
 	Dac	envDac ( 8 );
 	envDac.kinkedDac ( true );
 
+	// The oscDAC table stays centered at 0x7ff; the real chip's 0x380 center is
+	// equivalent to adding delta * envelope here, since voice output is
+	// wavDAC[wav] * envDAC[env]. Folding it into this LUT keeps normalizedVoiceDC
+	// and the filter-input leak compensation in sync for free
+	Dac	oscDac ( 12 );
+	oscDac.kinkedDac ( true );
+
+	const auto	waveDC = waveDCOffset * ( oscDac.getOutput ( 0x7ff, true ) - oscDac.getOutput ( 0x380, true ) ) * voice_voltage_range;
+
 	for ( auto i = 0; i < 256; ++i )
 	{
-		voiceDC[ i ] = 5.0 * VOLTAGE_SKEW + ( drift * 0.2143 * envDac.getOutput ( i ) );
+		voiceDC[ i ] = 5.0 * VOLTAGE_SKEW * voiceDCBias + ( voiceDCDrift * 0.2143 + waveDC ) * envDac.getOutput ( i );
 		normalizedVoiceDC[ i ] = int ( N16 * ( voiceDC[ i ] - vmin ) );
 	}
 }
@@ -132,7 +162,7 @@ FilterModelConfig6581::FilterModelConfig6581 ()
 {
 	dac.kinkedDac ( true );
 
-	setVoiceDCDrift ( 0.0 );
+	updateVoiceDC ();
 
 	// Build shared tables exactly once across all instances.
 	// The call_once lambda runs in whichever thread constructs the first instance;

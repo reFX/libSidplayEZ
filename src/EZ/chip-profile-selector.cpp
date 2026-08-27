@@ -109,7 +109,9 @@ std::string ChipProfileSelector::setProfiles ( const std::string& csvStr, const 
 		setting.fltGain = csv.get ( i, "fltGain", setting.fltGain );
 		setting.fltSaturation = csv.get ( i, "fltSat", setting.fltSaturation );
 		setting.fltBandpassWidthOffset = csv.get ( i, "fltBpw", setting.fltBandpassWidthOffset );
-		setting.digi = csv.get ( i, "digi", setting.digi );
+		setting.waveDC = csv.get ( i, "waveDC", setting.waveDC );
+		setting.extInDC = csv.get ( i, "extInDC", setting.extInDC );
+		setting.voiceBias = csv.get ( i, "bias", setting.voiceBias );
 		setting.leakageRate = csv.get ( i, "leakage", setting.leakageRate );
 
 		// Combined waveform strength level

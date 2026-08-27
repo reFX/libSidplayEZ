@@ -37,7 +37,9 @@ static std::string describeAppliedSettings ( const libsidplayEZ::ChipProfileSele
 	field ( "gain", centi ( s.fltGain ), centi ( defaults.fltGain ) );
 	field ( "sat", centi ( s.fltSaturation ), centi ( defaults.fltSaturation ) );
 	field ( "bpw", centi ( s.fltBandpassWidthOffset ), centi ( defaults.fltBandpassWidthOffset ) );
-	field ( "digi", centi ( s.digi ), centi ( defaults.digi ) );
+	field ( "wavedc", centi ( s.waveDC ), centi ( defaults.waveDC ) );
+	field ( "extdc", centi ( s.extInDC ), centi ( defaults.extInDC ) );
+	field ( "bias", centi ( s.voiceBias ), centi ( defaults.voiceBias ) );
 	field ( "leak", centi ( s.leakageRate ), centi ( defaults.leakageRate ) );
 	field ( "cws", s.cwsLevel, defaults.cwsLevel );
 	field ( "ultra", s.cwsSawPulseUltra, defaults.cwsSawPulseUltra );
@@ -224,9 +226,15 @@ bool libsidplayEZ::Player::setTuneNumber ( unsigned int songNo, const bool useFi
 		engine.set6581FilterSaturation ( chipProfile.fltSaturation );
 		engine.set6581FilterBandpassWidthOffset ( chipProfile.fltBandpassWidthOffset );
 
-		engine.set6581DigiVolume ( chipProfile.digi );
+		engine.set6581WaveDCOffset ( chipProfile.waveDC );
+		engine.set6581ExtInDC ( chipProfile.extInDC );
+		engine.set6581VoiceDCBias ( chipProfile.voiceBias );
 
 		engine.set6581LeakageRate ( chipProfile.leakageRate );
+
+		// Half-strength drift keeps gate clicks tame; the emu-editor override
+		// below turns it off, those tunes were composed without drift
+		engine.set6581VoiceDCDrift ( 0.5 );
 
 		engine.setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), 1.0f );
 		engine.set6581SawPulseUltra ( chipProfile.cwsSawPulseUltra );
@@ -263,8 +271,11 @@ bool libsidplayEZ::Player::setTuneNumber ( unsigned int songNo, const bool useFi
 				engine.set6581FilterGain ( 1.0 );
 				engine.set6581FilterSaturation ( 1.0 );
 				engine.set6581FilterBandpassWidthOffset ( 0.0 );
-				engine.set6581DigiVolume ( 1.0 );
+				engine.set6581WaveDCOffset ( 0.5 );
+				engine.set6581ExtInDC ( 1.0 );
+				engine.set6581VoiceDCBias ( 1.0 );
 				engine.set6581LeakageRate ( 1.0 );
+				engine.set6581VoiceDCDrift ( 0.0 );
 
 				engine.setCombinedWaveforms ( reSIDfp::CombinedWaveforms::AVERAGE, 1.0 );
 				engine.set6581SawPulseUltra ( false );

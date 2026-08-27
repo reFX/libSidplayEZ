@@ -520,13 +520,14 @@ public:
 	}
 
 	/**
-	* Set DC offset for external filter input which affects the digi volume
+	* Scale the DC a grounded EXT-IN pin feeds into the mix - constant, not
+	* envelope-scaled, so it shifts the digi baseline even with idle voices
 	*
-	* @param adjustment 0 .. 1
+	* @param adjustment 1 = chip default ( input ( 0 ) ), 0 = no DC; not clamped
 	*/
-	void setDigiVolume ( double adjustment ) noexcept
+	void setExtInDC ( double adjustment ) noexcept
 	{
-		this->Ve = int16_t ( adjustment * fmc6581.getNormalizedVoice ( 0.0f, 0 ) );
+		this->Ve = int ( adjustment * fmc6581.getNormalizedVoice ( 0.0f, 0 ) );
 	}
 
 	/**
@@ -537,6 +538,27 @@ public:
 	void setVoiceDCDrift ( double adjustment ) noexcept
 	{
 		fmc6581.setVoiceDCDrift ( adjustment );
+	}
+
+	/**
+	* Set voice DC bias, the scale of the ~5V voice operating point - the
+	* per-chip $d418 digi-loudness spread
+	*
+	* @param bias 1 = nominal chip, sensible range ~0.5 .. 1.5; not clamped
+	*/
+	void setVoiceDCBias ( double bias ) noexcept
+	{
+		fmc6581.setVoiceDCBias ( bias );
+	}
+
+	/**
+	* Set waveform DAC DC offset, the envelope-scaled part of the digi volume
+	*
+	* @param adjustment 0 is a centered waveform DAC, 1 the full offset of the real chip; not clamped, >1 exaggerates
+	*/
+	void setWaveDCOffset ( double adjustment ) noexcept
+	{
+		fmc6581.setWaveDCOffset ( adjustment );
 	}
 
 	/**

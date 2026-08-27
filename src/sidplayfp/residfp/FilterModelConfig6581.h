@@ -95,9 +95,17 @@ private:
 	void clFilterVcrIds () noexcept;
 	[[ nodiscard ]] sidinline double getDacZero ( double adjustment ) const noexcept {	return dac_zero + adjustment;	}
 
-	// Voice DC offset LUT (depends on drift parameter).
+	// Voice DC offset LUT (depends on the drift and wave-offset parameters).
 	double	voiceDC[ 256 ];
 	int		normalizedVoiceDC[ 256 ];	// getNormalizedVoice(0.0f, env) for each envelope value
+
+	// Drift is not a chip-profile field; the player applies it at every tune
+	// load (0 for emu-editor routines)
+	double	voiceDCDrift = 0.5;
+	double	waveDCOffset = 0.0;
+	double	voiceDCBias  = 1.0;
+
+	void updateVoiceDC () noexcept;
 
 public:
 	FilterModelConfig6581 ();
@@ -125,6 +133,23 @@ public:
 	void setBandpassWidthOffset ( double offset ) noexcept;
 
 	void setVoiceDCDrift ( double drift ) noexcept;
+
+	/**
+	* Set the 6581 waveform DAC DC offset: the real DAC centers at 0x380, not
+	* mid-scale, so every playing voice adds envelope-scaled DC to the mix.
+	* 0 = centered, 1 = real chip; unclamped, headroom ends ~9.
+	* Rebuilds the voice DC LUT; not for per-sample use.
+	*/
+	void setWaveDCOffset ( double adjustment ) noexcept;
+
+	/**
+	* Set the voice DC bias, scaling the ~5V operating point of the voices.
+	* Digi amplitude follows the distance between mixer DC and the volume
+	* op-amp's null, so this is the per-chip digi-loudness spread: 1 = nominal,
+	* +-0.15 ~ +-8 dB. Unclamped, but outside ~0.3 .. 1.8 the voltages leave
+	* the op-amp table range. Rebuilds the voice DC LUT; not for per-sample use.
+	*/
+	void setVoiceDCBias ( double bias ) noexcept;
 
 	/**
 	* Construct an 11 bit cutoff frequency DAC output voltage table.

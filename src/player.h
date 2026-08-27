@@ -109,10 +109,12 @@ public:
 	void set6581FilterGain ( const double value );
 	void set6581FilterSaturation ( const double value );
 	void set6581FilterBandpassWidthOffset ( const double value );
-	void set6581DigiVolume ( const double value );
 
 	void setDacLeakage ( const double value );
 	void set6581VoiceDCDrift ( const double value );
+	void set6581WaveDCOffset ( const double value );
+	void set6581VoiceDCBias ( const double value );
+	void set6581ExtInDC ( const double value );
 	void set6581SawPulseUltra ( const bool enable );
 	void set6581LeakageRate ( const double value );
 

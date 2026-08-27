@@ -129,8 +129,10 @@ public:
 	virtual void filter6581Gain ( double adjustment ) noexcept = 0;
 	virtual void filter6581Saturation ( double saturation ) noexcept = 0;
 	virtual void filter6581BandpassWidthOffset ( double offset ) noexcept = 0;
-	virtual void filter6581Digi ( double adjustment ) noexcept = 0;
 	virtual void voice6581DCDrift ( double adjustment ) noexcept = 0;
+	virtual void voice6581WaveDCOffset ( double adjustment ) noexcept = 0;
+	virtual void voice6581DCBias ( double bias ) noexcept = 0;
+	virtual void filter6581ExtInDC ( double adjustment ) noexcept = 0;
 	virtual void voiceSawPulseUltra ( bool enable ) noexcept = 0;
 	virtual void voice6581LeakageRate ( double rate ) noexcept = 0;
 
@@ -229,8 +231,10 @@ public:
 	void filter6581Gain ( double adjustment ) noexcept override { m_sid.setFilter6581Gain ( adjustment ); }
 	void filter6581Saturation ( double saturation ) noexcept override { m_sid.setFilter6581Saturation ( saturation ); }
 	void filter6581BandpassWidthOffset ( double offset ) noexcept override { m_sid.setFilter6581BandpassWidthOffset ( offset ); }
-	void filter6581Digi ( double adjustment ) noexcept override	{	m_sid.setFilter6581Digi ( adjustment );	}
 	void voice6581DCDrift ( double adjustment ) noexcept override { m_sid.setVoiceDCDrift ( adjustment ); }
+	void voice6581WaveDCOffset ( double adjustment ) noexcept override { m_sid.setWaveDCOffset ( adjustment ); }
+	void voice6581DCBias ( double bias ) noexcept override { m_sid.setVoiceDCBias ( bias ); }
+	void filter6581ExtInDC ( double adjustment ) noexcept override { m_sid.setFilter6581ExtInDC ( adjustment ); }
 	void voiceSawPulseUltra ( bool enable ) noexcept override { m_sid.setSawPulseUltra ( enable ); }
 	void voice6581LeakageRate ( double rate ) noexcept override { m_sid.setLeakageRate ( rate ); }
 	void filter8580Curve ( double filterCurve ) noexcept override { m_sid.setFilter8580Curve ( filterCurve ); }
