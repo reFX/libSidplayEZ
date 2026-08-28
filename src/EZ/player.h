@@ -55,6 +55,7 @@ public:
 	[[ nodiscard ]] const SidTune& getSidTune () const { return tune; }
 
 	void setDacLeakage ( const double leakage )		{ engine.setDacLeakage ( leakage ); }
+	void setExternalFilterResistance ( const double ohms )	{ engine.setExternalFilterResistance ( ohms ); }
 	void set6581VoiceDrift ( const double drift )	{ engine.set6581VoiceDCDrift ( drift ); }
 	void set6581WaveDCOffset ( const double value )	{ engine.set6581WaveDCOffset ( value ); }
 	void set6581LeakageRate ( const double rate )	{ engine.set6581LeakageRate ( rate ); }

@@ -139,6 +139,7 @@ public:
 	virtual void filter8580Curve ( double filterCurve ) noexcept = 0;
 
 	virtual void setDacLeakage ( const double leakage ) noexcept = 0;
+	virtual void externalFilterResistance ( double ohms ) noexcept = 0;
 
 	[[ nodiscard ]] virtual float getInternalEnvValue ( int voiceNo ) const noexcept = 0;
 
@@ -240,6 +241,7 @@ public:
 	void filter8580Curve ( double filterCurve ) noexcept override { m_sid.setFilter8580Curve ( filterCurve ); }
 
 	void setDacLeakage ( const double leakage ) noexcept override { m_sid.setDacLeakage ( leakage ); }
+	void externalFilterResistance ( double ohms ) noexcept override { m_sid.setExternalFilterResistance ( ohms ); }
 
 	[[ nodiscard ]] float getInternalEnvValue ( int voiceNo ) const noexcept override	{	return m_sid.getEnvLevel ( voiceNo );	}
 

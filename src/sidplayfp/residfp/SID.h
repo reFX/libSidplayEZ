@@ -449,6 +449,16 @@ public:
 		recalculateDACs ();
 	}
 
+	/**
+	* Set the external filter load resistance
+	*
+	* @see ExternalFilter::setResistance(double)
+	*/
+	void setExternalFilterResistance ( const double ohms ) noexcept
+	{
+		externalFilter.setResistance ( ohms );
+	}
+
 	void setDigiCapture ( const DigiMode mode ) noexcept
 	{
 		digi.setMode ( mode );

@@ -111,6 +111,7 @@ public:
 	void set6581FilterResonance ( const double value );
 
 	void setDacLeakage ( const double value );
+	void setExternalFilterResistance ( const double ohms );
 	void set6581VoiceDCDrift ( const double value );
 	void set6581WaveDCOffset ( const double value );
 	void set6581VoiceDCBias ( const double value );

@@ -70,6 +70,22 @@ private:
 	int w0lp_1_s7 = 0;
 	int w0hp_1_s17 = 0;
 
+	// Load impedance of the attached audio equipment, which sets the DC-blocker
+	// cutoff: 1k (low-impedance load) = 15.9 Hz, 10k (a line-in) = 1.6 Hz
+	double	extResistance = 1e3;
+
+	// Clock period, kept so a resistance change can rebuild the coefficients
+	double	dt = 1.0e-6;
+
+	void updateCoefficients () noexcept
+	{
+		// Low-pass:  R = 10kOhm, C = 1000pF; cutoff 1/2*PI*RC = 15915.5 Hz
+		w0lp_1_s7 = static_cast<int32_t>( ( dt / ( dt + getRC ( 10e3, 1000e-12 ) ) ) * ( 1 << 7 ) + 0.5 );
+
+		// High-pass: C = 10uF into the external load resistance
+		w0hp_1_s17 = static_cast<int32_t>( ( dt / ( dt + getRC ( extResistance, 10e-6 ) ) ) * ( 1 << 17 ) + 0.5 );
+	}
+
 public:
 	/**
 	* SID clocking
@@ -107,17 +123,22 @@ public:
 	*/
 	void setClockFrequency ( double frequency ) noexcept
 	{
-		const auto	dt = 1.0 / frequency;
-
-		// Low-pass:  R = 10kOhm, C = 1000pF; w0l = dt/(dt+RC) = 1e-6/(1e-6+1e4*1e-9) = 0.091
-		// Cutoff 1/2*PI*RC = 1/2*PI*1e4*1e-9 = 15915.5 Hz
-		w0lp_1_s7 = static_cast<int32_t>( ( dt / ( dt + getRC ( 10e3, 1000e-12 ) ) ) * ( 1 << 7 ) + 0.5 );
-
-		// High-pass: R = 10kOhm, C = 10uF;   w0h = dt/(dt+RC) = 1e-6/(1e-6+1e4*1e-5) = 0.00000999
-		// Cutoff 1/2*PI*RC = 1/2*PI*1e4*1e-5 = 1.59155 Hz
-		w0hp_1_s17 = static_cast<int32_t>( ( dt / ( dt + getRC ( 10e3, 10e-6 ) ) ) * ( 1 << 17 ) + 0.5 );
-
+		dt = 1.0 / frequency;
+		updateCoefficients ();
 		reset ();
+	}
+
+	/**
+	* Set the load impedance of the attached audio equipment, which the
+	* DC-blocker cutoff depends on: 1 kOhm (default) = 15.9 Hz, 10 kOhm
+	* (a line-in) = 1.6 Hz. Click-free, the filter state is kept.
+	*
+	* @param ohms the load resistance
+	*/
+	void setResistance ( double ohms ) noexcept
+	{
+		extResistance = ohms;
+		updateCoefficients ();
 	}
 
 	/**

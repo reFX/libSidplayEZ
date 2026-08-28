@@ -572,6 +572,14 @@ void Player::setDacLeakage ( const double value )
 }
 //-----------------------------------------------------------------------------
 
+void Player::setExternalFilterResistance ( const double ohms )
+{
+	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->externalFilterResistance ( ohms );
+}
+//-----------------------------------------------------------------------------
+
 void Player::set6581VoiceDCDrift ( const double value )
 {
 	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
