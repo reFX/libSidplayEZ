@@ -128,7 +128,7 @@ public:
 	virtual void filter6581_uCoxAndCap ( double uCox, bool oldCap ) noexcept = 0;
 	virtual void filter6581Gain ( double adjustment ) noexcept = 0;
 	virtual void filter6581Saturation ( double saturation ) noexcept = 0;
-	virtual void filter6581BandpassWidthOffset ( double offset ) noexcept = 0;
+	virtual void filter6581Resonance ( double resonance ) noexcept = 0;
 	virtual void voice6581DCDrift ( double adjustment ) noexcept = 0;
 	virtual void voice6581WaveDCOffset ( double adjustment ) noexcept = 0;
 	virtual void voice6581DCBias ( double bias ) noexcept = 0;
@@ -230,7 +230,7 @@ public:
 	void filter6581_uCoxAndCap ( double uCox, bool oldCap ) noexcept override { m_sid.setFilter6581_uCoxAndCap ( uCox, oldCap ); }
 	void filter6581Gain ( double adjustment ) noexcept override { m_sid.setFilter6581Gain ( adjustment ); }
 	void filter6581Saturation ( double saturation ) noexcept override { m_sid.setFilter6581Saturation ( saturation ); }
-	void filter6581BandpassWidthOffset ( double offset ) noexcept override { m_sid.setFilter6581BandpassWidthOffset ( offset ); }
+	void filter6581Resonance ( double resonance ) noexcept override { m_sid.setFilter6581Resonance ( resonance ); }
 	void voice6581DCDrift ( double adjustment ) noexcept override { m_sid.setVoiceDCDrift ( adjustment ); }
 	void voice6581WaveDCOffset ( double adjustment ) noexcept override { m_sid.setWaveDCOffset ( adjustment ); }
 	void voice6581DCBias ( double bias ) noexcept override { m_sid.setVoiceDCBias ( bias ); }

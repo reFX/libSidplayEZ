@@ -108,7 +108,8 @@ std::string ChipProfileSelector::setProfiles ( const std::string& csvStr, const 
 		setting.flt0Dac = csv.get ( i, "flt0Dac", setting.flt0Dac );
 		setting.fltGain = csv.get ( i, "fltGain", setting.fltGain );
 		setting.fltSaturation = csv.get ( i, "fltSat", setting.fltSaturation );
-		setting.fltBandpassWidthOffset = csv.get ( i, "fltBpw", setting.fltBandpassWidthOffset );
+		// Legacy 'fltBpw' held the same parameter inverted (0 = full resonance)
+		setting.fltResonance = csv.get ( i, "resonance", 1.0 - csv.get ( i, "fltBpw", 0.0 ) );
 		setting.waveDC = csv.get ( i, "waveDC", setting.waveDC );
 		setting.extInDC = csv.get ( i, "extInDC", setting.extInDC );
 		setting.voiceBias = csv.get ( i, "bias", setting.voiceBias );

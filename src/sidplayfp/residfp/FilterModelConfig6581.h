@@ -73,8 +73,8 @@ private:
 	static std::shared_ptr<SharedFilterTables6581>	s_sharedTables;
 	static std::once_flag							s_tablesOnce;
 
-	// Offset this instance's resonance table reflects, so setBandpassWidthOffset can
-	// skip the rebuild when unchanged
+	// Feedback offset this instance's resonance table reflects, so setResonance
+	// can skip the rebuild when unchanged
 	double											bandpassWidthOffset = 0.0;
 
 	// Typed alias for the shared block (avoids repeated static_cast).
@@ -101,7 +101,7 @@ private:
 
 	// Drift is not a chip-profile field; the player applies it at every tune
 	// load (0 for emu-editor routines)
-	double	voiceDCDrift = 0.5;
+	double	voiceDCDrift = 0.0;
 	double	waveDCOffset = 0.0;
 	double	voiceDCBias  = 1.0;
 
@@ -122,15 +122,14 @@ public:
 	void setVcrSaturation ( double saturation ) noexcept;
 
 	/**
-	* Set bandpass width offset — adds a constant floor to the resonance
-	* feedback coefficient (≈ 1/Q) across all registers and rebuilds the
-	* resonance table. offset > 0 widens the band and lowers resonance,
-	* including the maximum-resonance register; 0 is stock behaviour.
-	* Any offset but the default gives this instance a private 2 MiB table, so the
+	* Set resonance strength: 1 = stock chip, lower adds a constant floor to
+	* the resonance feedback coefficient (≈ 1/Q) across all registers,
+	* weakening the peak and widening the band.
+	* Any value but the default gives this instance a private 2 MiB table, so the
 	* pointer from getResonance () changes and callers must re-fetch it.
 	* Rebuilds the table; not intended for per-sample use.
 	*/
-	void setBandpassWidthOffset ( double offset ) noexcept;
+	void setResonance ( double resonance ) noexcept;
 
 	void setVoiceDCDrift ( double drift ) noexcept;
 
@@ -143,11 +142,11 @@ public:
 	void setWaveDCOffset ( double adjustment ) noexcept;
 
 	/**
-	* Set the voice DC bias, scaling the ~5V operating point of the voices.
+	* Set the voice DC bias, the per-chip spread of the ~5V operating point.
 	* Digi amplitude follows the distance between mixer DC and the volume
-	* op-amp's null, so this is the per-chip digi-loudness spread: 1 = nominal,
-	* +-0.15 ~ +-8 dB. Unclamped, but outside ~0.3 .. 1.8 the voltages leave
-	* the op-amp table range. Rebuilds the voice DC LUT; not for per-sample use.
+	* op-amp's null, so this is the digi-loudness spread of real chips.
+	* -1 .. 1 (clamped) maps to a 0.9 .. 1.1 scale of the operating point,
+	* roughly -5 .. +5 dB of digi. Rebuilds the voice DC LUT; not per-sample.
 	*/
 	void setVoiceDCBias ( double bias ) noexcept;
 

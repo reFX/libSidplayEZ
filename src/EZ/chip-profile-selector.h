@@ -31,7 +31,7 @@ public:
 		double		flt0Dac = 0.4;
 		double		fltGain = 0.92;
 		double		fltSaturation = 1.0;
-		double		fltBandpassWidthOffset = 0.0;
+		double		fltResonance = 1.0;		// resonance strength, 1 = stock chip
 
 		// 6581 waveform DAC DC offset, envelope-scaled (1 = real chip's full
 		// offset); with extInDC and voiceBias this sets the digi loudness
@@ -40,8 +40,9 @@ public:
 		// EXT-IN DC scale (1 = chip default, 0 = grounded pin)
 		double		extInDC = 1.0;
 
-		// Voice DC bias, per-chip spread of the ~5V operating point (1 = nominal)
-		double		voiceBias = 1.0;
+		// Voice DC bias, per-chip spread of the ~5V operating point:
+		// -1 .. 1, 0 = nominal chip, ~ -5 .. +5 dB of digi loudness
+		double		voiceBias = 0.0;
 
 		// 6581 charge-leakage rate (1.0 = R4-class/warm chip, ~10 = R3-class/warm, lower = colder)
 		double		leakageRate = 1.0;

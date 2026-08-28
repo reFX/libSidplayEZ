@@ -556,11 +556,11 @@ void Player::set6581FilterSaturation ( const double value )
 }
 //-----------------------------------------------------------------------------
 
-void Player::set6581FilterBandpassWidthOffset ( const double value )
+void Player::set6581FilterResonance ( const double value )
 {
 	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
-			s->filter6581BandpassWidthOffset ( value );
+			s->filter6581Resonance ( value );
 }
 //-----------------------------------------------------------------------------
 

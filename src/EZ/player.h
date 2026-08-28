@@ -64,7 +64,7 @@ public:
 	void set6581FilterCurve ( const double value )							{ engine.set6581FilterCurve ( value ); }
 	void set6581FilterGain ( const double value )							{ engine.set6581FilterGain ( value ); }
 	void set6581FilterSaturation ( const double value )						{ engine.set6581FilterSaturation ( value ); }
-	void set6581FilterBandpassWidthOffset ( const double value )			{ engine.set6581FilterBandpassWidthOffset ( value ); }
+	void set6581FilterResonance ( const double value )						{ engine.set6581FilterResonance ( value ); }
 	void set6581ExtInDC ( const double value )								{ engine.set6581ExtInDC ( value ); }
 	void set6581VoiceDCBias ( const double value )							{ engine.set6581VoiceDCBias ( value ); }
 	void setCombinedWaveforms ( const reSIDfp::CombinedWaveforms cws, const float threshold )	{ engine.setCombinedWaveforms ( cws, threshold ); }

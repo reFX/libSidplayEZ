@@ -490,27 +490,25 @@ public:
 	}
 
 	/**
-	* Set bandpass width offset.
+	* Set resonance strength.
 	*
 	* The filter is a two-integrator loop whose resonance feedback is the 1/Q
-	* term, so bandwidth ≈ f0 * (feedback + offset). This adds a constant floor
-	* to that feedback across all 16 resonance registers, widening the band and
-	* lowering resonance. Crucially it also widens the maximum-resonance setting
-	* (register 15, whose feedback is 0) modelling weak/"broken" 6581 chips
-	* whose resonance never narrowed much.
-	* Bandwidth and resonance are the same parameter in this topology, so
-	* widening necessarily lowers the LP/HP resonance peak.
+	* term; weakening resonance adds a constant floor to that feedback across
+	* all 16 resonance registers - including register 15, whose feedback is 0 -
+	* modelling weak/"broken" 6581 chips whose resonance never narrowed much.
+	* Bandwidth and resonance are the same parameter in this topology, so less
+	* resonance also means a wider band (at 1 kHz cutoff, 0 ≈ +1 kHz).
 	*
 	* Rebuilds a resonance table, so this is a config-time control, not per-sample.
 	*
-	* @param offset  0 = default; e.g. at 1 kHz cutoff, offset 1.0 ≈ +1 kHz bandwidth
+	* @param resonance 1 = stock chip, 0 = no resonance peak at all
 	*/
-	void setBandpassWidthOffset ( double offset ) noexcept
+	void setResonance ( double resonance ) noexcept
 	{
-		fmc6581.setBandpassWidthOffset ( offset );
+		fmc6581.setResonance ( resonance );
 
-		// A non-default offset swaps in this instance's own table, so both cached
-		// pointers have to follow it
+		// A non-default resonance swaps in this instance's own table, so both
+		// cached pointers have to follow it
 		const auto	resonanceIndex = this->currentResonance ? this->currentResonance - this->resonance : 0;
 
 		this->resonance = fmc6581.getResonance ();
@@ -541,10 +539,10 @@ public:
 	}
 
 	/**
-	* Set voice DC bias, the scale of the ~5V voice operating point - the
-	* per-chip $d418 digi-loudness spread
+	* Set voice DC bias, the per-chip spread of the ~5V voice operating point -
+	* the $d418 digi-loudness spread
 	*
-	* @param bias 1 = nominal chip, sensible range ~0.5 .. 1.5; not clamped
+	* @param bias -1 .. 1 (clamped), 0 = nominal chip, ~ -5 .. +5 dB of digi
 	*/
 	void setVoiceDCBias ( double bias ) noexcept
 	{

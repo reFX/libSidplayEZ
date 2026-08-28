@@ -113,7 +113,9 @@ void FilterModelConfig6581::setWaveDCOffset ( double adjustment ) noexcept
 
 void FilterModelConfig6581::setVoiceDCBias ( double bias ) noexcept
 {
-	voiceDCBias = bias;
+	// The usable spread is narrow - a 10% operating-point shift is already
+	// ~5 dB of digi level - so the exposed -1 .. 1 maps to a 0.9 .. 1.1 scale
+	voiceDCBias = 1.0 + 0.1 * std::max ( -1.0, std::min ( 1.0, bias ) );
 	updateVoiceDC ();
 }
 //-----------------------------------------------------------------------------
@@ -342,9 +344,10 @@ void FilterModelConfig6581::setVcrSaturation ( double saturation ) noexcept
 }
 //-----------------------------------------------------------------------------
 
-void FilterModelConfig6581::setBandpassWidthOffset ( double offset ) noexcept
+void FilterModelConfig6581::setResonance ( double resonance ) noexcept
 {
-	offset = std::max ( 0.0, offset );
+	// Internally an offset added to the feedback coefficient, 0 = stock table
+	const auto	offset = std::max ( 0.0, 1.0 - resonance );
 
 	// A tiny delta is inaudible, so treat near-equal offsets as unchanged and keep
 	// the table this instance already has
