@@ -91,7 +91,7 @@ const CombinedWaveformConfig config[ 3 ][ 2 ][ 5 ] =
 			// NP  guessed
 			{ exponentialDistance, 0.96f, 1.f, 2.5f, 1.1f, 1.2f },
 		},
-		{ /* 8580 R5 4887 sampled by reFX-Mike */
+		{ /* 8580 R5 4887 sampled by Toddler-Boy */
 			// TS  error  741 (76/32768) [RMS: 53.74]
 			{ exponentialDistance, 0.812351167f, 1.1727736f, 0.f, 1.87459648f, 2.31578159f },
 			// PT  error 7199 (192/32768) [RMS: 88.43]
@@ -117,7 +117,7 @@ const CombinedWaveformConfig config[ 3 ][ 2 ][ 5 ] =
 			// NP  guessed
 			{ exponentialDistance, 0.96f, 1.f, 2.5f, 1.1f, 1.2f },
 		},
-		{ /* 8580 R5 1088 sampled by reFX-Mike */
+		{ /* 8580 R5 1088 sampled by Toddler-Boy */
 			// TS  error 10660 (353/32768) [RMS: 58.34]
 			{ exponentialDistance, 0.853578329f, 1.09615636f, 0.f, 1.8819375f, 6.80794907f },
 			// PT  error 10635 (289/32768) [RMS: 108.81]
@@ -143,7 +143,7 @@ const CombinedWaveformConfig config[ 3 ][ 2 ][ 5 ] =
 			// NP  guessed
 			{ exponentialDistance, 0.96f, 1.f, 2.5f, 1.1f, 1.2f },
 		},
-		{ /* 8580 R5 1489 sampled by reFX-Mike */
+		{ /* 8580 R5 1489 sampled by Toddler-Boy */
 			// TS  error  4837 (388/32768) [RMS: 76.07]
 			{ exponentialDistance, 0.89762634f, 56.7594185f, 0.f, 7.68995237f, 12.0754194f },
 			// PT  error  9266 (508/32768) [RMS: 127.83]
