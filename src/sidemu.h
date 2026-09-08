@@ -110,7 +110,8 @@ public:
 	*/
 	virtual void armStartupDeclick () noexcept {}
 
-	virtual void combinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold ) noexcept = 0;
+	virtual void voice6581CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold ) noexcept = 0;
+	virtual void voice8580CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold ) noexcept = 0;
 
 	// How the digi buffer derives its samples; the mode implies the register
 	// its data rides on
@@ -214,10 +215,8 @@ public:
 
 	void armStartupDeclick () noexcept override { m_sid.armStartupDeclick (); }
 
-	void combinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold ) noexcept override
-	{
-		m_sid.setCombinedWaveforms ( cws, threshold );
-	}
+	void voice6581CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold ) noexcept override { m_sid.setCombinedWaveforms6581 ( cws, threshold ); }
+	void voice8580CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold ) noexcept override { m_sid.setCombinedWaveforms8580 ( cws, threshold ); }
 
 	void setDigiCapture ( reSIDfp::DigiMode mode ) noexcept override { m_sid.setDigiCapture ( mode ); }
 	void setDigiScan ( reSIDfp::DigiMode mode ) noexcept override { m_sid.setDigiScan ( mode ); }

@@ -492,11 +492,19 @@ void Player::sidParams ( double cpuFreq, int frequency )
 }
 //-----------------------------------------------------------------------------
 
-void Player::setCombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold )
+void Player::set6581CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold )
 {
 	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
 		if ( auto s = m_mixer.getSid ( i ) )
-			s->combinedWaveforms ( cws, threshold );
+			s->voice6581CombinedWaveforms ( cws, threshold );
+}
+//-----------------------------------------------------------------------------
+
+void Player::set8580CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold )
+{
+	for ( auto i = 0; i < m_mixer.getNumChips (); i++ )
+		if ( auto s = m_mixer.getSid ( i ) )
+			s->voice8580CombinedWaveforms ( cws, threshold );
 }
 //-----------------------------------------------------------------------------
 

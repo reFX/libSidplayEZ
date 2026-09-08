@@ -68,7 +68,8 @@ public:
 	void set6581FilterResonance ( const double value )						{ engine.set6581FilterResonance ( value ); }
 	void set6581ExtInDC ( const double value )								{ engine.set6581ExtInDC ( value ); }
 	void set6581VoiceDCBias ( const double value )							{ engine.set6581VoiceDCBias ( value ); }
-	void setCombinedWaveforms ( const reSIDfp::CombinedWaveforms cws, const float threshold )	{ engine.setCombinedWaveforms ( cws, threshold ); }
+	void set6581CombinedWaveforms ( const reSIDfp::CombinedWaveforms cws, const float threshold )	{ engine.set6581CombinedWaveforms ( cws, threshold ); }
+	void set8580CombinedWaveforms ( const reSIDfp::CombinedWaveforms cws, const float threshold )	{ engine.set8580CombinedWaveforms ( cws, threshold ); }
 	void setDigiCapture ( const reSIDfp::DigiMode mode )					{ engine.setDigiCapture ( mode ); }
 	void setDigiScan ( const reSIDfp::DigiMode mode )						{ engine.setDigiScan ( mode ); }
 	void setDigiSmoothing ( const bool enable )								{ engine.setDigiSmoothing ( enable ); }

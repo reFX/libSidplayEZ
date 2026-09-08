@@ -97,7 +97,8 @@ public:
 	*/
 	[[ nodiscard ]] bool isJammed () const { return m_c64.isJammed (); }
 
-	void setCombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold );
+	void set6581CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold );
+	void set8580CombinedWaveforms ( reSIDfp::CombinedWaveforms cws, const float threshold );
 
 	void setDigiCapture ( const reSIDfp::DigiMode mode );
 	void setDigiScan ( const reSIDfp::DigiMode mode );

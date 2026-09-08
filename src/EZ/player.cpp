@@ -236,7 +236,7 @@ bool libsidplayEZ::Player::setTuneNumber ( unsigned int songNo, const bool useFi
 		// upstream measurements behind it are doubtful
 		engine.set6581VoiceDCDrift ( 0.0 );
 
-		engine.setCombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), 1.0f );
+		engine.set6581CombinedWaveforms ( reSIDfp::CombinedWaveforms ( chipProfile.cwsLevel ), 1.0f );
 		engine.set6581SawPulseUltra ( chipProfile.cwsSawPulseUltra );
 
 		stiEZ.chipSettingsValues = describeAppliedSettings ( chipProfile );
@@ -277,7 +277,7 @@ bool libsidplayEZ::Player::setTuneNumber ( unsigned int songNo, const bool useFi
 				engine.set6581LeakageRate ( 1.0 );
 				engine.set6581VoiceDCDrift ( 0.0 );
 
-				engine.setCombinedWaveforms ( reSIDfp::CombinedWaveforms::AVERAGE, 1.0 );
+				engine.set6581CombinedWaveforms ( reSIDfp::CombinedWaveforms::AVERAGE, 1.0 );
 				engine.set6581SawPulseUltra ( false );
 
 				// Mirrors the fixed values above

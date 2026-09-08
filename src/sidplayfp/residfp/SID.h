@@ -421,7 +421,7 @@ public:
 			vce.waveformGenerator.setWaveformModels ( waveTable );
 		}
 
-		setCombinedWaveforms ( CombinedWaveforms::AVERAGE, 1.0f );
+		applyCombinedWaveforms ( CombinedWaveforms::AVERAGE, 1.0f );
 	}
 
 	/**
@@ -430,15 +430,33 @@ public:
 	[[ nodiscard ]] ChipModel getChipModel () const noexcept { return is6581 ? ChipModel::MOS6581 : ChipModel::MOS8580; }
 
 	/**
-	* Set combined waveforms strength.
+	* Set combined waveforms strength (6581 only, ignored on the 8580).
 	*/
-	void setCombinedWaveforms ( CombinedWaveforms cws, const float threshold ) noexcept
+	void setCombinedWaveforms6581 ( [[ maybe_unused ]] CombinedWaveforms cws, [[ maybe_unused ]] const float threshold ) noexcept
+	{
+		if constexpr ( is6581 )
+			applyCombinedWaveforms ( cws, threshold );
+	}
+
+	/**
+	* Set combined waveforms strength (8580 only, ignored on the 6581).
+	*/
+	void setCombinedWaveforms8580 ( [[ maybe_unused ]] CombinedWaveforms cws, [[ maybe_unused ]] const float threshold ) noexcept
+	{
+		if constexpr ( ! is6581 )
+			applyCombinedWaveforms ( cws, threshold );
+	}
+
+private:
+	void applyCombinedWaveforms ( CombinedWaveforms cws, const float threshold ) noexcept
 	{
 		WaveformCalculator::buildPulldownTable ( pulldownTable, is6581, cws, threshold );
 
 		for ( auto& vce : voice )
 			vce.waveformGenerator.setPulldownModels ( pulldownTable );
 	}
+
+public:
 
 	/**
 	* Set DAC leakage
